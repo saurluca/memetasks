@@ -90,8 +90,8 @@ const updateTodoPositions = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
-    <div class="max-w-md mx-auto pt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center">
+    <div class="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Offline-First Todo App</h1>
         <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300">
@@ -99,7 +99,7 @@ const updateTodoPositions = async () => {
           <span v-else class="text-gray-800">🌙</span>
         </button>
       </div>
-      
+        <image-popup />
       <form @submit.prevent="addTodo" class="mb-4">
         <div class="flex">
           <input

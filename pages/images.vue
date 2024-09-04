@@ -1,54 +1,20 @@
 <script setup lang="ts">
-import {ref, watch} from 'vue'
+import { ref, watch } from 'vue'
 import { LoaderCircle } from 'lucide-vue-next';
+import { useImageGenerator } from '~/composables/imageGenerator'
 
 const prompt = ref('')
-const imageUrl = ref('')
-const isLoading = ref(false)
 const useEnhancedPrompt = ref(true)
 
-const generateImage = async () => {
+const { imageUrl, isLoading, generateImage } = useImageGenerator()
+
+const handleGenerateImage = async () => {
   if (prompt.value) {
-    isLoading.value = true
-    imageUrl.value = ''
     try {
-      let finalPrompt = prompt.value
-
-      if (useEnhancedPrompt.value) {
-        // Enhance the prompt
-        const enhanceResponse = await fetch(`https://promptgen.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt.value)}`)
-
-        if (!enhanceResponse.ok) {
-          const errorText = await enhanceResponse.text()
-          throw new Error(`Failed to enhance prompt: ${errorText}`)
-        }
-
-        const responseText = await enhanceResponse.text()
-
-        try {
-          const {response} = JSON.parse(responseText)
-          const enhancedPrompt = response.response
-          if (enhancedPrompt) {
-            finalPrompt = enhancedPrompt.replace(/^"|"$/g, '') // Remove surrounding quotes
-          } else {
-            console.warn("enhancedPrompt is undefined in the response")
-          }
-        } catch (parseError) {
-          console.error("Error parsing JSON:", parseError)
-          throw new Error("Failed to parse enhanced prompt response")
-        }
-      }
-
-      // Generate the image with the final prompt
-      const imageResponse = await fetch(`https://memes.spuckteller.workers.dev/?prompt=${encodeURIComponent(finalPrompt)}`)
-      if (!imageResponse.ok) throw new Error('Failed to generate image')
-      const blob = await imageResponse.blob()
-      imageUrl.value = URL.createObjectURL(blob)
+      await generateImage(prompt.value, useEnhancedPrompt.value)
     } catch (error) {
-      console.error('Error generating image:', error)
-      // You might want to add user-facing error handling here
-    } finally {
-      isLoading.value = false
+      // Handle user-facing error here
+      console.error('Failed to generate image:', error)
     }
   }
 }
@@ -75,7 +41,7 @@ watch(prompt, () => {
           {{ useEnhancedPrompt ? 'Enhance: ON' : 'Enhance: OFF' }}
         </button>
       </div>
-      <form @submit.prevent="generateImage" class="mb-6">
+      <form @submit.prevent="handleGenerateImage" class="mb-6">
         <div class="flex flex-col space-y-4">
           <input
             v-model="prompt"
