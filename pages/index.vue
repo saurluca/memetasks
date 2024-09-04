@@ -94,8 +94,14 @@ const updateTodo = async (todo: Todo) => {
 const deleteTodo = async (id: string) => {
   const index = todos.value.findIndex(t => t.id === id)
   if (index !== -1) {
-    todos.value[index].deletedAt = new Date()
-    todos.value[index].image = null
+    // todos.value[index].deletedAt = new Date()
+    // todos.value[index].image = null
+    // Mark the todo as deleted
+    todos.value.splice(index, 1)
+    // Update positions of remaining todos
+    todos.value.forEach((todo, i) => {
+      todo.position = i
+    })
     await updateLocalTodos(todos.value)
   }
 }
