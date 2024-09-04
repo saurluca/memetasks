@@ -128,9 +128,16 @@ const toggleTodo = async (todo: Todo) => {
   todo.completedAt = todo.completed ? new Date() : null;
   todo.updatedAt = new Date();
   await updateLocalTodos(todos.value);
-  if (todo.completed && todo.image instanceof Blob && imagePopup.value) {
-    imagePopup.value.open();
-    imagePopup.value.setImageBlob(todo.image);
+  console.log('todo.image', todo.image)
+  console.log('imagePopup.value', imagePopup.value)
+  console.log('todo.completed', todo.completed)
+  if (todo.completed && todo.image instanceof Blob) {
+    if (imagePopup.value) {
+      imagePopup.value.open();
+      imagePopup.value.setImageBlob(todo.image);
+    } else {
+      console.warn('ImagePopup component not initialized');
+    }
   } else if (todo.completed) {
     console.warn('Todo completed but image is missing or invalid');
   }
@@ -310,7 +317,8 @@ const toggleTagPopup = () => {
           </li>
         </template>
       </draggable>
-    </div>
+    </div> 
+    <ImagePopup ref="imagePopup" />
   </div>
 </template>
 
