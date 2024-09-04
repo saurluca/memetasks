@@ -99,7 +99,7 @@ const updateTodoPositions = async () => {
           <span v-else class="text-gray-800">🌙</span>
         </button>
       </div>
-        <image-popup />
+        <imagePopup/>
       <form @submit.prevent="addTodo" class="mb-4">
         <div class="flex">
           <input
