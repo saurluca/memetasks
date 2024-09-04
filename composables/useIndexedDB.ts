@@ -28,7 +28,16 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 1, {
 export async function loadTodosFromIndexedDB(): Promise<Todo[]> {
   const db = await dbPromise
   const todos = await db.getAllFromIndex('todos', 'by-position')
-  return todos.filter(todo => !todo.deletedAt).sort((a, b) => a.position - b.position)
+  return todos
+    .filter(todo => !todo.deletedAt)
+    .sort((a, b) => a.position - b.position)
+    .map((todo, index) => ({
+      ...todo,
+      position: index,
+      completedAt: todo.completedAt ? new Date(todo.completedAt) : null,
+      updatedAt: new Date(todo.updatedAt),
+      deletedAt: todo.deletedAt ? new Date(todo.deletedAt) : null
+    }))
 }
 
 export async function updateLocalTodos(todos: Todo[]): Promise<void> {
