@@ -4,11 +4,13 @@ import type { DBSchema } from 'idb'
 interface Todo {
   id: string
   text: string
+  createdAt: Date
   completed: boolean
   completedAt: Date | null
   updatedAt: Date
   deletedAt: Date | null
   position: number
+  image: Blob | null
 }
 
 interface TodoDB extends DBSchema {
@@ -58,7 +60,9 @@ export async function updateLocalTodos(todos: Todo[]): Promise<void> {
       completedAt: todo.completedAt ? new Date(todo.completedAt).toISOString() : null,
       updatedAt: new Date(todo.updatedAt).toISOString(),
       deletedAt: todo.deletedAt ? new Date(todo.deletedAt).toISOString() : null,
-      position: todo.position
+      position: todo.position,
+      image: todo.image ? todo.image : null,
+      createdAt: new Date(todo.createdAt).toISOString() // Add this line
     }
     await store.put(cloneableTodo)
   }

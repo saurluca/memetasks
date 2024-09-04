@@ -8,6 +8,7 @@ import ImagePopup from '~/components/imagePopup'
 interface Todo {
   id: string
   text: string
+  createdAt: Date
   completed: boolean
   completedAt: Date | null
   updatedAt: Date
@@ -20,6 +21,7 @@ const todos = ref<Todo[]>([])
 const newTodoText = ref('')
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
+const timeToWait = 12000
 
 onMounted(async () => {
   todos.value = await loadTodosFromIndexedDB()
@@ -50,6 +52,7 @@ const addTodo = async () => {
   const newTodo: Todo = {
     id: nanoid(),
     text: newTodoText.value.trim(),
+    createdAt: new Date(),
     completed: false,
     completedAt: null,
     updatedAt: new Date(),
@@ -57,7 +60,7 @@ const addTodo = async () => {
     position: todos.value.length,
     image: null
   }
-
+  console.log('newTodo', newTodo)
   todos.value.push(newTodo)
   await updateLocalTodos(todos.value)
   newTodoText.value = ''
@@ -107,15 +110,22 @@ const deleteTodo = async (id: string) => {
 }
 
 const toggleTodo = async (todo: Todo) => {
-  todo.completed = !todo.completed
-  todo.completedAt = todo.completed ? new Date() : null
-  todo.updatedAt = new Date()
-  await updateLocalTodos(todos.value)
+  // Check if 1 minutes have passed since the todo was created
+  console.log('new Date().getTime()', new Date().getTime())
+  console.log('new Date(todo.createdAt).getTime()', new Date(todo.createdAt).getTime())
+  if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
+    return; // Exit the function if less than 1 minutes have passed
+  }
+
+  todo.completed = !todo.completed;
+  todo.completedAt = todo.completed ? new Date() : null;
+  todo.updatedAt = new Date();
+  await updateLocalTodos(todos.value);
   if (todo.completed && todo.image instanceof Blob && imagePopup.value) {
-    imagePopup.value.open()
-    imagePopup.value.setImageBlob(todo.image)
+    imagePopup.value.open();
+    imagePopup.value.setImageBlob(todo.image);
   } else if (todo.completed) {
-    console.warn('Todo completed but image is missing or invalid')
+    console.warn('Todo completed but image is missing or invalid');
   }
 }
 
@@ -132,7 +142,7 @@ const updateTodoPositions = async () => {
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center">
     <div class="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Offline-First Todo App</h1>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Todo App</h1>
         <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300">
           <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
           <span v-else class="text-gray-800">🌙</span>
@@ -168,15 +178,21 @@ const updateTodoPositions = async () => {
                 <input
                     type="checkbox"
                     :checked="todo.completed"
-                    @change="() => toggleTodo(todo)"
-                    class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300"
+                    @click="(event) => {
+                      if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
+                        event.preventDefault();
+                      } else {
+                        toggleTodo(todo);
+                      }
+                    }"
+                    :class="[
+                        'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
+                        {
+                            'text-blue-600 cursor-pointer': new Date().getTime() - new Date(todo.createdAt).getTime() >= timeToWait,
+                            'text-gray-400 cursor-not-allowed': new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait
+                        }
+                    ]"
                 />
-                <svg class="absolute w-4 h-4 top-0.5 left-0.5 pointer-events-none text-white" viewBox="0 0 20 20" fill="currentColor"
-                     style="display: none;">
-                  <path fill-rule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clip-rule="evenodd"/>
-                </svg>
               </div>
               <span
                   :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
