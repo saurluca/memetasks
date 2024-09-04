@@ -5,23 +5,37 @@ import { useImageGenerator } from '~/composables/imageGenerator'
 
 const prompt = ref('')
 const useEnhancedPrompt = ref(true)
+const displayImageUrl = ref('')
 
-const { imageUrl, isLoading, generateImage } = useImageGenerator()
+const { imageBlob, isLoading, generateImage } = useImageGenerator()
 
 const handleGenerateImage = async () => {
   if (prompt.value) {
     try {
-      await generateImage(prompt.value, useEnhancedPrompt.value)
+      const result = await generateImage(prompt.value, useEnhancedPrompt.value)
+      if (result.imageBlob) {
+        displayImageUrl.value = URL.createObjectURL(result.imageBlob)
+      }
     } catch (error) {
-      // Handle user-facing error here
       console.error('Failed to generate image:', error)
+      // Handle user-facing error here
     }
   }
 }
 
 watch(prompt, () => {
   if (prompt.value === '') {
-    imageUrl.value = ''
+    if (displayImageUrl.value) {
+      URL.revokeObjectURL(displayImageUrl.value)
+    }
+    displayImageUrl.value = ''
+  }
+})
+
+// Clean up object URL when component is unmounted
+onUnmounted(() => {
+  if (displayImageUrl.value) {
+    URL.revokeObjectURL(displayImageUrl.value)
   }
 })
 </script>
@@ -61,7 +75,7 @@ watch(prompt, () => {
         <div v-if="isLoading" class="flex items-center justify-center">
           <LoaderCircle class="animate-spin h-16 w-16 text-blue-500" />
         </div>
-        <img v-else-if="imageUrl" :src="imageUrl" alt="Generated Image" class="max-w-full max-h-full object-contain rounded shadow-lg"/>
+        <img v-else-if="displayImageUrl" :src="displayImageUrl" alt="Generated Image" class="max-w-full max-h-full object-contain rounded shadow-lg"/>
         <p v-else class="text-gray-500">Your generated image will appear here</p>
       </div>
     </div>

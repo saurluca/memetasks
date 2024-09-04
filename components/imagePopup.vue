@@ -1,10 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps<{
-  imageUrl: string
   altText?: string
 }>()
+
+const imageBlob = ref<Blob | null>(null)
+const imageUrl = ref('')
+
+onMounted(() => {
+  if (imageBlob.value) {
+    imageUrl.value = URL.createObjectURL(imageBlob.value)
+  }
+})
+
+onUnmounted(() => {
+  if (imageUrl.value) {
+    URL.revokeObjectURL(imageUrl.value)
+  }
+})
 
 const isOpen = ref(false)
 
@@ -16,14 +30,24 @@ const close = () => {
   isOpen.value = false
 }
 
-defineExpose({ open, close })
+const setImageBlob = (blob: Blob) => {
+  if (imageUrl.value) {
+    URL.revokeObjectURL(imageUrl.value)
+  }
+  imageBlob.value = blob
+  imageUrl.value = URL.createObjectURL(blob)
+}
+
+const hasImage = computed(() => !!imageBlob.value)
+
+defineExpose({ open, close, setImageBlob })
 </script>
 
 
 <template>
-    <button @click="open" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
+    <!-- <button @click="open" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
       Open
-    </button>
+    </button> -->
   <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
     <div class="relative max-w-3xl w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">
       <button @click="close" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
@@ -32,8 +56,9 @@ defineExpose({ open, close })
         </svg>
       </button>
       <div class="p-4">
-        <!-- <img :src="imageUrl" :alt="altText" class="w-full h-auto rounded-lg" /> -->
-         hello there
+        <img v-if="hasImage && imageUrl" :src="imageUrl" :alt="altText || 'Generated image'" class="w-full h-auto rounded-lg" />
+        <p v-else-if="!hasImage" class="text-gray-500">No image provided</p>
+        <p v-else class="text-gray-500">Loading image...</p>
       </div>
     </div>
   </div>

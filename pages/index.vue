@@ -3,6 +3,7 @@ import { ref, onMounted, watch } from 'vue'
 import { nanoid } from 'nanoid'
 import draggable from 'vuedraggable'
 import { loadTodosFromIndexedDB, updateLocalTodos } from '~/composables/useIndexedDB'
+import ImagePopup from '~/components/imagePopup'
 
 interface Todo {
   id: string
@@ -12,11 +13,13 @@ interface Todo {
   updatedAt: Date
   deletedAt: Date | null
   position: number
+  image: Blob | null
 }
 
 const todos = ref<Todo[]>([])
 const newTodoText = ref('')
 const isDarkMode = ref(false)
+const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 
 onMounted(async () => {
   todos.value = await loadTodosFromIndexedDB()
@@ -51,12 +54,36 @@ const addTodo = async () => {
     completedAt: null,
     updatedAt: new Date(),
     deletedAt: null,
-    position: todos.value.length
+    position: todos.value.length,
+    image: null
   }
 
   todos.value.push(newTodo)
   await updateLocalTodos(todos.value)
   newTodoText.value = ''
+
+  // Generate and add the image after creating the todo
+  const { generateImage } = useImageGenerator()
+  try {
+    const result = await generateImage(newTodo.text, true)
+    if (result.imageBlob instanceof Blob) {
+      const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
+      console.log('todoIndex', todoIndex)
+      if (todoIndex !== -1) {
+        todos.value[todoIndex].image = result.imageBlob
+        await updateLocalTodos(todos.value)
+        console.log('Todo updated with image:', todos.value[todoIndex])
+      } else {
+        console.warn('Todo not found after image generation')
+      }
+    } else {
+      console.warn('Generated image is not a Blob')
+    console.log('Type of result:', typeof result);
+    console.log('Type of result.imageBlob:', result.imageBlob ? typeof result.imageBlob : 'undefined');
+    }
+  } catch (error) {
+    console.error('Error generating image:', error)
+  }
 }
 
 const updateTodo = async (todo: Todo) => {
@@ -78,6 +105,15 @@ const toggleTodo = async (todo: Todo) => {
   todo.completedAt = todo.completed ? new Date() : null
   todo.updatedAt = new Date()
   await updateLocalTodos(todos.value)
+ console.log('todo', todo)
+ console.log('imagePopup', imagePopup.value)
+ console.log('todo.image', todo.image)
+ if (todo.completed && todo.image instanceof Blob && imagePopup.value) {
+  imagePopup.value.open()
+  imagePopup.value.setImageBlob(todo.image)
+} else if (todo.completed) {
+  console.warn('Todo completed but image is missing or invalid')
+}
 }
 
 const updateTodoPositions = async () => {
@@ -99,7 +135,7 @@ const updateTodoPositions = async () => {
           <span v-else class="text-gray-800">🌙</span>
         </button>
       </div>
-        <imagePopup/>
+      <ImagePopup ref="imagePopup" />
       <form @submit.prevent="addTodo" class="mb-4">
         <div class="flex">
           <input
@@ -129,7 +165,7 @@ const updateTodoPositions = async () => {
                 <input
                   type="checkbox"
                   :checked="todo.completed"
-                  @change="toggleTodo(todo)"
+                  @change="() => toggleTodo(todo)"
                   class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300"
                 />
                 <svg class="absolute w-4 h-4 top-0.5 left-0.5 pointer-events-none text-white" viewBox="0 0 20 20" fill="currentColor" style="display: none;">
