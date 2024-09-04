@@ -3,7 +3,8 @@ import {ref, onMounted, watch} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadTodosFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
-import ImagePopup from '~/components/imagePopup'
+import ImagePopup from '~/components/imagePopup.vue'
+import { Wifi, WifiOff } from 'lucide-vue-next'
 
 interface Todo {
   id: string
@@ -22,16 +23,25 @@ const newTodoText = ref('')
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const timeToWait = 12000
+const isOnline = ref(navigator.onLine)
 
 onMounted(async () => {
   todos.value = await loadTodosFromIndexedDB()
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
+
+  window.addEventListener('online', () => isOnline.value = true)
+  window.addEventListener('offline', () => isOnline.value = false)
 })
 
 watch(isDarkMode, () => {
   localStorage.setItem('darkMode', isDarkMode.value.toString())
   applyDarkMode()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('online', () => isOnline.value = true)
+  window.removeEventListener('offline', () => isOnline.value = false)
 })
 
 const applyDarkMode = () => {
@@ -110,11 +120,9 @@ const deleteTodo = async (id: string) => {
 }
 
 const toggleTodo = async (todo: Todo) => {
-  // Check if 1 minutes have passed since the todo was created
-  console.log('new Date().getTime()', new Date().getTime())
-  console.log('new Date(todo.createdAt).getTime()', new Date(todo.createdAt).getTime())
+  // Check if set minutes have passed since the todo was created
   if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
-    return; // Exit the function if less than 1 minutes have passed
+    return; 
   }
 
   todo.completed = !todo.completed;
@@ -143,12 +151,24 @@ const updateTodoPositions = async () => {
     <div class="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Todo App</h1>
-        <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300">
-          <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
-          <span v-else class="text-gray-800">🌙</span>
-        </button>
+
+        <div class="flex items-center">
+          <div class="mr-2">
+            <span v-if="isOnline" class="text-green-500" title="Online">
+              <Wifi />
+            </span>
+            <span v-else class="text-red-500" title="Offline">
+              <WifiOff/>
+            </span>
+          </div>
+
+          <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300">
+            <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
+            <span v-else class="text-gray-800">🌙</span>
+          </button>
+        </div>
       </div>
-      <ImagePopup ref="imagePopup"/>
+
       <form @submit.prevent="addTodo" class="mb-4">
         <div class="flex">
           <input
