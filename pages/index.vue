@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { nanoid } from 'nanoid'
+import {ref, onMounted, watch} from 'vue'
+import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
-import { loadTodosFromIndexedDB, updateLocalTodos } from '~/composables/useIndexedDB'
+import {loadTodosFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/imagePopup'
 
 interface Todo {
@@ -62,8 +62,8 @@ const addTodo = async () => {
   await updateLocalTodos(todos.value)
   newTodoText.value = ''
 
-  // Generate and add the image after creating the todo
-  const { generateImage } = useImageGenerator()
+  // Generate and add the image after creating the to do
+  const {generateImage} = useImageGenerator()
   try {
     const result = await generateImage(newTodo.text, true)
     if (result.imageBlob instanceof Blob) {
@@ -78,8 +78,8 @@ const addTodo = async () => {
       }
     } else {
       console.warn('Generated image is not a Blob')
-    console.log('Type of result:', typeof result);
-    console.log('Type of result.imageBlob:', result.imageBlob ? typeof result.imageBlob : 'undefined');
+      console.log('Type of result:', typeof result);
+      console.log('Type of result.imageBlob:', result.imageBlob ? typeof result.imageBlob : 'undefined');
     }
   } catch (error) {
     console.error('Error generating image:', error)
@@ -95,7 +95,7 @@ const deleteTodo = async (id: string) => {
   const index = todos.value.findIndex(t => t.id === id)
   if (index !== -1) {
     todos.value[index].deletedAt = new Date()
-    todos.value = todos.value.filter(t => t.id !== id)
+    todos.value[index].image = null
     await updateLocalTodos(todos.value)
   }
 }
@@ -105,15 +105,12 @@ const toggleTodo = async (todo: Todo) => {
   todo.completedAt = todo.completed ? new Date() : null
   todo.updatedAt = new Date()
   await updateLocalTodos(todos.value)
- console.log('todo', todo)
- console.log('imagePopup', imagePopup.value)
- console.log('todo.image', todo.image)
- if (todo.completed && todo.image instanceof Blob && imagePopup.value) {
-  imagePopup.value.open()
-  imagePopup.value.setImageBlob(todo.image)
-} else if (todo.completed) {
-  console.warn('Todo completed but image is missing or invalid')
-}
+  if (todo.completed && todo.image instanceof Blob && imagePopup.value) {
+    imagePopup.value.open()
+    imagePopup.value.setImageBlob(todo.image)
+  } else if (todo.completed) {
+    console.warn('Todo completed but image is missing or invalid')
+  }
 }
 
 const updateTodoPositions = async () => {
@@ -135,53 +132,56 @@ const updateTodoPositions = async () => {
           <span v-else class="text-gray-800">🌙</span>
         </button>
       </div>
-      <ImagePopup ref="imagePopup" />
+      <ImagePopup ref="imagePopup"/>
       <form @submit.prevent="addTodo" class="mb-4">
         <div class="flex">
           <input
-            v-model="newTodoText"
-            placeholder="Add a new todo"
-            class="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+              v-model="newTodoText"
+              placeholder="Add a new todo"
+              class="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
           />
           <button
-            type="submit"
-            class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300"
+              type="submit"
+              class="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300"
           >
             Add
           </button>
         </div>
       </form>
 
-      <draggable 
-        v-model="todos" 
-        item-key="id"
-        @end="updateTodoPositions"
-        class="space-y-3"
+      <draggable
+          v-model="todos"
+          item-key="id"
+          @end="updateTodoPositions"
+          class="space-y-3"
       >
         <template #item="{ element: todo }">
           <li class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
             <div class="flex items-center flex-grow mr-4 min-w-0">
               <div class="relative mr-3">
                 <input
-                  type="checkbox"
-                  :checked="todo.completed"
-                  @change="() => toggleTodo(todo)"
-                  class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300"
+                    type="checkbox"
+                    :checked="todo.completed"
+                    @change="() => toggleTodo(todo)"
+                    class="form-checkbox h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300"
                 />
-                <svg class="absolute w-4 h-4 top-0.5 left-0.5 pointer-events-none text-white" viewBox="0 0 20 20" fill="currentColor" style="display: none;">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                <svg class="absolute w-4 h-4 top-0.5 left-0.5 pointer-events-none text-white" viewBox="0 0 20 20" fill="currentColor"
+                     style="display: none;">
+                  <path fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"/>
                 </svg>
               </div>
               <span
-                :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
-                :title="todo.text"
+                  :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
+                  :title="todo.text"
               >
                 {{ todo.text }}
               </span>
             </div>
             <button
-              @click="deleteTodo(todo.id)"
-              class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+                @click="deleteTodo(todo.id)"
+                class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
             >
               Delete
             </button>
