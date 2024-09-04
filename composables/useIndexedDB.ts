@@ -1,5 +1,6 @@
 import { openDB } from 'idb'
 import type { DBSchema } from 'idb'
+import { toRaw } from 'vue'
 
 export interface Tag {
   id: string
@@ -85,7 +86,7 @@ export async function updateLocalTodos(todos: Todo[]): Promise<void> {
       position: todo.position,
       image: todo.image ? todo.image : null,
       createdAt: new Date(todo.createdAt),
-      tags: todo.tags || []
+      tags: Array.isArray(todo.tags) ? toRaw(todo.tags) : [],
     }
     await store.put(cloneableTodo)
   }

@@ -226,11 +226,11 @@ const toggleTagPopup = () => {
             <span
               v-for="tag in tags"
               :key="tag.id"
-              @click="toggleTag(tag.id)"
+              @click="toggleTag(tag.text)"
               class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
               :class="{
-                'bg-blue-500 text-white dark:bg-blue-300 dark:text-blue-900': currentTags.includes(tag.id),
-                'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100': !currentTags.includes(tag.id)
+                'bg-blue-500 text-white dark:bg-blue-300 dark:text-blue-900': currentTags.includes(tag.text),
+                'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100': !currentTags.includes(tag.text)
               }"
             >
               {{ tag.text }}
