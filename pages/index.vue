@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, watch} from 'vue'
+import {ref, onMounted, watch, computed} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadTodosFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
@@ -19,8 +19,20 @@ const newTagText = ref('')
 const showTagPopup = ref(false)
 const currentTags = ref<string[]>([])
 
+// Add this computed property
+const filteredTodos = computed(() => {
+  if (currentTags.value.length === 0) {
+    return todos.value;
+  }
+  return todos.value.filter(todo => 
+    todo.tags && todo.tags.some(tag => currentTags.value.includes(tag))
+  );
+});
+
 onMounted(async () => {
-  todos.value = await loadTodosFromIndexedDB()
+  const { todos: loadedTodos, tags: loadedTags } = await loadTodosFromIndexedDB()
+  todos.value = loadedTodos
+  tags.value = loadedTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
 
@@ -63,7 +75,7 @@ const addTodo = async () => {
     deletedAt: null,
     position: todos.value.length,
     image: null,
-    tags: null,
+    tags: currentTags.value.length > 0 ? [...currentTags.value] : [],
   }
 
   console.log('newTodo', newTodo)
@@ -145,7 +157,14 @@ const addTag = () => {
   tags.value.push(newTag)
   newTagText.value = ''
   // You might want to add a function to save tags to IndexedDB
-  
+  // Save tags to IndexedDB
+  updateLocalTags(tags.value)
+    .then(() => {
+      console.log('Tags saved successfully')
+    })
+    .catch((error) => {
+      console.error('Error saving tags:', error)
+    })
 }
 
 const toggleTag = (tagId: string) => {
@@ -247,7 +266,7 @@ const toggleTagPopup = () => {
       </div>
 
       <draggable
-          v-model="todos"
+          v-model="filteredTodos"
           item-key="id"
           @end="updateTodoPositions"
           class="space-y-3"

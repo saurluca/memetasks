@@ -18,7 +18,7 @@ export interface Todo {
   deletedAt: Date | null
   position: number
   image: Blob | null
-  tags: Tag[] | null
+  tags: string[]
 }
 
 interface TodoDB extends DBSchema {
@@ -27,28 +27,42 @@ interface TodoDB extends DBSchema {
     value: Todo
     indexes: { 'by-position': number }
   }
+  tags: {
+    key: string
+    value: Tag
+  }
 }
 
-const dbPromise = openDB<TodoDB>('todo-app-db', 1, {
-  upgrade(db) {
-    const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
-    todoStore.createIndex('by-position', 'position')
+const dbPromise = openDB<TodoDB>('todo-app-db', 2, {
+  upgrade(db, oldVersion, newVersion, transaction) {
+    if (oldVersion < 1) {
+      const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
+      todoStore.createIndex('by-position', 'position')
+    }
+    if (oldVersion < 2) {
+      db.createObjectStore('tags', { keyPath: 'id' })
+    }
   },
 })
 
-export async function loadTodosFromIndexedDB(): Promise<Todo[]> {
+export async function loadTodosFromIndexedDB(): Promise<{ todos: Todo[], tags: Tag[] }> {
   const db = await dbPromise
   const todos = await db.getAllFromIndex('todos', 'by-position')
-  return todos
-    .filter(todo => !todo.deletedAt)
-    .sort((a, b) => a.position - b.position)
-    .map((todo, index) => ({
-      ...todo,
-      position: index,
-      completedAt: todo.completedAt ? new Date(todo.completedAt) : null,
-      updatedAt: new Date(todo.updatedAt),
-      deletedAt: todo.deletedAt ? new Date(todo.deletedAt) : null
-    }))
+  const tags = await db.getAll('tags')
+  
+  return {
+    todos: todos
+      .filter(todo => !todo.deletedAt)
+      .sort((a, b) => a.position - b.position)
+      .map((todo, index) => ({
+        ...todo,
+        position: index,
+        completedAt: todo.completedAt ? new Date(todo.completedAt) : null,
+        updatedAt: new Date(todo.updatedAt),
+        deletedAt: todo.deletedAt ? new Date(todo.deletedAt) : null
+      })),
+    tags
+  }
 }
 
 export async function updateLocalTodos(todos: Todo[]): Promise<void> {
@@ -71,7 +85,7 @@ export async function updateLocalTodos(todos: Todo[]): Promise<void> {
       position: todo.position,
       image: todo.image ? todo.image : null,
       createdAt: new Date(todo.createdAt),
-      tags: todo.tags ? todo.tags : null,
+      tags: todo.tags || []
     }
     await store.put(cloneableTodo)
   }
@@ -79,4 +93,23 @@ export async function updateLocalTodos(todos: Todo[]): Promise<void> {
   await tx.done
 }
 
+export async function updateLocalTags(tags: Tag[]): Promise<void> {
+  const db = await dbPromise
+  const tx = db.transaction('tags', 'readwrite')
+  const store = tx.objectStore('tags')
 
+  // Clear existing tags
+  await store.clear()
+
+  // Add updated tags
+  for (const tag of tags) {
+    const cloneableTag = {
+      ...tag,
+      createdAt: new Date(tag.createdAt),
+      deletedAt: tag.deletedAt ? new Date(tag.deletedAt) : null
+    }
+    await store.put(cloneableTag)
+  }
+
+  await tx.done
+}
