@@ -1,7 +1,14 @@
 import { openDB } from 'idb'
 import type { DBSchema } from 'idb'
 
-interface Todo {
+export interface Tag {
+  id: string
+  text: string
+  createdAt: Date
+  deletedAt: Date | null
+}
+
+export interface Todo {
   id: string
   text: string
   createdAt: Date
@@ -11,6 +18,7 @@ interface Todo {
   deletedAt: Date | null
   position: number
   image: Blob | null
+  tags: Tag[] | null
 }
 
 interface TodoDB extends DBSchema {
@@ -57,15 +65,18 @@ export async function updateLocalTodos(todos: Todo[]): Promise<void> {
       id: todo.id,
       text: todo.text,
       completed: todo.completed,
-      completedAt: todo.completedAt ? new Date(todo.completedAt).toISOString() : null,
-      updatedAt: new Date(todo.updatedAt).toISOString(),
-      deletedAt: todo.deletedAt ? new Date(todo.deletedAt).toISOString() : null,
+      completedAt: todo.completedAt ? new Date(todo.completedAt) : null,
+      updatedAt: new Date(todo.updatedAt),
+      deletedAt: todo.deletedAt ? new Date(todo.deletedAt) : null,
       position: todo.position,
       image: todo.image ? todo.image : null,
-      createdAt: new Date(todo.createdAt).toISOString() // Add this line
+      createdAt: new Date(todo.createdAt),
+      tags: todo.tags ? todo.tags : null,
     }
     await store.put(cloneableTodo)
   }
 
   await tx.done
 }
+
+

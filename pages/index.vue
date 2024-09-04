@@ -3,27 +3,21 @@ import {ref, onMounted, watch} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadTodosFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
+import type { Todo, Tag } from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/imagePopup.vue'
 import { Wifi, WifiOff } from 'lucide-vue-next'
-
-interface Todo {
-  id: string
-  text: string
-  createdAt: Date
-  completed: boolean
-  completedAt: Date | null
-  updatedAt: Date
-  deletedAt: Date | null
-  position: number
-  image: Blob | null
-}
+import { Plus } from 'lucide-vue-next'
 
 const todos = ref<Todo[]>([])
+const tags = ref<Tag[]>([])
 const newTodoText = ref('')
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const timeToWait = 12000
 const isOnline = ref(navigator.onLine)
+const newTagText = ref('')
+const showTagPopup = ref(false)
+const currentTags = ref<string[]>([])
 
 onMounted(async () => {
   todos.value = await loadTodosFromIndexedDB()
@@ -68,8 +62,10 @@ const addTodo = async () => {
     updatedAt: new Date(),
     deletedAt: null,
     position: todos.value.length,
-    image: null
+    image: null,
+    tags: null,
   }
+
   console.log('newTodo', newTodo)
   todos.value.push(newTodo)
   await updateLocalTodos(todos.value)
@@ -81,27 +77,18 @@ const addTodo = async () => {
     const result = await generateImage(newTodo.text, true)
     if (result.imageBlob instanceof Blob) {
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
-      console.log('todoIndex', todoIndex)
       if (todoIndex !== -1) {
         todos.value[todoIndex].image = result.imageBlob
         await updateLocalTodos(todos.value)
-        console.log('Todo updated with image:', todos.value[todoIndex])
       } else {
         console.warn('Todo not found after image generation')
       }
     } else {
       console.warn('Generated image is not a Blob')
-      console.log('Type of result:', typeof result);
-      console.log('Type of result.imageBlob:', result.imageBlob ? typeof result.imageBlob : 'undefined');
     }
   } catch (error) {
     console.error('Error generating image:', error)
   }
-}
-
-const updateTodo = async (todo: Todo) => {
-  todo.updatedAt = new Date()
-  await updateLocalTodos(todos.value)
 }
 
 const deleteTodo = async (id: string) => {
@@ -144,6 +131,35 @@ const updateTodoPositions = async () => {
   })
   await updateLocalTodos(todos.value)
 }
+
+const addTag = () => {
+  if (!newTagText.value.trim()) return
+
+  const newTag: Tag = {
+    id: nanoid(),
+    text: newTagText.value.trim(),
+    createdAt: new Date(),
+    deletedAt: null,
+  }
+
+  tags.value.push(newTag)
+  newTagText.value = ''
+  // You might want to add a function to save tags to IndexedDB
+  
+}
+
+const toggleTag = (tagId: string) => {
+  const index = currentTags.value.indexOf(tagId)
+  if (index === -1) {
+    currentTags.value.push(tagId)
+  } else {
+    currentTags.value.splice(index, 1)
+  }
+}
+
+const toggleTagPopup = () => {
+  showTagPopup.value = !showTagPopup.value
+}
 </script>
 
 <template>
@@ -184,6 +200,51 @@ const updateTodoPositions = async () => {
           </button>
         </div>
       </form>
+
+      <div class="mb-4">
+        <div class="flex items-center justify-between">
+          <div class="flex flex-wrap gap-2 flex-grow">
+            <span
+              v-for="tag in tags"
+              :key="tag.id"
+              @click="toggleTag(tag.id)"
+              class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
+              :class="{
+                'bg-blue-500 text-white dark:bg-blue-300 dark:text-blue-900': currentTags.includes(tag.id),
+                'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100': !currentTags.includes(tag.id)
+              }"
+            >
+              {{ tag.text }}
+            </span>
+          </div>
+          <div class="relative ml-2">
+            <button
+              @click="toggleTagPopup"
+              class="p-1 rounded-full bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300"
+            >
+              <Plus class="w-4 h-4" />
+            </button>
+            <div v-if="showTagPopup" class="absolute right-0 z-10 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2">
+              <form @submit.prevent="addTag" class="flex">
+                <input
+                  v-model="newTagText"
+                  placeholder="New tag"
+                  class="flex-grow px-3 py-1 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+                  @keyup.enter="addTag"
+                  @keyup.esc="showTagPopup = false"
+                />
+                <button
+                  type="submit"
+                  class="px-3 py-1 text-sm bg-green-500 text-white rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300 flex items-center"
+                >
+                  <Plus class="w-4 h-4 mr-1" />
+                  Add
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <draggable
           v-model="todos"
