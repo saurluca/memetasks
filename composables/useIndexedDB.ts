@@ -1,4 +1,4 @@
-import type { DBSchema, IDBPDatabase } from 'idb'
+import { openDB, DBSchema } from 'idb'
 
 interface Todo {
   id: string
@@ -18,29 +18,21 @@ interface TodoDB extends DBSchema {
   }
 }
 
-let dbPromise: Promise<IDBPDatabase<TodoDB>> | null = null
-
-async function getDB() {
-  if (!dbPromise) {
-    const { openDB } = await import('idb')
-    dbPromise = openDB<TodoDB>('todo-app-db', 1, {
-      upgrade(db) {
-        const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
-        todoStore.createIndex('by-position', 'position')
-      },
-    })
-  }
-  return dbPromise
-}
+const dbPromise = openDB<TodoDB>('todo-app-db', 1, {
+  upgrade(db) {
+    const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
+    todoStore.createIndex('by-position', 'position')
+  },
+})
 
 export async function loadTodosFromIndexedDB(): Promise<Todo[]> {
-  const db = await getDB()
+  const db = await dbPromise
   const todos = await db.getAllFromIndex('todos', 'by-position')
   return todos.filter(todo => !todo.deletedAt).sort((a, b) => a.position - b.position)
 }
 
 export async function updateLocalTodos(todos: Todo[]): Promise<void> {
-  const db = await getDB()
+  const db = await dbPromise
   const tx = db.transaction('todos', 'readwrite')
   const store = tx.objectStore('todos')
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { nanoid } from 'nanoid'
 import draggable from 'vuedraggable'
 import { loadTodosFromIndexedDB, updateLocalTodos } from '~/composables/useIndexedDB'
@@ -16,10 +16,30 @@ interface Todo {
 
 const todos = ref<Todo[]>([])
 const newTodoText = ref('')
+const isDarkMode = ref(false)
 
 onMounted(async () => {
   todos.value = await loadTodosFromIndexedDB()
+  isDarkMode.value = localStorage.getItem('darkMode') === 'true'
+  applyDarkMode()
 })
+
+watch(isDarkMode, () => {
+  localStorage.setItem('darkMode', isDarkMode.value.toString())
+  applyDarkMode()
+})
+
+const applyDarkMode = () => {
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+}
 
 const addTodo = async () => {
   if (!newTodoText.value.trim()) return
@@ -70,9 +90,15 @@ const updateTodoPositions = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-    <div class="max-w-md mx-auto pt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Offline-First Todo App</h1>
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    <div class="max-w-md mx-auto pt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Offline-First Todo App</h1>
+        <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600">
+          <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
+          <span v-else class="text-gray-800">🌙</span>
+        </button>
+      </div>
       
       <form @submit.prevent="addTodo" class="mb-4">
         <div class="flex">
@@ -97,7 +123,7 @@ const updateTodoPositions = async () => {
         class="space-y-2"
       >
         <template #item="{ element: todo }">
-          <li class="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <li class="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded-lg transition-colors duration-300">
             <div class="flex items-center flex-grow mr-2 min-w-0">
               <input
                 type="checkbox"
@@ -106,7 +132,7 @@ const updateTodoPositions = async () => {
                 class="mr-3 form-checkbox h-5 w-5 text-blue-600"
               />
               <span
-                :class="['truncate', { 'line-through': todo.completed, 'text-gray-500 dark:text-gray-400': todo.completed }]"
+                :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
                 :title="todo.text"
               >
                 {{ todo.text }}
@@ -114,7 +140,7 @@ const updateTodoPositions = async () => {
             </div>
             <button
               @click="deleteTodo(todo.id)"
-              class="px-2 py-1 text-sm text-red-600 hover:bg-red-100 rounded dark:text-red-400 dark:hover:bg-red-900"
+              class="px-2 py-1 text-sm rounded text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900"
             >
               Delete
             </button>
