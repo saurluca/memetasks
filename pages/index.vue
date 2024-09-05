@@ -6,7 +6,7 @@ import {loadDataFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedD
 import type {Todo, Tag} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/imagePopup.vue'
 import {Wifi, WifiOff} from 'lucide-vue-next'
-import {Plus} from 'lucide-vue-next'
+import {Plus, Minus} from 'lucide-vue-next'
 
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
@@ -49,7 +49,6 @@ onUnmounted(() => {
   window.removeEventListener('offline', () => isOnline.value = false)
 })
 
-// what is this for? TODO
 const applyDarkMode = () => {
   if (isDarkMode.value) {
     document.documentElement.classList.add('dark')
@@ -170,7 +169,7 @@ const addTag = () => {
 
   tags.value.push(newTag)
   newTagText.value = ''
-  // You might want to add a function to save tags to IndexedDB
+  
   // Save tags to IndexedDB
   updateLocalTags(tags.value)
       .then(() => {
@@ -193,6 +192,31 @@ const toggleTag = (tagId: string) => {
 const toggleTagPopup = () => {
   showTagPopup.value = !showTagPopup.value
 }
+
+const removeSelectedTags = async () => {
+  // Remove all currently selected tags
+  for (const tagName of currentTags.value) {
+    console.log('tagName', tagName)
+    // Mark the tag as deleted in the tags array
+    const index = tags.value.findIndex(tag => tag.text === tagName)
+    if (index !== -1) {
+      tags.value[index].deletedAt = new Date()
+    } else {
+      console.warn(`Tag with name ${tagName} not found`)
+    }
+  }
+
+  // Clear the currentTags array
+  currentTags.value = []
+
+  // Update tags in IndexedDB
+  try {
+    await updateLocalTags(tags.value)
+  } catch (error) {
+    console.error('Error removing and marking selected tags as deleted:', error)
+  }
+}
+
 </script>
 
 <template>
@@ -251,12 +275,22 @@ const toggleTagPopup = () => {
             </span>
           </div>
           <div class="relative ml-2">
-            <button
-                @click="toggleTagPopup"
-                class="p-1 rounded-full bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300"
-            >
-              <Plus class="w-4 h-4"/>
-            </button>
+            <div class="flex space-x-2">
+              <button
+                  @click="toggleTagPopup"
+                  class="p-1 rounded-full bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300"
+              >
+                <Plus class="w-4 h-4"/>
+              </button>
+              <button
+                  @click="removeSelectedTags"
+                  class="p-1 rounded-full bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+                  :disabled="currentTags.length === 0"
+                  :class="{ 'opacity-50 cursor-not-allowed': currentTags.length === 0 }"
+              >
+                <Minus class="w-4 h-4"/>
+              </button>
+            </div>
             <div v-if="showTagPopup" class="absolute right-0 z-10 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2">
               <form @submit.prevent="addTag" class="flex">
                 <input
@@ -328,4 +362,3 @@ const toggleTagPopup = () => {
     <ImagePopup ref="imagePopup"/>
   </div>
 </template>
-

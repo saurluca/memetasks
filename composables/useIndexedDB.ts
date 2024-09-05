@@ -49,7 +49,7 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 2, {
 export async function loadDataFromIndexedDB(): Promise<{ todos: Todo[], tags: Tag[] }> {
   const db = await dbPromise
   const todos = await db.getAllFromIndex('todos', 'by-position')
-  const tags = await db.getAll('tags')
+  const allTags = await db.getAll('tags')
   
   return {
     todos: todos
@@ -62,7 +62,7 @@ export async function loadDataFromIndexedDB(): Promise<{ todos: Todo[], tags: Ta
         updatedAt: new Date(todo.updatedAt),
         deletedAt: todo.deletedAt ? new Date(todo.deletedAt) : null
       })),
-    tags
+    tags: allTags.filter(tag => !tag.deletedAt)
   }
 }
 
