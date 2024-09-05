@@ -336,7 +336,7 @@ const removeSelectedTags = async () => {
         <template #item="{ element: todo }">
           <li class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
             <div class="flex items-center flex-grow mr-4 min-w-0">
-              <div class="relative mr-3">
+              <div class="flex items-center relatil mr-3">
                 <input
                     type="checkbox"
                     :checked="todo.completed"
