@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
+const isOpen = ref(false)
 const imageBlob = ref<Blob | null>(null)
 const imageUrl = ref('')
 
@@ -15,8 +16,6 @@ onUnmounted(() => {
     URL.revokeObjectURL(imageUrl.value)
   }
 })
-
-const isOpen = ref(false)
 
 const open = () => {
   isOpen.value = true
@@ -39,7 +38,6 @@ const hasImage = computed(() => !!imageBlob.value)
 defineExpose({ open, close, setImageBlob })
 </script>
 
-
 <template>
   <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
     <div class="relative max-w-3xl w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">
@@ -49,8 +47,8 @@ defineExpose({ open, close, setImageBlob })
         </svg>
       </button>
       <div class="p-4">
-        <img v-if="hasImage && imageUrl" :src="imageUrl" :alt="altText || 'Generated image'" class="w-full h-auto rounded-lg" />
-        <p v-else-if="!hasImage" class="text-gray-500">No image provided</p>
+        <img v-if="imageUrl" :src="imageUrl" alt="Todo image" class="w-full h-auto rounded-lg" />
+        <p v-else-if="!imageBlob" class="text-gray-500">No image provided</p>
         <p v-else class="text-gray-500">Loading image...</p>
       </div>
     </div>
