@@ -7,6 +7,7 @@ import type {Todo, Tag} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/imagePopup.vue'
 import {Wifi, WifiOff} from 'lucide-vue-next'
 import {Plus, Minus} from 'lucide-vue-next'
+import {useOnline} from '@vueuse/core'
 
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
@@ -14,7 +15,7 @@ const newTodoText = ref('')
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const timeToWait = 12000
-const isOnline = ref(navigator.onLine)
+const isOnline = useOnline()
 const newTagText = ref('')
 const showTagPopup = ref(false)
 const currentTags = ref<string[]>([])
@@ -35,8 +36,8 @@ onMounted(async () => {
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
 
-  window.addEventListener('online', () => isOnline.value = true)
-  window.addEventListener('offline', () => isOnline.value = false)
+  // window.addEventListener('online', () => isOnline.value = true)
+  // window.addEventListener('offline', () => isOnline.value = false)
 })
 
 watch(isDarkMode, () => {
@@ -44,10 +45,10 @@ watch(isDarkMode, () => {
   applyDarkMode()
 })
 
-onUnmounted(() => {
-  window.removeEventListener('online', () => isOnline.value = true)
-  window.removeEventListener('offline', () => isOnline.value = false)
-})
+// onUnmounted(() => {
+//   window.removeEventListener('online', () => isOnline.value = true)
+//   window.removeEventListener('offline', () => isOnline.value = false)
+// })
 
 const applyDarkMode = () => {
   if (isDarkMode.value) {
@@ -125,6 +126,7 @@ const deleteTodo = async (id: string) => {
 }
 
 const toggleTodo = async (todo: Todo) => {
+  console.log(isOnline)
   // Check if set minutes have passed since the todo was created
   if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
     return;
@@ -219,7 +221,7 @@ const removeSelectedTags = async () => {
     console.error('Error removing and marking selected tags as deleted:', error)
   }
 }
-
+// awd
 </script>
 
 <template>
@@ -260,7 +262,6 @@ const removeSelectedTags = async () => {
           </button>
         </div>
       </form>
-
       <div class="mb-4">
         <div class="flex items-center justify-between">
           <div class="flex flex-wrap gap-2 flex-grow">
@@ -270,18 +271,17 @@ const removeSelectedTags = async () => {
                 @click="toggleTag(tag.text)"
                 class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
                 :class="[
-                  currentTags.includes(tag.text) ? 'text-white dark:text-gray-900' : 'text-gray-800 dark:text-gray-100',
                   {
-                    'bg-rose-500 dark:bg-rose-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 0,
-                    'bg-rose-200 dark:bg-rose-200': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 0,
-                    'bg-blue-500 dark:bg-blue-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 1,
-                    'bg-blue-300 dark:bg-blue-300': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 1,
-                    'bg-green-500 dark:bg-green-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 2,
-                    'bg-green-300 dark:bg-green-300': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 2,
-                    'bg-orange-400 dark:bg-orange-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 3,
-                    'bg-orange-200 dark:bg-orange-200': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 3,
-                    'bg-fuchsia-500 dark:bg-fuchsia-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 4,
-                    'bg-fuchsia-200 dark:bg-fuchsia-300': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 4,
+                    'bg-rose-500 text-white dark:bg-rose-600 dark:text-white': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 0,
+                    'bg-rose-100 text-rose-900 dark:bg-rose-300 dark:text-rose-900': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 0,
+                    'bg-blue-500 text-white dark:bg-blue-600 dark:text-white': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 1,
+                    'bg-blue-100 text-blue-900 dark:bg-blue-300 dark:text-blue-900': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 1,
+                    'bg-green-500 text-white dark:bg-green-600 dark:text-white': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 2,
+                    'bg-green-100 text-green-900 dark:bg-green-300 dark:text-green-900': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 2,
+                    'bg-orange-500 text-white dark:bg-orange-600 dark:text-white': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 3,
+                    'bg-orange-100 text-orange-900 dark:bg-orange-300 dark:text-orange-900': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 3,
+                    'bg-fuchsia-500 text-white dark:bg-fuchsia-600 dark:text-white': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 4,
+                    'bg-fuchsia-100 text-fuchsia-900 dark:bg-fuchsia-300 dark:text-fuchsia-900': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 4,
                   }
                 ]"
             >
