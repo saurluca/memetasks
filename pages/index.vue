@@ -306,12 +306,12 @@ const removeSelectedTags = async () => {
               </button>
             </div>
             <div v-if="showTagPopup" class="absolute right-0 z-10 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2">
-              <form @submit.prevent="addTag" class="flex">
+              <form @submit.prevent="addTag(); showTagPopup = false" class="flex">
                 <input
                     v-model="newTagText"
                     placeholder="New tag"
                     class="flex-grow px-3 py-1 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
-                    @keyup.enter="addTag"
+                    @keyup.enter="addTag(); showTagPopup = false"
                     @keyup.esc="showTagPopup = false"
                 />
                 <button
