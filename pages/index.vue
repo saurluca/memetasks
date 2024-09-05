@@ -3,10 +3,10 @@ import {ref, onMounted, watch, computed} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadDataFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
-import type { Todo, Tag } from '~/composables/useIndexedDB'
+import type {Todo, Tag} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/imagePopup.vue'
-import { Wifi, WifiOff } from 'lucide-vue-next'
-import { Plus } from 'lucide-vue-next'
+import {Wifi, WifiOff} from 'lucide-vue-next'
+import {Plus} from 'lucide-vue-next'
 
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
@@ -23,13 +23,13 @@ const filteredTodos = computed(() => {
   if (currentTags.value.length === 0) {
     return todos.value;
   }
-  return todos.value.filter(todo => 
-    todo.tags && todo.tags.some(tag => currentTags.value.includes(tag))
+  return todos.value.filter(todo =>
+      todo.tags && todo.tags.some(tag => currentTags.value.includes(tag))
   );
 });
 
 onMounted(async () => {
-  const { todos: loadedTodos, tags: loadedTags } = await loadDataFromIndexedDB()
+  const {todos: loadedTodos, tags: loadedTags} = await loadDataFromIndexedDB()
   todos.value = loadedTodos
   tags.value = loadedTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
@@ -83,7 +83,11 @@ const addTodo = async () => {
   await updateLocalTodos(todos.value)
   newTodoText.value = ''
 
-  // Generate and add the image after creating the to do
+  await generateTodoImage(newTodo)
+}
+
+const generateTodoImage = async (newTodo: Todo) => {
+  // this method generates and adds an image to a newTodo
   const {generateImage} = useImageGenerator()
   try {
     const result = await generateImage(newTodo.text, true)
@@ -102,10 +106,6 @@ const addTodo = async () => {
     console.error('Error generating image:', error)
   }
 }
-//
-// const generateTodoImage = async (todo: Todo) => {
-//
-// }
 
 const deleteTodo = async (id: string) => {
   const index = todos.value.findIndex(t => t.id === id)
@@ -128,7 +128,7 @@ const deleteTodo = async (id: string) => {
 const toggleTodo = async (todo: Todo) => {
   // Check if set minutes have passed since the todo was created
   if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
-    return; 
+    return;
   }
 
   // set new completed value
@@ -173,12 +173,12 @@ const addTag = () => {
   // You might want to add a function to save tags to IndexedDB
   // Save tags to IndexedDB
   updateLocalTags(tags.value)
-    .then(() => {
-      console.log('Tags saved successfully')
-    })
-    .catch((error) => {
-      console.error('Error saving tags:', error)
-    })
+      .then(() => {
+        console.log('Tags saved successfully')
+      })
+      .catch((error) => {
+        console.error('Error saving tags:', error)
+      })
 }
 
 const toggleTag = (tagId: string) => {
@@ -204,7 +204,7 @@ const toggleTagPopup = () => {
         <div class="flex items-center">
           <div class="mr-2">
             <span v-if="isOnline" class="text-green-500" title="Online">
-              <Wifi />
+              <Wifi/>
             </span>
             <span v-else class="text-red-500" title="Offline">
               <WifiOff/>
@@ -238,11 +238,11 @@ const toggleTagPopup = () => {
         <div class="flex items-center justify-between">
           <div class="flex flex-wrap gap-2 flex-grow">
             <span
-              v-for="tag in tags"
-              :key="tag.id"
-              @click="toggleTag(tag.text)"
-              class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
-              :class="{
+                v-for="tag in tags"
+                :key="tag.id"
+                @click="toggleTag(tag.text)"
+                class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
+                :class="{
                 'bg-blue-500 text-white dark:bg-blue-300 dark:text-blue-900': currentTags.includes(tag.text),
                 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100': !currentTags.includes(tag.text)
               }"
@@ -252,25 +252,25 @@ const toggleTagPopup = () => {
           </div>
           <div class="relative ml-2">
             <button
-              @click="toggleTagPopup"
-              class="p-1 rounded-full bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300"
+                @click="toggleTagPopup"
+                class="p-1 rounded-full bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300"
             >
-              <Plus class="w-4 h-4" />
+              <Plus class="w-4 h-4"/>
             </button>
             <div v-if="showTagPopup" class="absolute right-0 z-10 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2">
               <form @submit.prevent="addTag" class="flex">
                 <input
-                  v-model="newTagText"
-                  placeholder="New tag"
-                  class="flex-grow px-3 py-1 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
-                  @keyup.enter="addTag"
-                  @keyup.esc="showTagPopup = false"
+                    v-model="newTagText"
+                    placeholder="New tag"
+                    class="flex-grow px-3 py-1 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+                    @keyup.enter="addTag"
+                    @keyup.esc="showTagPopup = false"
                 />
                 <button
-                  type="submit"
-                  class="px-3 py-1 text-sm bg-green-500 text-white rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300 flex items-center"
+                    type="submit"
+                    class="px-3 py-1 text-sm bg-green-500 text-white rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300 flex items-center"
                 >
-                  <Plus class="w-4 h-4 mr-1" />
+                  <Plus class="w-4 h-4 mr-1"/>
                   Add
                 </button>
               </form>
@@ -324,8 +324,8 @@ const toggleTagPopup = () => {
           </li>
         </template>
       </draggable>
-    </div> 
-    <ImagePopup ref="imagePopup" />
+    </div>
+    <ImagePopup ref="imagePopup"/>
   </div>
 </template>
 
