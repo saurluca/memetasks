@@ -46,7 +46,7 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 2, {
   },
 })
 
-export async function loadTodosFromIndexedDB(): Promise<{ todos: Todo[], tags: Tag[] }> {
+export async function loadDataFromIndexedDB(): Promise<{ todos: Todo[], tags: Tag[] }> {
   const db = await dbPromise
   const todos = await db.getAllFromIndex('todos', 'by-position')
   const tags = await db.getAll('tags')

@@ -2,7 +2,7 @@
 import {ref, onMounted, watch, computed} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
-import {loadTodosFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
+import {loadDataFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
 import type { Todo, Tag } from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/imagePopup.vue'
 import { Wifi, WifiOff } from 'lucide-vue-next'
@@ -19,7 +19,6 @@ const newTagText = ref('')
 const showTagPopup = ref(false)
 const currentTags = ref<string[]>([])
 
-// Add this computed property
 const filteredTodos = computed(() => {
   if (currentTags.value.length === 0) {
     return todos.value;
@@ -30,7 +29,7 @@ const filteredTodos = computed(() => {
 });
 
 onMounted(async () => {
-  const { todos: loadedTodos, tags: loadedTags } = await loadTodosFromIndexedDB()
+  const { todos: loadedTodos, tags: loadedTags } = await loadDataFromIndexedDB()
   todos.value = loadedTodos
   tags.value = loadedTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
@@ -50,6 +49,7 @@ onUnmounted(() => {
   window.removeEventListener('offline', () => isOnline.value = false)
 })
 
+// what is this for? TODO
 const applyDarkMode = () => {
   if (isDarkMode.value) {
     document.documentElement.classList.add('dark')
@@ -102,14 +102,21 @@ const addTodo = async () => {
     console.error('Error generating image:', error)
   }
 }
+//
+// const generateTodoImage = async (todo: Todo) => {
+//
+// }
 
 const deleteTodo = async (id: string) => {
   const index = todos.value.findIndex(t => t.id === id)
   if (index !== -1) {
+    // soft delete
     // todos.value[index].deletedAt = new Date()
     // todos.value[index].image = null
-    // Mark the todo as deleted
+
+    // hard delete
     todos.value.splice(index, 1)
+
     // Update positions of remaining todos
     todos.value.forEach((todo, i) => {
       todo.position = i
@@ -124,13 +131,13 @@ const toggleTodo = async (todo: Todo) => {
     return; 
   }
 
+  // set new completed value
   todo.completed = !todo.completed;
   todo.completedAt = todo.completed ? new Date() : null;
   todo.updatedAt = new Date();
   await updateLocalTodos(todos.value);
-  console.log('todo.image', todo.image)
-  console.log('imagePopup.value', imagePopup.value)
-  console.log('todo.completed', todo.completed)
+
+  // open popup with image if image available
   if (todo.completed && todo.image instanceof Blob) {
     if (imagePopup.value) {
       imagePopup.value.open();

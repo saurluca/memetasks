@@ -45,7 +45,6 @@ export function useImageGenerator() {
         if (!imageResponse.ok) throw new Error('Failed to generate image')
         const blob = await imageResponse.blob()
         imageBlob.value = blob
-        console.log('imageBlob', imageBlob.value)
         imageUrl.value = URL.createObjectURL(blob)
 
         // Return the imageBlob and imageUrl

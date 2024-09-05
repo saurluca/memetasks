@@ -7,7 +7,7 @@ const prompt = ref('')
 const useEnhancedPrompt = ref(true)
 const displayImageUrl = ref('')
 
-const { imageBlob, isLoading, generateImage } = useImageGenerator()
+const { isLoading, generateImage } = useImageGenerator()
 
 const handleGenerateImage = async () => {
   if (prompt.value) {
@@ -18,7 +18,6 @@ const handleGenerateImage = async () => {
       }
     } catch (error) {
       console.error('Failed to generate image:', error)
-      // Handle user-facing error here
     }
   }
 }
