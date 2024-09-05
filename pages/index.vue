@@ -205,6 +205,9 @@ const removeSelectedTags = async () => {
       console.warn(`Tag with name ${tagName} not found`)
     }
   }
+  
+  // Filter out the deleted tags
+  tags.value = tags.value.filter(tag => !tag.deletedAt)
 
   // Clear the currentTags array
   currentTags.value = []
