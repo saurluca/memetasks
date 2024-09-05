@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, watch, computed, nextTick, onUnmounted} from 'vue'
+import {ref, onMounted, watch, computed, nextTick, onUnmounted, shallowRef} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadDataFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
@@ -7,7 +7,7 @@ import type {Todo, Tag} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/imagePopup.vue'
 import {Wifi, WifiOff} from 'lucide-vue-next'
 import {Plus, Minus} from 'lucide-vue-next'
-import {useOnline} from '@vueuse/core'
+import {useOnline, useDebounceFn, useInfiniteScroll} from '@vueuse/core'
 
 // State variables
 const todos = ref<Todo[]>([])
@@ -21,6 +21,8 @@ const newTagText = ref('')
 const showTagPopup = ref(false)
 const currentTags = ref<string[]>([])
 const newTagInput = ref<HTMLInputElement | null>(null)
+const maxDisplayedTasks = ref(10) // New state variable for max tasks
+const containerRef = ref<HTMLElement | null>(null)
 
 // Computed properties
 const filteredTodos = computed(() => {
@@ -28,9 +30,24 @@ const filteredTodos = computed(() => {
     return todos.value;
   }
   return todos.value.filter(todo =>
-      todo.tags && todo.tags.some(tag => currentTags.value.includes(tag))
+    todo.tags && todo.tags.some(tag => currentTags.value.includes(tag))
   );
-});
+})
+
+const displayedTodos = computed(() => {
+  return filteredTodos.value.slice(0, maxDisplayedTasks.value)
+})
+
+// Infinite scroll
+const { isLoading } = useInfiniteScroll(
+  containerRef,
+  () => {
+    if (maxDisplayedTasks.value < filteredTodos.value.length) {
+      maxDisplayedTasks.value += 10
+    }
+  },
+  { distance: 10 }
+)
 
 // Lifecycle hooks
 onMounted(async () => {
@@ -91,38 +108,29 @@ const deleteTodo = async (id: string) => {
 }
 
 const toggleTodo = async (todo: Todo) => {
-  console.log(isOnline)
-  // Check if set minutes have passed since the todo was created
-  if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
+  const currentTime = new Date().getTime()
+  if (currentTime - new Date(todo.createdAt).getTime() < timeToWait) {
     return;
   }
 
-  // set new completed value
   todo.completed = !todo.completed;
   todo.completedAt = todo.completed ? new Date() : null;
   todo.updatedAt = new Date();
   await updateLocalTodos(todos.value);
 
-  // open popup with image if image available
   if (todo.completed && todo.image instanceof Blob) {
-    if (imagePopup.value) {
-      imagePopup.value.open();
-      imagePopup.value.setImageBlob(todo.image);
-    } else {
-      console.warn('ImagePopup component not initialized');
-    }
-  } else if (todo.completed) {
-    console.warn('Todo completed but image is missing or invalid');
+    imagePopup.value?.open();
+    imagePopup.value?.setImageBlob(todo.image);
   }
 }
 
-const updateTodoPositions = async () => {
+const updateTodoPositions = useDebounceFn(async () => {
   todos.value.forEach((todo, index) => {
     todo.position = index
     todo.updatedAt = new Date()
   })
   await updateLocalTodos(todos.value)
-}
+}, 300)
 
 // Image generation
 const generateTodoImage = async (newTodo: Todo) => {
@@ -354,51 +362,59 @@ watch(isDarkMode, () => {
         </div>
       </div>
 
-      <draggable
-          v-model="filteredTodos"
-          item-key="id"
-          @end="updateTodoPositions"
-          class="space-y-3"
+      <div 
+        ref="containerRef"
+        class="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
       >
-        <template #item="{ element: todo }">
-          <li class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
-            <div class="flex items-center flex-grow mr-4 min-w-0">
-              <div class="flex items-center relatil mr-3">
-                <input
-                    type="checkbox"
-                    :checked="todo.completed"
-                    @click="(event) => {
-                      if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
-                        event.preventDefault();
-                      } else {
-                        toggleTodo(todo);
-                      }
-                    }"
-                    :class="[
-                        'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
-                        {
-                            'text-blue-600 cursor-pointer': new Date().getTime() - new Date(todo.createdAt).getTime() >= timeToWait,
-                            'text-gray-400 cursor-not-allowed': new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait
+        <draggable
+            v-model="displayedTodos"
+            item-key="id"
+            @end="updateTodoPositions"
+            class="space-y-3"
+        >
+          <template #item="{ element: todo }">
+            <li class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+              <div class="flex items-center flex-grow mr-4 min-w-0">
+                <div class="flex items-center relatil mr-3">
+                  <input
+                      type="checkbox"
+                      :checked="todo.completed"
+                      @click="(event) => {
+                        if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
+                          event.preventDefault();
+                        } else {
+                          toggleTodo(todo);
                         }
-                    ]"
-                />
+                      }"
+                      :class="[
+                          'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
+                          {
+                              'text-blue-600 cursor-pointer': new Date().getTime() - new Date(todo.createdAt).getTime() >= timeToWait,
+                              'text-gray-400 cursor-not-allowed': new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait
+                          }
+                      ]"
+                  />
+                </div>
+                <span
+                    :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
+                    :title="todo.text"
+                >
+                  {{ todo.text }}
+                </span>
               </div>
-              <span
-                  :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
-                  :title="todo.text"
+              <button
+                  @click="deleteTodo(todo.id)"
+                  class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
               >
-                {{ todo.text }}
-              </span>
-            </div>
-            <button
-                @click="deleteTodo(todo.id)"
-                class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
-            >
-              Delete
-            </button>
-          </li>
-        </template>
-      </draggable>
+                Delete
+              </button>
+            </li>
+          </template>
+        </draggable>
+      </div>
+      <div v-if="filteredTodos.length > maxDisplayedTasks" class="mt-4 text-center text-gray-600 dark:text-gray-400">
+        Showing {{ maxDisplayedTasks }} of {{ filteredTodos.length }} tasks
+      </div>
     </div>
     <ImagePopup ref="imagePopup"/>
   </div>
