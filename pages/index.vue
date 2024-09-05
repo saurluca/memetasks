@@ -269,10 +269,21 @@ const removeSelectedTags = async () => {
                 :key="tag.id"
                 @click="toggleTag(tag.text)"
                 class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
-                :class="{
-                'bg-blue-500 text-white dark:bg-blue-300 dark:text-blue-900': currentTags.includes(tag.text),
-                'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100': !currentTags.includes(tag.text)
-              }"
+                :class="[
+                  currentTags.includes(tag.text) ? 'text-white dark:text-gray-900' : 'text-gray-800 dark:text-gray-100',
+                  {
+                    'bg-rose-500 dark:bg-rose-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 0,
+                    'bg-rose-200 dark:bg-rose-200': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 0,
+                    'bg-blue-500 dark:bg-blue-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 1,
+                    'bg-blue-300 dark:bg-blue-300': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 1,
+                    'bg-green-500 dark:bg-green-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 2,
+                    'bg-green-300 dark:bg-green-300': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 2,
+                    'bg-orange-400 dark:bg-orange-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 3,
+                    'bg-orange-200 dark:bg-orange-200': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 3,
+                    'bg-fuchsia-500 dark:bg-fuchsia-500': currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 4,
+                    'bg-fuchsia-200 dark:bg-fuchsia-300': !currentTags.includes(tag.text) && tag.id.charCodeAt(0) % 5 === 4,
+                  }
+                ]"
             >
               {{ tag.text }}
             </span>
