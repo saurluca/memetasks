@@ -40,6 +40,8 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <NuxtPwaManifest />
+  <NuxtPage />
   <div class="flex items-center justify-center min-h-screen">
     <div class="max-w-2xl p-6">
       <h1 class="text-2xl font-bold mb-6 text-center">Image Generator</h1>

@@ -225,6 +225,8 @@ const removeSelectedTags = async () => {
 </script>
 
 <template>
+  <NuxtPwaManifest />
+  <NuxtPage />
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center">
     <div class="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
