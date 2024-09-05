@@ -9,6 +9,7 @@ import {Wifi, WifiOff} from 'lucide-vue-next'
 import {Plus, Minus} from 'lucide-vue-next'
 import {useOnline} from '@vueuse/core'
 
+// State variables
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const newTodoText = ref('')
@@ -21,6 +22,7 @@ const showTagPopup = ref(false)
 const currentTags = ref<string[]>([])
 const newTagInput = ref<HTMLInputElement | null>(null)
 
+// Computed properties
 const filteredTodos = computed(() => {
   if (currentTags.value.length === 0) {
     return todos.value;
@@ -30,6 +32,7 @@ const filteredTodos = computed(() => {
   );
 });
 
+// Lifecycle hooks
 onMounted(async () => {
   const {todos: loadedTodos, tags: loadedTags} = await loadDataFromIndexedDB()
   todos.value = loadedTodos
@@ -40,28 +43,11 @@ onMounted(async () => {
   document.addEventListener('keydown', handleKeyDown)
 })
 
-watch(isDarkMode, () => {
-  localStorage.setItem('darkMode', isDarkMode.value.toString())
-  applyDarkMode()
-})
-
-// Optional: Remove event listener on component unmount
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
 })
 
-const applyDarkMode = () => {
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
-}
-
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-}
-
+// Core todo functionality
 const addTodo = async () => {
   if (!newTodoText.value.trim()) return
 
@@ -84,27 +70,6 @@ const addTodo = async () => {
   newTodoText.value = ''
 
   await generateTodoImage(newTodo)
-}
-
-const generateTodoImage = async (newTodo: Todo) => {
-  // this method generates and adds an image to a newTodo
-  const {generateImage} = useImageGenerator()
-  try {
-    const result = await generateImage(newTodo.text, true)
-    if (result.imageBlob instanceof Blob) {
-      const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
-      if (todoIndex !== -1) {
-        todos.value[todoIndex].image = result.imageBlob
-        await updateLocalTodos(todos.value)
-      } else {
-        console.warn('Todo not found after image generation')
-      }
-    } else {
-      console.warn('Generated image is not a Blob')
-    }
-  } catch (error) {
-    console.error('Error generating image:', error)
-  }
 }
 
 const deleteTodo = async (id: string) => {
@@ -159,6 +124,29 @@ const updateTodoPositions = async () => {
   await updateLocalTodos(todos.value)
 }
 
+// Image generation
+const generateTodoImage = async (newTodo: Todo) => {
+  // this method generates and adds an image to a newTodo
+  const {generateImage} = useImageGenerator()
+  try {
+    const result = await generateImage(newTodo.text, true)
+    if (result.imageBlob instanceof Blob) {
+      const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
+      if (todoIndex !== -1) {
+        todos.value[todoIndex].image = result.imageBlob
+        await updateLocalTodos(todos.value)
+      } else {
+        console.warn('Todo not found after image generation')
+      }
+    } else {
+      console.warn('Generated image is not a Blob')
+    }
+  } catch (error) {
+    console.error('Error generating image:', error)
+  }
+}
+
+// Tag functionality
 const addTag = () => {
   if (!newTagText.value.trim()) return
 
@@ -232,11 +220,31 @@ const removeSelectedTags = async () => {
   }
 }
 
+// Dark mode functionality
+const toggleDarkMode = () => {
+  isDarkMode.value = !isDarkMode.value
+}
+
+const applyDarkMode = () => {
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+// Event handlers
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && showTagPopup.value) {
     closeTagPopup()
   }
 }
+
+// Watchers
+watch(isDarkMode, () => {
+  localStorage.setItem('darkMode', isDarkMode.value.toString())
+  applyDarkMode()
+})
 
 // awd
 </script>
