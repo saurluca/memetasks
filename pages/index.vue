@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, watch, computed, nextTick} from 'vue'
+import {ref, onMounted, watch, computed, nextTick, onUnmounted} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadDataFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
@@ -37,8 +37,7 @@ onMounted(async () => {
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
 
-  // window.addEventListener('online', () => isOnline.value = true)
-  // window.addEventListener('offline', () => isOnline.value = false)
+  document.addEventListener('keydown', handleKeyDown)
 })
 
 watch(isDarkMode, () => {
@@ -46,10 +45,10 @@ watch(isDarkMode, () => {
   applyDarkMode()
 })
 
-// onUnmounted(() => {
-//   window.removeEventListener('online', () => isOnline.value = true)
-//   window.removeEventListener('offline', () => isOnline.value = false)
-// })
+// Optional: Remove event listener on component unmount
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeyDown)
+})
 
 const applyDarkMode = () => {
   if (isDarkMode.value) {
@@ -201,6 +200,11 @@ const toggleTagPopup = () => {
   }
 }
 
+const closeTagPopup = () => {
+  showTagPopup.value = false
+  newTagText.value = '' // Clear the input when closing
+}
+
 const removeSelectedTags = async () => {
   // Remove all currently selected tags
   for (const tagName of currentTags.value) {
@@ -227,6 +231,13 @@ const removeSelectedTags = async () => {
     console.error('Error removing and marking selected tags as deleted:', error)
   }
 }
+
+const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && showTagPopup.value) {
+    closeTagPopup()
+  }
+}
+
 // awd
 </script>
 
@@ -314,14 +325,13 @@ const removeSelectedTags = async () => {
               </button>
             </div>
             <div v-if="showTagPopup" class="absolute right-0 z-10 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2">
-              <form @submit.prevent="addTag(); showTagPopup = false" class="flex">
+              <form @submit.prevent="addTag(); closeTagPopup()" class="flex">
                 <input
                     ref="newTagInput"
                     v-model="newTagText"
                     placeholder="New tag"
                     class="flex-grow px-3 py-1 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
-                    @keyup.enter="addTag(); showTagPopup = false"
-                    @keyup.esc="showTagPopup = false"
+                    @keyup.enter="addTag(); closeTagPopup()"
                 />
                 <button
                     type="submit"
