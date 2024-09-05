@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, watch, computed} from 'vue'
+import {ref, onMounted, watch, computed, nextTick} from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadDataFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
@@ -19,6 +19,7 @@ const isOnline = useOnline()
 const newTagText = ref('')
 const showTagPopup = ref(false)
 const currentTags = ref<string[]>([])
+const newTagInput = ref<HTMLInputElement | null>(null)
 
 const filteredTodos = computed(() => {
   if (currentTags.value.length === 0) {
@@ -193,6 +194,11 @@ const toggleTag = (tagId: string) => {
 
 const toggleTagPopup = () => {
   showTagPopup.value = !showTagPopup.value
+  if (showTagPopup.value) {
+    nextTick(() => {
+      newTagInput.value?.focus()
+    })
+  }
 }
 
 const removeSelectedTags = async () => {
@@ -310,6 +316,7 @@ const removeSelectedTags = async () => {
             <div v-if="showTagPopup" class="absolute right-0 z-10 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2">
               <form @submit.prevent="addTag(); showTagPopup = false" class="flex">
                 <input
+                    ref="newTagInput"
                     v-model="newTagText"
                     placeholder="New tag"
                     class="flex-grow px-3 py-1 text-sm border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
