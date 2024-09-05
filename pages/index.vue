@@ -243,8 +243,9 @@ const applyDarkMode = () => {
 
 // Event handlers
 const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && showTagPopup.value) {
+  if (event.key === 'Escape') {
     closeTagPopup()
+    imagePopup.value?.close()
   }
 }
 
