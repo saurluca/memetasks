@@ -1,6 +1,7 @@
 import { openDB } from 'idb'
 import type { DBSchema } from 'idb'
 import { toRaw } from 'vue'
+import { nanoid } from 'nanoid'
 
 export interface Tag {
   id: string
@@ -41,7 +42,22 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 2, {
       todoStore.createIndex('by-position', 'position')
     }
     if (oldVersion < 2) {
-      db.createObjectStore('tags', { keyPath: 'id' })
+      const tagStore = db.createObjectStore('tags', { keyPath: 'id' })
+      
+      // Add default tags
+      const now = new Date()
+      tagStore.add({
+        id: nanoid(),
+        text: 'general',
+        createdAt: now,
+        deletedAt: null
+      })
+      tagStore.add({
+        id: nanoid(),
+        text: 'work',
+        createdAt: now,
+        deletedAt: null
+      })
     }
   },
 })
