@@ -1,27 +1,29 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed, nextTick, onUnmounted } from 'vue'
-import { nanoid } from 'nanoid'
-import { loadDataFromIndexedDB, updateLocalTodos, updateLocalTags } from '~/composables/useIndexedDB'
-import type { Todo, Tag } from '~/composables/useIndexedDB'
+import {ref, onMounted, watch, computed, nextTick, onUnmounted} from 'vue'
+import {nanoid} from 'nanoid'
+import {loadDataFromIndexedDB, updateLocalTodos, updateLocalTags} from '~/composables/useIndexedDB'
+import type {Todo, Tag} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/ImagePopup.vue'
-import { Wifi, WifiOff } from 'lucide-vue-next'
-import { useOnline, useDebounceFn } from '@vueuse/core'
+import {Wifi, WifiOff} from 'lucide-vue-next'
+import {useOnline, useDebounceFn} from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
+//     vivid prompts for image generation. Enhance the given prompt to make it more descriptive and suitable for an image generation AI. Focus on visual details, style, mood, and composition. Keep the response concise and only return the enhanced prompt.' },
 
 // State variables
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 12000
+const timeToWait = 0
 const isOnline = useOnline()
 const currentTags = ref<string[]>([])
+const memeMode = ref(true)
 
 // Lifecycle hooks
 onMounted(async () => {
-  const { todos: loadedTodos, tags: loadedTags } = await loadDataFromIndexedDB()
+  const {todos: loadedTodos, tags: loadedTags} = await loadDataFromIndexedDB()
   todos.value = loadedTodos
   tags.value = loadedTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
@@ -72,9 +74,12 @@ const toggleTodo = async (todo: Todo) => {
   todo.updatedAt = new Date()
   await updateLocalTodos(todos.value)
 
-  if (todo.completed && todo.image instanceof Blob) {
+  if (todo.completed) {
     imagePopup.value?.open()
+    console.log("todo image",todo.image)
+    if (todo.image instanceof Blob) {
     imagePopup.value?.setImageBlob(todo.image)
+    }
   }
 }
 
@@ -87,15 +92,19 @@ const updateTodoPositions = useDebounceFn(async () => {
 }, 300)
 
 const generateTodoImage = async (newTodo: Todo) => {
-  const { generateImage } = useImageGenerator()
+  const { generateImage } = memeMode.value ? useMemeGenerator() : useImageGenerator();
+
   try {
-    const result = await generateImage(newTodo.text, true)
-    if (result.imageBlob instanceof Blob) {
+    const result = await generateImage(newTodo.text)
+    console.log("image recieved")
+    console.log("result in generated TODO", result)
+    if (result.imageBlob) {
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
         todos.value[todoIndex].image = result.imageBlob
         await updateLocalTodos(todos.value)
       }
+      console.log("image generated")
     }
   } catch (error) {
     console.error('Error generating image:', error)
@@ -129,6 +138,7 @@ const removeSelectedTags = async () => {
   await updateLocalTags(tags.value)
 }
 
+
 // Dark mode functionality
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
@@ -157,21 +167,29 @@ watch(isDarkMode, () => {
 </script>
 
 <template>
-  <NuxtPwaManifest />
-  <NuxtPage />
+  <NuxtPwaManifest/>
+  <NuxtPage/>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center">
     <div class="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Todo App</h1>
 
         <div class="flex items-center">
-          <div class="mr-2">
-            <span v-if="isOnline" class="text-green-500" title="Online">
+          <div class="mr-2 flex items-center">
+            <button
+                @click="memeMode = !memeMode"
+                class="px-3 py-1 mr-2 text-xs font-medium rounded-full transition-colors duration-300"
+                :class="memeMode ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+            >
+              {{ memeMode ? 'Meme: ON' : 'Meme: OFF' }}
+            </button>
+            <span v-if="isOnline" class="text-green-500 mr-2" title="Online">
               <Wifi/>
             </span>
-            <span v-else class="text-red-500" title="Offline">
+            <span v-else class="text-red-500 mr-2" title="Offline">
               <WifiOff/>
             </span>
+
           </div>
 
           <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300">
@@ -181,23 +199,23 @@ watch(isDarkMode, () => {
         </div>
       </div>
 
-      <TodoInput @add-todo="addTodo" />
-      <TagManager 
-        :tags="tags" 
-        :current-tags="currentTags" 
-        @toggle-tag="toggleTag" 
-        @add-tag="addTag" 
-        @remove-selected-tags="removeSelectedTags" 
+      <TodoInput @add-todo="addTodo"/>
+      <TagManager
+          :tags="tags"
+          :current-tags="currentTags"
+          @toggle-tag="toggleTag"
+          @add-tag="addTag"
+          @remove-selected-tags="removeSelectedTags"
       />
-      <TodoList 
-        :todos="todos" 
-        :current-tags="currentTags" 
-        :time-to-wait="timeToWait"
-        @toggle-todo="toggleTodo"
-        @delete-todo="deleteTodo"
-        @update-positions="updateTodoPositions"
+      <TodoList
+          :todos="todos"
+          :current-tags="currentTags"
+          :time-to-wait="timeToWait"
+          @toggle-todo="toggleTodo"
+          @delete-todo="deleteTodo"
+          @update-positions="updateTodoPositions"
       />
     </div>
-    <ImagePopup ref="imagePopup" />
+    <ImagePopup ref="imagePopup"/>
   </div>
 </template>

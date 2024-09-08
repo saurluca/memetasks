@@ -5,7 +5,7 @@ export function useImageGenerator() {
   const imageBlob = ref<Blob | null>(null)
   const isLoading = ref(false)
 
-  const generateImage = async (prompt: string, useEnhancedPrompt: boolean) => {
+  const generateImage = async (prompt: string, useEnhancedPrompt: boolean = true) => {
     console.log('generateImage called with prompt:', prompt, 'and useEnhancedPrompt:', useEnhancedPrompt)
     if (prompt) {
       isLoading.value = true
@@ -42,6 +42,7 @@ export function useImageGenerator() {
         // Generate the image with the final prompt
         const imageResponse = await fetch(`https://memes.spuckteller.workers.dev/?prompt=${encodeURIComponent(finalPrompt)}`)
         console.log('imageResponse', imageResponse)
+
         if (!imageResponse.ok) throw new Error('Failed to generate image')
         const blob = await imageResponse.blob()
         imageBlob.value = blob
