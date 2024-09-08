@@ -1,23 +1,20 @@
 <script setup lang="ts">
-import {ref, onMounted, watch, computed, nextTick, onUnmounted} from 'vue'
+import {ref, onMounted, watch, onUnmounted} from 'vue'
 import {nanoid} from 'nanoid'
 import {loadDataFromIndexedDB, updateLocalTodos, updateLocalTags} from '~/composables/useIndexedDB'
 import type {Todo, Tag} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/ImagePopup.vue'
-import {Wifi, WifiOff} from 'lucide-vue-next'
-import {useOnline, useDebounceFn} from '@vueuse/core'
+import {useDebounceFn} from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
-//     vivid prompts for image generation. Enhance the given prompt to make it more descriptive and suitable for an image generation AI. Focus on visual details, style, mood, and composition. Keep the response concise and only return the enhanced prompt.' },
 
 // State variables
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 0
-const isOnline = useOnline()
+const timeToWait = 20000
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
 
@@ -183,13 +180,6 @@ watch(isDarkMode, () => {
             >
               {{ memeMode ? 'Meme: ON' : 'Meme: OFF' }}
             </button>
-            <span v-if="isOnline" class="text-green-500 mr-2" title="Online">
-              <Wifi/>
-            </span>
-            <span v-else class="text-red-500 mr-2" title="Offline">
-              <WifiOff/>
-            </span>
-
           </div>
 
           <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300">

@@ -121,12 +121,6 @@ export function useMemeGenerator() {
                         resolve({ imageBlob: imageBlob.value, imageUrl: imageUrl.value, memeHeader: memeHeader.value });
                     });
                 });
-
-                // Remove the following lines
-                // const endTime4 = performance.now(); // End timing
-                // console.log(`Image generation finished,  took ${endTime4 - startTime} milliseconds`);
-                // return {imageBlob: imageBlob.value, imageUrl: imageUrl.value, memeHeader: memeHeader.value}
-                
             } catch (error) {
                 console.error('Error generating image:', error)
                 throw error // Re-throw the error to be handled by the caller
