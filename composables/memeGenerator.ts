@@ -1,0 +1,108 @@
+import {ref} from 'vue'
+
+export function useMemeGenerator() {
+    const imageUrl = ref('')
+    const imageBlob = ref<Blob | null>(null)
+    const isLoading = ref(false)
+    const memeHeader = ref('')
+
+    const generateImage = async (prompt: string, useEnhancedPrompt: boolean) => {
+        console.log('generateImage called with prompt:', prompt, 'and useEnhancedPrompt:', useEnhancedPrompt)
+        if (prompt) {
+            isLoading.value = true
+            imageUrl.value = ''
+            imageBlob.value = null
+            memeHeader.value = ''
+            try {
+                // Get meme prompt and header
+                console.log('awaitng memePromptResponse')
+                console.log('url', `https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`)
+                const memePromptResponse = await fetch(`https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                })
+                console.log('memePromptResponse', memePromptResponse)
+
+                if (!memePromptResponse.ok) {
+                    const errorText = await memePromptResponse.text()
+                    throw new Error(`Failed to get meme prompt: ${errorText}`)
+                }
+
+                const responseData = await memePromptResponse.json()
+                console.log('responseData', responseData)
+
+                const responseString = responseData.response
+
+                const jsonMatch = responseString.match(/{.*}/s);
+
+                const jsonString = jsonMatch[0]; // This will contain the JSON string
+                const data = JSON.parse(jsonString); // Parse the JSON string
+
+                const finalPrompt = data.enhancedPrompt; // Access the enhancedPrompt
+                const memeHeader = data.memeHeader || ''
+                console.log(finalPrompt);
+                console.log(memeHeader);
+
+                const imageResponse = await fetch(`https://memes.spuckteller.workers.dev/?prompt=${encodeURIComponent(finalPrompt)}`)
+                console.log('imageResponse', imageResponse)
+
+                if (!imageResponse.ok) throw new Error('Failed to generate image')
+                const blob = await imageResponse.blob()
+                
+                // Create a canvas to draw the image and the meme header
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (!ctx) throw new Error('Failed to get canvas context'); // Ensure ctx is not null
+
+                // Create an image element to load the blob
+                const img = new Image();
+                img.src = URL.createObjectURL(blob);
+                
+                // Wait for the image to load
+                await new Promise((resolve) => {
+                    img.onload = resolve;
+                });
+
+                // Set canvas dimensions
+                canvas.width = img.width;
+                canvas.height = img.height + 50; // Extra space for the header
+
+                // Draw the image on the canvas
+                ctx.drawImage(img, 0, 50); // Draw image below the header
+
+                // Set font and draw the meme header
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(memeHeader, canvas.width / 2, 30); // Draw header at the top
+
+                // Convert canvas to blob
+                canvas.toBlob((newBlob) => {
+                    imageBlob.value = newBlob;
+                    imageUrl.value = URL.createObjectURL(newBlob as Blob);
+                    console.log('imageUrl', imageUrl.value);
+                });
+
+                // Return the imageBlob, imageUrl, and memeHeader
+                return {imageBlob: imageBlob.value, imageUrl: imageUrl.value, memeHeader: memeHeader.value}
+            } catch (error) {
+                console.error('Error generating image:', error)
+                throw error // Re-throw the error to be handled by the caller
+            } finally {
+                isLoading.value = false
+            }
+        }
+        // Return null if no prompt was provided
+        return {imageBlob: null, imageUrl: '', memeHeader: ''}
+    }
+
+    return {
+        imageUrl,
+        imageBlob,
+        isLoading,
+        memeHeader,
+        generateImage
+    }
+}
