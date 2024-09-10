@@ -36,8 +36,13 @@ const addTag = () => {
 }
 
 const getTagColor = (tagId: string) => {
+  console.log("Manager")
+  console.log("tagId", tagId)
   const colorIndex = tagId.charCodeAt(0) % 5
+
+  console.log("colorIndex", colorIndex)
   const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
+  console.log(colors[colorIndex])
   return colors[colorIndex]
 }
 </script>
@@ -48,13 +53,13 @@ const getTagColor = (tagId: string) => {
       <div class="flex flex-wrap gap-2 flex-grow">
         <span
           v-for="tag in tags"
-          :key="tag.id"
+          :key="tag.text"
           @click="emit('toggle-tag', tag.text)"
           class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
           :class="[
             {
-              [`bg-${getTagColor(tag.id)}-500 text-white dark:bg-${getTagColor(tag.id)}-600 dark:text-white`]: props.currentTags.includes(tag.text),
-              [`bg-${getTagColor(tag.id)}-100 text-${getTagColor(tag.id)}-900 dark:bg-${getTagColor(tag.id)}-300 dark:text-${getTagColor(tag.id)}-900`]: !props.currentTags.includes(tag.text),
+              [`bg-${getTagColor(tag.text)}-500 text-white dark:bg-${getTagColor(tag.text)}-600 dark:text-white`]: props.currentTags.includes(tag.text),
+              [`bg-${getTagColor(tag.text)}-100 text-${getTagColor(tag.text)}-900 dark:bg-${getTagColor(tag.text)}-300 dark:text-${getTagColor(tag.text)}-900`]: !props.currentTags.includes(tag.text),
             }
           ]"
         >
