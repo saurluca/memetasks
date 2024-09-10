@@ -7,7 +7,8 @@
 dist
 
 # Node dependencies
-node_modules
+node_module
+s
 
 # Logs
 logs
@@ -22,3 +23,4 @@ logs
 .env
 .env.*
 !.env.example
+node_modules
