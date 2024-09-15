@@ -121,12 +121,10 @@ const addTag = async (text: string) => {
 }
 
 const toggleTag = (tagText: string) => {
-  const index = currentTags.value.indexOf(tagText)
-  if (index === -1) {
-    currentTags.value.push(tagText)
-  } else {
-    currentTags.value.splice(index, 1)
-  }
+  // Deselect all tags first
+  currentTags.value = []
+  // Select the new tag
+  currentTags.value.push(tagText)
 }
 
 const removeSelectedTags = async () => {
