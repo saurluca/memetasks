@@ -94,7 +94,7 @@ const generateTodoImage = async (newTodo: Todo) => {
   try {
     const result = await generateImage(newTodo.text)
     console.log("image recieved")
-    console.log("result in generated TODO", result)
+    // console.log("result in generated TODO", result)
     if (result.imageBlob) {
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
@@ -121,10 +121,14 @@ const addTag = async (text: string) => {
 }
 
 const toggleTag = (tagText: string) => {
-  // Deselect all tags first
-  currentTags.value = []
-  // Select the new tag
-  currentTags.value.push(tagText)
+  if (currentTags.value.includes(tagText)) {
+    currentTags.value = []
+  } else {
+    // Deselect all tags first
+    currentTags.value = []
+    // Select the new tag
+    currentTags.value.push(tagText)
+  }
 }
 
 const removeSelectedTags = async () => {

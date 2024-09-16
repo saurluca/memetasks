@@ -38,12 +38,12 @@ const {isLoading} = useInfiniteScroll(
 )
 
 const getTagColor = (tagId: string) => {
-  console.log("tagId", tagId)
+  // console.log("tagId", tagId)
   const colorIndex = tagId.charCodeAt(0) % 5
 
-  console.log("colorIndex", colorIndex)
+  // console.log("colorIndex", colorIndex)
   const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
-  console.log(colors[colorIndex])
+  // console.log(colors[colorIndex])
   return colors[colorIndex]
 }
 </script>

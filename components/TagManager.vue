@@ -14,6 +14,10 @@ const newTagText = ref('')
 const showTagPopup = ref(false)
 const newTagInput = ref<HTMLInputElement | null>(null)
 
+const toggleTag = (tagText: string) => {
+  emit('toggle-tag', tagText)
+}
+
 const toggleTagPopup = () => {
   showTagPopup.value = !showTagPopup.value
   if (showTagPopup.value) {
@@ -36,13 +40,13 @@ const addTag = () => {
 }
 
 const getTagColor = (tagId: string) => {
-  console.log("Manager")
-  console.log("tagId", tagId)
+  // console.log("Manager")
+  // console.log("tagId", tagId)
   const colorIndex = tagId.charCodeAt(0) % 5
 
-  console.log("colorIndex", colorIndex)
+  // console.log("colorIndex", colorIndex)
   const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
-  console.log(colors[colorIndex])
+  // console.log(colors[colorIndex])
   return colors[colorIndex]
 }
 </script>
@@ -54,7 +58,7 @@ const getTagColor = (tagId: string) => {
         <span
           v-for="tag in tags"
           :key="tag.text"
-          @click="emit('toggle-tag', tag.text)"
+          @click="toggleTag(tag.text)" 
           class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
           :class="[
             {
