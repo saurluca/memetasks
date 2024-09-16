@@ -93,8 +93,7 @@ const generateTodoImage = async (newTodo: Todo) => {
 
   try {
     const result = await generateImage(newTodo.text)
-    console.log("image recieved")
-    // console.log("result in generated ODO", result)
+    console.log("image received")
     if (result.imageBlob) {
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
@@ -171,7 +170,7 @@ watch(isDarkMode, () => {
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center">
     <div class="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Todo App</h1>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dodo it!</h1>
 
         <div class="flex items-center">
           <div class="mr-2 flex items-center">
