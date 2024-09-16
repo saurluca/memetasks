@@ -94,7 +94,7 @@ const generateTodoImage = async (newTodo: Todo) => {
   try {
     const result = await generateImage(newTodo.text)
     console.log("image recieved")
-    // console.log("result in generated TODO", result)
+    // console.log("result in generated ODO", result)
     if (result.imageBlob) {
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
