@@ -77,4 +77,12 @@ export default defineNuxtConfig({
 
     }
   },
+  pwa: {
+    manifest: {
+      name: 'Dodo it!',
+      short_name: 'Dodo it!',
+      start_url: '/',
+      display: 'standalone',
+    }
+  }
 })
