@@ -142,6 +142,15 @@ const removeSelectedTags = async () => {
   await updateLocalTags(tags.value)
 }
 
+const getTagColor = (tagId: string) => {
+  console.log("getting tag color")
+  console.log(tagId)
+  const colorIndex = tagId.charCodeAt(0) % 5
+  const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
+  console.log("color", colors[colorIndex])
+  return colors[colorIndex]
+}
+
 // Dark mode functionality
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
@@ -217,6 +226,7 @@ watch(isDarkMode, () => {
           @toggle-todo="toggleTodo"
           @delete-todo="deleteTodo"
           @update-positions="updateTodoPositions"
+          @get-tag-color="getTagColor"
       />
     </div>
     <ImagePopup ref="imagePopup"/>

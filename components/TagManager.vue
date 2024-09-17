@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { Plus, Minus } from 'lucide-vue-next'
 import type { Tag } from '~/composables/useIndexedDB'
+import { getTagColor } from '~/composables/getTagColor'
 
 const props = defineProps<{
   tags: Tag[]
@@ -37,17 +38,6 @@ const addTag = () => {
     emit('add-tag', newTagText.value.trim())
     closeTagPopup()
   }
-}
-
-const getTagColor = (tagId: string) => {
-  // console.log("Manager")
-  // console.log("tagId", tagId)
-  const colorIndex = tagId.charCodeAt(0) % 5
-
-  // console.log("colorIndex", colorIndex)
-  const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
-  // console.log(colors[colorIndex])
-  return colors[colorIndex]
 }
 </script>
 

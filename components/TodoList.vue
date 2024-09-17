@@ -2,6 +2,8 @@
 import {computed, ref} from 'vue'
 import draggable from 'vuedraggable'
 import type {Todo} from '~/composables/useIndexedDB'
+import { getTagColor } from '~/composables/getTagColor'
+
 
 const props = defineProps<{
   todos: Todo[]
@@ -10,7 +12,7 @@ const props = defineProps<{
 }>()
 
 // Define timeElapsed as a computed property
-const timeElapsed = (todo: Todo) => { 
+const timeElapsed = (todo: Todo) => {
   return new Date().getTime() - new Date(todo.createdAt).getTime();
 };
 
@@ -60,15 +62,9 @@ const {isLoading} = useInfiniteScroll(
     {distance: 10}
 )
 
-const getTagColor = (tagId: string) => {
-  const colorIndex = tagId.charCodeAt(0) % 5
-  const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
-  return colors[colorIndex]
-}
-
 // Update the checkbox click handler to use timeElapsed
 const handleCheckboxClick = (event, todo) => {
-  if (timeElapsed(todo) < props.timeToWait) {
+  if (todo.completed || timeElapsed(todo) < props.timeToWait) {
     event.preventDefault();
   } else {
     emit('toggle-todo', todo);
@@ -117,16 +113,18 @@ const handleCheckboxClick = (event, todo) => {
                 :key="tag"
                 class="px-2 py-1 rounded-full text-sm transition-colors duration-300"
                 :class="[
-                `bg-${getTagColor(tag)}-500 text-white`,
-                'dark:bg-' + getTagColor(tag) + '-600 dark:text-white'
+                {
+                [`bg-${getTagColor(tag)}-500 text-white dark:bg-${getTagColor(tag)}-600 dark:text-white`]: props.currentTags.includes(tag),
+                [`bg-${getTagColor(tag)}-100 text-${getTagColor(tag)}-900 dark:bg-${getTagColor(tag)}-300 dark:text-${getTagColor(tag)}-900`]: !props.currentTags.includes(tag),
+                }
               ]"
             >
               {{ tag }}
             </span>
           </div>
           <button v-if="!todo.deletedAt"
-              @click="emit('delete-todo', todo.id)"
-              class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+                  @click="emit('delete-todo', todo.id)"
+                  class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
           >
             Delete
           </button>
