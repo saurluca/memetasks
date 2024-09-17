@@ -14,7 +14,7 @@ const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 1
+const timeToWait = 12000
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
 
@@ -226,7 +226,6 @@ watch(isDarkMode, () => {
           @toggle-todo="toggleTodo"
           @delete-todo="deleteTodo"
           @update-positions="updateTodoPositions"
-          @get-tag-color="getTagColor"
       />
     </div>
     <ImagePopup ref="imagePopup"/>

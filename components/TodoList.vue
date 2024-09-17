@@ -130,7 +130,7 @@ const handleCheckboxClick = (event, todo) => {
     <button
         @click="toggleShowDeletedTodos"
         class="mt-4 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 rounded-full p-1">
-      Show completed tasks
+      {{ showDeletedTodos ? 'Hide completed tasks' : 'Show completed tasks' }}
     </button>
   </div>
 </template>
