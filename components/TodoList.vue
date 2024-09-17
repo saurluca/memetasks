@@ -95,11 +95,10 @@ const handleCheckboxClick = (event, todo) => {
               />
             </div>
             <span
-                v-if="!todo.isExpanded"
                 :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
                 :title="todo.text"
             >
-              {{ todo.text }}
+              {{ todo.text.slice(0, 75) }}{{ todo.text.length > 50 ? '...' : '' }}
             </span>
           </div>
           <div class="flex flex-wrap gap-1">
@@ -116,9 +115,12 @@ const handleCheckboxClick = (event, todo) => {
             >
               {{ tag }}
             </span>
-          </div> </div>
+          </div>
+        </div>
         <div v-if="todo.isExpanded" class="mt-2" @click="todo.isExpanded = !todo.isExpanded">
-          <p class="text-gray-700 dark:text-gray-300">{{ todo.text }}</p>
+          <p class="text-gray-700 dark:text-gray-300">
+            {{ todo.text.slice(65, end) }}
+          </p>
           <div class="relative flex justify-end mt-2">
             <button @click="emit('delete-todo', todo.id)" class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
               <Trash2 class="h-4 w-4 mr-1" />
