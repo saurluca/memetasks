@@ -35,7 +35,7 @@ interface TodoDB extends DBSchema {
   }
 }
 
-const dbPromise = openDB<TodoDB>('todo-app-db', 2, {
+const dbPromise = openDB<TodoDB>('todo-app-db', 3, {
   upgrade(db, oldVersion, newVersion, transaction) {
     if (oldVersion < 1) {
       const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
@@ -59,6 +59,49 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 2, {
         deletedAt: null
       })
     }
+    if (oldVersion < 3) {
+      const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
+
+      const now = new Date()
+      todoStore.add({
+        id: nanoid(),
+        text: "Create your first todo and check out your first meme!",
+        createdAt: now,
+        completed: false,
+        completedAt: null,
+        updatedAt: now,
+        deletedAt: null,
+        position: 0,
+        image: null,
+        tags: [],
+      })
+
+      todoStore.add({
+        id: nanoid(),
+        text: "Create your first tag by click on the +, select it and create another task!",
+        createdAt: now,
+        completed: false,
+        completedAt: null,
+        updatedAt: now,
+        deletedAt: null,
+        position: 1,
+        image: null,
+        tags: [],
+      })
+
+      todoStore.add({
+        id: nanoid(),
+        text: "Psychology shows, that only sometimes getting a reward feels more rewarding. So there won't be a meme every time!",
+        createdAt: now,
+        completed: false,
+        completedAt: null,
+        updatedAt: now,
+        deletedAt: null,
+        position: 2,
+        image: null,
+        tags: [],
+      })
+    }
   },
 })
 
@@ -69,7 +112,6 @@ export async function loadDataFromIndexedDB(): Promise<{ todos: Todo[], tags: Ta
   
   return {
     todos: todos
-      // .filter(todo => !todo.deletedAt)
       .sort((a, b) => a.position - b.position)
       .map((todo, index) => ({
         ...todo,
