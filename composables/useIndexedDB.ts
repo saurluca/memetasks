@@ -69,7 +69,7 @@ export async function loadDataFromIndexedDB(): Promise<{ todos: Todo[], tags: Ta
   
   return {
     todos: todos
-      .filter(todo => !todo.deletedAt)
+      // .filter(todo => !todo.deletedAt)
       .sort((a, b) => a.position - b.position)
       .map((todo, index) => ({
         ...todo,
