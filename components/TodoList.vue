@@ -77,52 +77,55 @@ const handleCheckboxClick = (event, todo) => {
       class="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
   >
     <ul class="space-y-3">
-      <li v-for="todo in displayedTodos" :key="todo.id" class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
-        <div class="flex items-center flex-grow mr-4 min-w-0">
-          <div class="flex items-center relative mr-3">
-            <input
-                type="checkbox"
-                :checked="todo.completed"
-                @click="(event) => handleCheckboxClick(event, todo)"
+      <li v-for="todo in displayedTodos" :key="todo.id" class="flex flex-col p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
+        <div class="flex items-center justify-between" @click="todo.isExpanded = !todo.isExpanded">
+          <div class="flex items-center flex-grow mr-4 min-w-0">
+            <div class="flex items-center relative mr-3">
+              <input
+                  type="checkbox"
+                  :checked="todo.completed"
+                  @click="(event) => handleCheckboxClick(event, todo)"
+                  :class="[
+                  'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
+                  {
+                    'text-blue-600 cursor-pointer': !todo.completed && timeElapsed(todo) >= props.timeToWait,
+                    'text-gray-400 cursor-not-allowed': todo.completed || timeElapsed(todo) < props.timeToWait
+                  }
+                ]"
+              />
+            </div>
+            <span
+                v-if="!todo.isExpanded"
+                :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
+                :title="todo.text"
+            >
+              {{ todo.text }}
+            </span>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            <span
+                v-for="tag in todo.tags"
+                :key="tag"
+                class="px-2 py-1 rounded-full text-sm transition-colors duration-300 mr-1"
                 :class="[
-                'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
                 {
-                  'text-blue-600 cursor-pointer': !todo.completed && timeElapsed(todo) >= props.timeToWait,
-                  'text-gray-400 cursor-not-allowed': todo.completed || timeElapsed(todo) < props.timeToWait
+                [`bg-${getTagColor(tag)}-500 text-white dark:bg-${getTagColor(tag)}-600 dark:text-white`]: props.currentTags.includes(tag),
+                [`bg-${getTagColor(tag)}-100 text-${getTagColor(tag)}-900 dark:bg-${getTagColor(tag)}-300 dark:text-${getTagColor(tag)}-900`]: !props.currentTags.includes(tag),
                 }
               ]"
-            />
+            >
+              {{ tag }}
+            </span>
+          </div> </div>
+        <div v-if="todo.isExpanded" class="mt-2" @click="todo.isExpanded = !todo.isExpanded">
+          <p class="text-gray-700 dark:text-gray-300">{{ todo.text }}</p>
+          <div class="relative flex justify-end mt-2">
+            <button @click="emit('delete-todo', todo.id)" class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
+              <Trash2 class="h-4 w-4 mr-1" />
+              Delete
+            </button>
           </div>
-          <span
-              :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
-              :title="todo.text"
-          >
-            {{ todo.text }}
-          </span>
         </div>
-        <div class="flex flex-wrap gap-1">
-          <span
-              v-for="tag in todo.tags"
-              :key="tag"
-              class="px-2 py-1 rounded-full text-sm transition-colors duration-300 mr-1"
-              :class="[
-              {
-              [`bg-${getTagColor(tag)}-500 text-white dark:bg-${getTagColor(tag)}-600 dark:text-white`]: props.currentTags.includes(tag),
-              [`bg-${getTagColor(tag)}-100 text-${getTagColor(tag)}-900 dark:bg-${getTagColor(tag)}-300 dark:text-${getTagColor(tag)}-900`]: !props.currentTags.includes(tag),
-              }
-            ]"
-          >
-            {{ tag }}
-          </span>
-        </div>
-        <button v-if="!todo.deletedAt"
-                @click="emit('delete-todo', todo.id)"
-                class="px-2 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
-        >
-          <span class="flex items-center h-6 w-6">
-             <Trash2 />
-          </span>
-        </button>
       </li>
     </ul>
   </div>
