@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, onMounted, watch, onUnmounted} from 'vue'
+import {ref, onMounted, watch, onUnmounted, computed} from 'vue'
 import {nanoid} from 'nanoid'
 import {loadDataFromIndexedDB, updateLocalTodos, updateLocalTags} from '~/composables/useIndexedDB'
 import type {Todo, Tag} from '~/composables/useIndexedDB'
@@ -14,15 +14,19 @@ const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 20000
+const timeToWait = 10
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
+const completedTodos = ref(0)
 
 // Lifecycle hooks
 onMounted(async () => {
-  const {todos: loadedTodos, tags: loadedTags} = await loadDataFromIndexedDB()
+  console.log("mount")
+  const {todos: loadedTodos, tags: loadedTags, completedTodos: numCompletedTodos} = await loadDataFromIndexedDB()
   todos.value = loadedTodos
   tags.value = loadedTags
+  completedTodos.value = numCompletedTodos
+  console.log("completed todos", completedTodos.value)
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
 
@@ -57,11 +61,23 @@ const addTodo = async (text: string) => {
 const deleteTodo = async (id: string) => {
   const index = todos.value.findIndex(t => t.id === id)
   if (index !== -1) {
-    todos.value.splice(index, 1)
+    // Soft delete by setting deletedAt to the current date
+    todos.value[index].deletedAt = new Date()
+
+    // Filter out the deleted todo from the visible list
+    todos.value = todos.value.filter(todo => !todo.deletedAt)
+
+    // Update positions of remaining todos
     todos.value.forEach((todo, i) => {
       todo.position = i
     })
+
     await updateLocalTodos(todos.value)
+
+    // Update completedTodos count if the deleted todo was completed
+    if (todos.value[index].completed === true) {
+      completedTodos.value = completedTodos.value - 1
+    }
   }
 }
 
@@ -72,11 +88,14 @@ const toggleTodo = async (todo: Todo) => {
   await updateLocalTodos(todos.value)
 
   if (todo.completed) {
+    completedTodos.value = completedTodos.value + 1
     imagePopup.value?.open()
     console.log("todo image",todo.image)
     if (todo.image instanceof Blob) {
     imagePopup.value?.setImageBlob(todo.image)
     }
+  } else {
+    completedTodos.value = completedTodos.value - 1
   }
 }
 
@@ -136,6 +155,10 @@ const removeSelectedTags = async () => {
   await updateLocalTags(tags.value)
 }
 
+// const numberOfCompletedTasks = computed(() => {
+//   console.log("todos.value",todos.value.filter(todo => todo.completed).length)
+//   return todos.value?.filter(todo => todo.completed).length
+// })
 
 // Dark mode functionality
 const toggleDarkMode = () => {
@@ -173,6 +196,9 @@ watch(isDarkMode, () => {
         <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dodo it!</h1>
 
         <div class="flex items-center">
+          <div class="bg-amber-300 rounded-full">
+            {{ completedTodos }}
+          </div>
           <div class="mr-2 flex items-center">
             <button
                 @click="memeMode = !memeMode"
