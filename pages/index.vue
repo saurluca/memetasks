@@ -14,7 +14,7 @@ const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 1000
+const timeToWait = 1
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
 
@@ -69,17 +69,20 @@ const deleteTodo = async (id: string) => {
 }
 
 const toggleTodo = async (todo: Todo) => {
-  todo.completed = !todo.completed
-  todo.completedAt = todo.completed ? new Date() : null
-  todo.updatedAt = new Date()
-  await updateLocalTodos(todos.value)
+  console.log("toggeling todo", todo.completed)
+  if (!todo.completed) {
+    todo.completed = true
+    todo.completedAt = new Date()
+    todo.updatedAt = new Date()
+    todo.deletedAt = new Date()
 
-  if (todo.completed) {
-    imagePopup.value?.open()
-    console.log("todo image", todo.image)
     if (todo.image instanceof Blob) {
+      imagePopup.value?.open()
+      console.log("todo image", todo.image)
       imagePopup.value?.setImageBlob(todo.image)
     }
+
+    await updateLocalTodos(todos.value);
   }
 }
 

@@ -8,6 +8,12 @@ const props = defineProps<{
   currentTags: string[]
   timeToWait: number
 }>()
+
+// Define timeElapsed as a computed property
+const timeElapsed = (todo: Todo) => { 
+  return new Date().getTime() - new Date(todo.createdAt).getTime();
+};
+
 const showDeletedTodos = ref(false)
 
 const emit = defineEmits(['toggle-todo', 'delete-todo', 'update-positions'])
@@ -25,25 +31,17 @@ const filteredTodos = computed(() => {
 })
 
 const displayedTodos = computed(() => {
-  console.log("showdeltedTodos", showDeletedTodos)
-  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt);
-  const deletedTodos = filteredTodos.value
-      .filter(todo => todo.deletedAt && todo.completed)
-      .sort((a, b) => b.position - a.position);
-  
+  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt && !todo.completed);
+
   if (showDeletedTodos.value) {
+    const deletedTodos = filteredTodos.value
+        .filter(todo => todo.deletedAt && todo.completed)
+        .sort((a, b) => b.position - a.position);
+
     return [...activeTodos, ...deletedTodos].slice(0, maxDisplayedTasks.value);
   } else {
-    return filteredTodos.value
-        .filter(todo => !todo.deletedAt)
-        .slice(0, maxDisplayedTasks.value)
+    return activeTodos.slice(0, maxDisplayedTasks.value)
   }
-})
-
-const hiddenTodos = computed(() => {
-  return filteredTodos.value
-      .filter(todo => todo.deletedAt)
-      .slice(0, maxDisplayedTasks.value)
 })
 
 const toggleShowDeletedTodos = () => {
@@ -67,6 +65,15 @@ const getTagColor = (tagId: string) => {
   const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
   return colors[colorIndex]
 }
+
+// Update the checkbox click handler to use timeElapsed
+const handleCheckboxClick = (event, todo) => {
+  if (timeElapsed(todo) < props.timeToWait) {
+    event.preventDefault();
+  } else {
+    emit('toggle-todo', todo);
+  }
+}
 </script>
 
 <template>
@@ -87,18 +94,12 @@ const getTagColor = (tagId: string) => {
               <input
                   type="checkbox"
                   :checked="todo.completed"
-                  @click="(event) => {
-                  if (new Date().getTime() - new Date(todo.createdAt).getTime() < props.timeToWait) {
-                    event.preventDefault();
-                  } else {
-                    emit('toggle-todo', todo);
-                  }
-                }"
+                  @click="(event) => handleCheckboxClick(event, todo)"
                   :class="[
                   'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
                   {
-                    'text-blue-600 cursor-pointer': new Date().getTime() - new Date(todo.createdAt).getTime() >= props.timeToWait,
-                    'text-gray-400 cursor-not-allowed': new Date().getTime() - new Date(todo.createdAt).getTime() < props.timeToWait
+                    'text-blue-600 cursor-pointer': !todo.completed && timeElapsed(todo) >= props.timeToWait,
+                    'text-gray-400 cursor-not-allowed': todo.completed || timeElapsed(todo) < props.timeToWait
                   }
                 ]"
               />
