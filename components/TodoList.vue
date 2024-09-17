@@ -98,7 +98,7 @@ const handleCheckboxClick = (event, todo) => {
                 :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
                 :title="todo.text"
             >
-              {{ todo.text.slice(0, 75) }}{{ todo.text.length > 50 ? '...' : '' }}
+              {{ todo.text.length > 75 ? todo.text.slice(0, todo.text.lastIndexOf(' ', 75)) + '...' : todo.text }}
             </span>
           </div>
           <div class="flex flex-wrap gap-1">
@@ -118,10 +118,10 @@ const handleCheckboxClick = (event, todo) => {
           </div>
         </div>
         <div v-if="todo.isExpanded" class="mt-2" @click="todo.isExpanded = !todo.isExpanded">
-          <p class="text-gray-700 dark:text-gray-300">
-            {{ todo.text.slice(65, end) }}
+          <p v-if="todo.text.length > 75" class="text-gray-700 dark:text-gray-300">
+            {{ todo.text.slice(todo.text.lastIndexOf(' ', 75), todo.text.length) }}
           </p>
-          <div class="relative flex justify-end mt-2">
+          <div class="relative flex justify-end mt-1">
             <button @click="emit('delete-todo', todo.id)" class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
               <Trash2 class="h-4 w-4 mr-1" />
               Delete
