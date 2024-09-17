@@ -14,7 +14,7 @@ const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 10
+const timeToWait = 1000
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
 
@@ -175,7 +175,7 @@ watch(isDarkMode, () => {
       <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
           <div
-              class="bg-amber-300 rounded-full font-bold text-xl p-1 text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 8 }} flex items-center justify-center mr-1">
+              class="bg-amber-300 rounded-full font-bold text-xl p-0.5 text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
             {{ numberOfCompletedTodos }}
           </div>
           <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dodo it!</h1>
