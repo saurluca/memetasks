@@ -42,65 +42,69 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 3, {
       todoStore.createIndex('by-position', 'position')
     }
     if (oldVersion < 2) {
-      const tagStore = db.createObjectStore('tags', { keyPath: 'id' })
-      
-      // Add default tags
-      const now = new Date()
-      tagStore.add({
-        id: nanoid(),
-        text: 'general',
-        createdAt: now,
-        deletedAt: null
-      })
-      tagStore.add({
-        id: nanoid(),
-        text: 'work',
-        createdAt: now,
-        deletedAt: null
-      })
+      if (!db.objectStoreNames.contains('tags')) {
+        const tagStore = db.createObjectStore('tags', { keyPath: 'id' })
+        
+        // Add default tags
+        const now = new Date()
+        tagStore.add({
+          id: nanoid(),
+          text: 'general',
+          createdAt: now,
+          deletedAt: null
+        })
+        tagStore.add({
+          id: nanoid(),
+          text: 'work',
+          createdAt: now,
+          deletedAt: null
+        })
+      }
     }
     if (oldVersion < 3) {
-      const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
+      if (!db.objectStoreNames.contains('todos')) {
+        const todoStore = db.createObjectStore('todos', { keyPath: 'id' })
 
-      const now = new Date()
-      todoStore.add({
-        id: nanoid(),
-        text: "Create your first todo and check out your first meme!",
-        createdAt: now,
-        completed: false,
-        completedAt: null,
-        updatedAt: now,
-        deletedAt: null,
-        position: 0,
-        image: null,
-        tags: [],
-      })
+        const now = new Date()
+        todoStore.add({
+          id: nanoid(),
+          text: "Create your first todo and check out your first meme!",
+          createdAt: now,
+          completed: false,
+          completedAt: null,
+          updatedAt: now,
+          deletedAt: null,
+          position: 0,
+          image: null,
+          tags: [],
+        })
 
-      todoStore.add({
-        id: nanoid(),
-        text: "Create your first tag by click on the +, select it and create another task!",
-        createdAt: now,
-        completed: false,
-        completedAt: null,
-        updatedAt: now,
-        deletedAt: null,
-        position: 1,
-        image: null,
-        tags: [],
-      })
+        todoStore.add({
+          id: nanoid(),
+          text: "Create your first tag by click on the +, select it and create another task!",
+          createdAt: now,
+          completed: false,
+          completedAt: null,
+          updatedAt: now,
+          deletedAt: null,
+          position: 1,
+          image: null,
+          tags: [],
+        })
 
-      todoStore.add({
-        id: nanoid(),
-        text: "Psychology shows, that only sometimes getting a reward feels more rewarding. So there won't be a meme every time!",
-        createdAt: now,
-        completed: false,
-        completedAt: null,
-        updatedAt: now,
-        deletedAt: null,
-        position: 2,
-        image: null,
-        tags: [],
-      })
+        todoStore.add({
+          id: nanoid(),
+          text: "Psychology shows, that only sometimes getting a reward feels more rewarding. So there won't be a meme every time!",
+          createdAt: now,
+          completed: false,
+          completedAt: null,
+          updatedAt: now,
+          deletedAt: null,
+          position: 2,
+          image: null,
+          tags: [],
+        })
+      }
     }
   },
 })
