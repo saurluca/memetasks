@@ -195,15 +195,15 @@ watch(isDarkMode, () => {
         </div>
 
         <div class="flex items-center">
-          <div class="mr-2 flex items-center">
-            <button
-                @click="memeMode = !memeMode"
-                class="px-3 py-1 mr-1 font-medium rounded-full transition-colors duration-300"
-                :class="memeMode ? 'bg-blue-500 text-white ' : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white'"
-            >
-              {{ memeMode ? 'Memes' : 'Memes' }}
-            </button>
-          </div>
+<!--          <div class="mr-2 flex items-center">-->
+<!--            <button-->
+<!--                @click="memeMode = !memeMode"-->
+<!--                class="px-3 py-1 mr-1 font-medium text-sx rounded-full transition-colors duration-300"-->
+<!--                :class="memeMode ? 'bg-blue-500 text-white ' : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white'"-->
+<!--            >-->
+<!--              {{ memeMode ? 'Memes' : 'Memes' }}-->
+<!--            </button>-->
+<!--          </div>-->
 
           <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300 text-xl">
             <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
