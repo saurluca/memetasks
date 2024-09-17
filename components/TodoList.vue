@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ref, computed} from 'vue'
+import {computed, ref} from 'vue'
 import draggable from 'vuedraggable'
 import type {Todo} from '~/composables/useIndexedDB'
 
@@ -8,6 +8,7 @@ const props = defineProps<{
   currentTags: string[]
   timeToWait: number
 }>()
+const showDeletedTodos = ref(false)
 
 const emit = defineEmits(['toggle-todo', 'delete-todo', 'update-positions'])
 
@@ -24,10 +25,32 @@ const filteredTodos = computed(() => {
 })
 
 const displayedTodos = computed(() => {
+  console.log("showdeltedTodos", showDeletedTodos)
+  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt);
+  const deletedTodos = filteredTodos.value
+      .filter(todo => todo.deletedAt && todo.completed)
+      .sort((a, b) => b.position - a.position);
+  
+  if (showDeletedTodos.value) {
+    return [...activeTodos, ...deletedTodos].slice(0, maxDisplayedTasks.value);
+  } else {
+    return filteredTodos.value
+        .filter(todo => !todo.deletedAt)
+        .slice(0, maxDisplayedTasks.value)
+  }
+})
+
+const hiddenTodos = computed(() => {
   return filteredTodos.value
-      .filter(todo => !todo.deletedAt)
+      .filter(todo => todo.deletedAt)
       .slice(0, maxDisplayedTasks.value)
 })
+
+const toggleShowDeletedTodos = () => {
+  console.log("toggeling", showDeletedTodos.value)
+  showDeletedTodos.value = !showDeletedTodos.value;
+  displayedTodos.value;
+}
 
 const {isLoading} = useInfiniteScroll(
     containerRef,
@@ -90,9 +113,9 @@ const getTagColor = (tagId: string) => {
           <div class="flex flex-wrap gap-1">
             <span
                 v-for="tag in todo.tags"
-              :key="tag"
-              class="px-2 py-1 rounded-full text-sm transition-colors duration-300"
-              :class="[
+                :key="tag"
+                class="px-2 py-1 rounded-full text-sm transition-colors duration-300"
+                :class="[
                 `bg-${getTagColor(tag)}-500 text-white`,
                 'dark:bg-' + getTagColor(tag) + '-600 dark:text-white'
               ]"
@@ -100,7 +123,7 @@ const getTagColor = (tagId: string) => {
               {{ tag }}
             </span>
           </div>
-          <button
+          <button v-if="!todo.deletedAt"
               @click="emit('delete-todo', todo.id)"
               class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
           >
@@ -110,7 +133,14 @@ const getTagColor = (tagId: string) => {
       </template>
     </draggable>
   </div>
-  <div v-if="filteredTodos.length > maxDisplayedTasks" class="mt-4 text-center text-gray-600 dark:text-gray-400">
-    Showing {{ maxDisplayedTasks }} of {{ filteredTodos.length }} tasks
+  <div>
+    <button
+        @click="toggleShowDeletedTodos"
+        class="mt-4 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 rounded-full p-1">
+      Show completed tasks
+    </button>
   </div>
+  <!--  <div v-if="filteredTodos.length > maxDisplayedTasks" class="mt-4 text-center text-gray-600 dark:text-gray-400">-->
+  <!--    Showing {{ maxDisplayedTasks }} of {{ filteredTodos.length }} tasks-->
+  <!--  </div>-->
 </template>
