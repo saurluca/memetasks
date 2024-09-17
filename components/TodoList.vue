@@ -3,7 +3,7 @@ import {computed, ref} from 'vue'
 import draggable from 'vuedraggable'
 import type {Todo} from '~/composables/useIndexedDB'
 import { getTagColor } from '~/composables/getTagColor'
-
+import { Trash2 } from 'lucide-vue-next'
 
 const props = defineProps<{
   todos: Todo[]
@@ -111,7 +111,7 @@ const handleCheckboxClick = (event, todo) => {
             <span
                 v-for="tag in todo.tags"
                 :key="tag"
-                class="px-2 py-1 rounded-full text-sm transition-colors duration-300"
+                class="px-2 py-1 rounded-full text-sm transition-colors duration-300 mr-1"
                 :class="[
                 {
                 [`bg-${getTagColor(tag)}-500 text-white dark:bg-${getTagColor(tag)}-600 dark:text-white`]: props.currentTags.includes(tag),
@@ -124,9 +124,11 @@ const handleCheckboxClick = (event, todo) => {
           </div>
           <button v-if="!todo.deletedAt"
                   @click="emit('delete-todo', todo.id)"
-                  class="px-3 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
+                  class="px-2 py-1.5 text-sm font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
           >
-            Delete
+            <span class="flex items-center h-6 w-6">
+               <Trash2 />
+            </span>
           </button>
         </li>
       </template>
@@ -139,7 +141,4 @@ const handleCheckboxClick = (event, todo) => {
       Show completed tasks
     </button>
   </div>
-  <!--  <div v-if="filteredTodos.length > maxDisplayedTasks" class="mt-4 text-center text-gray-600 dark:text-gray-400">-->
-  <!--    Showing {{ maxDisplayedTasks }} of {{ filteredTodos.length }} tasks-->
-  <!--  </div>-->
 </template>

@@ -8,6 +8,7 @@ import {useDebounceFn} from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
+import { Trash2 } from 'lucide-vue-next';
 
 // State variables
 const todos = ref<Todo[]>([])
