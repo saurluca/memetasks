@@ -8,7 +8,6 @@ import {useDebounceFn} from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
-import { Trash2 } from 'lucide-vue-next';
 
 // State variables
 const todos = ref<Todo[]>([])
@@ -184,7 +183,7 @@ watch(isDarkMode, () => {
   <NuxtPwaManifest/>
   <NuxtPage/>
   <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 flex items-center justify-center">
-    <div class="w-full max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
+    <div class="w-full max-w-2xl mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
           <div
