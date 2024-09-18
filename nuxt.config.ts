@@ -5,10 +5,10 @@ export default defineNuxtConfig({
   robots: {
     UserAgent: '*',
     Disallow: '/images, /backup',
-    Sitemap: 'https://dodoit.net/sitemap.xml'
+    Sitemap: 'https://memetasks.com/sitemap.xml'
   },
   sitemap: {
-    hostname: 'https://dodoit.net',
+    hostname: 'https://memetasks.com',
     gzip: true,
     routes: [
         '/'
@@ -25,12 +25,12 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      title: 'Dodo it!',
+      title: 'Memetasks',
       meta: [
         {
           hid: 'description',
           name: 'description',
-          content: 'Dodoit is a fun and simple to-do app where checking off tasks rewards you with AI-generated memes tailored ' +
+          content: 'Memetasks is a fun and simple to-do app where checking off tasks rewards you with AI-generated memes tailored ' +
               'to what you’ve completed. Fast, offline-first, and designed for a clean, fuss-free experience.',
         },
         {
@@ -41,22 +41,22 @@ export default defineNuxtConfig({
         {
           hid: 'author',
           name: 'author',
-          content: 'Dodoit Team'
+          content: 'Memetasks Team'
         },
         {
           hid: 'og:title',
           property: 'og:title',
-          content: 'Dodo it! - Meme-based To-Do App'
+          content: 'Memetasks - Meme-based To-Do App'
         },
         {
           hid: 'og:description',
           property: 'og:description',
-          content: 'Complete tasks and get rewarded with fun AI-generated memes! Dodoit is fast, offline-first, and easy to use.'
+          content: 'Complete tasks and get rewarded with fun AI-generated memes! Memetasks is fast, offline-first, and easy to use.'
         },
         {
           hid: 'og:url',
           property: 'og:url',
-          content: 'https://dodoit.net'
+          content: 'https://memetasks.com'
         },
         {
           hid: 'twitter:card',
@@ -66,7 +66,7 @@ export default defineNuxtConfig({
         {
           hid: 'twitter:title',
           name: 'twitter:title',
-          content: 'Dodo it! - Meme-based To-Do App'
+          content: 'Memetasks- Your meme-based To-Do App'
         },
         {
           hid: 'twitter:description',
@@ -79,8 +79,8 @@ export default defineNuxtConfig({
   },
   pwa: {
     manifest: {
-      name: 'Dodo it!',
-      short_name: 'Dodo it!',
+      name: 'Memetasks',
+      short_name: 'Memetasks',
       start_url: '/',
       display: 'standalone',
     }

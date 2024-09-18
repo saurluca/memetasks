@@ -142,15 +142,6 @@ const removeSelectedTags = async () => {
   await updateLocalTags(tags.value)
 }
 
-const getTagColor = (tagId: string) => {
-  console.log("getting tag color")
-  console.log(tagId)
-  const colorIndex = tagId.charCodeAt(0) % 5
-  const colors = ['rose', 'blue', 'green', 'orange', 'fuchsia']
-  console.log("color", colors[colorIndex])
-  return colors[colorIndex]
-}
-
 // Dark mode functionality
 const toggleDarkMode = () => {
   isDarkMode.value = !isDarkMode.value
@@ -190,20 +181,10 @@ watch(isDarkMode, () => {
               class="bg-amber-300 rounded-full font-bold text-xl p-0.5 text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
             {{ numberOfCompletedTodos }}
           </div>
-          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Dodo it!</h1>
+          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Meme your tasks!</h1>
         </div>
 
         <div class="flex items-center">
-<!--          <div class="mr-2 flex items-center">-->
-<!--            <button-->
-<!--                @click="memeMode = !memeMode"-->
-<!--                class="px-3 py-1 mr-1 font-medium text-sx rounded-full transition-colors duration-300"-->
-<!--                :class="memeMode ? 'bg-blue-500 text-white ' : 'bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-white'"-->
-<!--            >-->
-<!--              {{ memeMode ? 'Memes' : 'Memes' }}-->
-<!--            </button>-->
-<!--          </div>-->
-
           <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300 text-xl">
             <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
             <span v-else class="text-gray-800">🌙</span>
