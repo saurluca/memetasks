@@ -1,19 +1,25 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
-  modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/robots', '@nuxtjs/sitemap', '@nuxtjs/ionic'],
+  modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic'],
   ssr: false,
   target: 'static',
-  robots: {
-    UserAgent: '*',
-    Disallow: '/images, /backup',
-    Sitemap: 'https://memetasks.com/sitemap.xml'
+  hooks: {
+      'pages:extend'(pages) {
+          // add a route
+          pages.push({
+              name: 'tasks',
+              path: '/tasks',
+              file: '~/pages/index.vue'
+          })
+      }
   },
   sitemap: {
     hostname: 'https://memetasks.com',
     gzip: true,
     routes: [
-        '/'
+        '/',
+        '/tasks'
     ],
   },
   devtools: { enabled: true },

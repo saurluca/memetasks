@@ -18,7 +18,6 @@
     "@capacitor/keyboard": "6.0.2",
     "@capacitor/status-bar": "6.0.1",
     "@nuxtjs/ionic": "^0.15.1",
-    "@nuxtjs/robots": "^4.1.7",
     "@nuxtjs/sitemap": "^6.0.1",
     "@vite-pwa/nuxt": "^0.10.5",
     "@vueuse/core": "^11.0.3",
