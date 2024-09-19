@@ -18,7 +18,7 @@ const addTodo = () => {
       <input
         v-model="newTodoText"
         placeholder="Add a new todo"
-        class="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+        class="flex-grow px-4 py-2 border bg-gray-50 text-black rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
       />
       <button
         type="submit"

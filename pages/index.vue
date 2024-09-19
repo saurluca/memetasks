@@ -178,7 +178,7 @@ watch(isDarkMode, () => {
       <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
           <div
-              class="bg-amber-300 rounded-full font-bold text-xl p-0.5 text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
+              class="bg-amber-300 text-black rounded-full font-bold text-xl p-0.5 text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
             {{ numberOfCompletedTodos }}
           </div>
           <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Meme your tasks!</h1>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import type {Todo} from '~/composables/useIndexedDB'
-import { getTagColor } from '~/composables/getTagColor'
-import { Trash2 } from 'lucide-vue-next'
+import {getTagColor} from '~/composables/getTagColor'
+import {Trash2} from 'lucide-vue-next'
+import CheckMark from "assets/svg/CheckMark.vue";
 
 const props = defineProps<{
   todos: Todo[]
@@ -77,24 +78,31 @@ const handleCheckboxClick = (event, todo) => {
       class="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
   >
     <ul class="space-y-3">
-      <li v-for="todo in displayedTodos" :key="todo.id" class="flex flex-col p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
+      <li v-for="todo in displayedTodos" :key="todo.id"
+          class="flex flex-col p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
         <div class="flex items-center justify-between" @click="todo.isExpanded = !todo.isExpanded">
           <div class="flex items-center flex-grow mr-4 min-w-0">
-            <div class="flex items-center relative mr-3">
+            <label class="flex items-center relative">
               <input
                   type="checkbox"
                   :checked="todo.completed"
+                  class="peer h-5 w-5 transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-green-600 checked:border-green-600"
                   @click="(event) => handleCheckboxClick(event, todo)"
-                  :class="[
-                  'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
-                  {
-                    'text-blue-600 cursor-pointer': !todo.completed && timeElapsed(todo) >= props.timeToWait,
-                    'text-gray-400 cursor-not-allowed': todo.completed || timeElapsed(todo) < props.timeToWait
-                  }
-                ]"
+                  :class="{
+      'cursor-pointer text-blue-600': !todo.completed && timeElapsed(todo) >= props.timeToWait,
+      'cursor-not-allowed text-gray-400 opacity-50': todo.completed || timeElapsed(todo) < props.timeToWait
+    }"
+                  :disabled="todo.completed || timeElapsed(todo) < props.timeToWait"
               />
-            </div>
+              <span
+                  class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+              >
+    <CheckMark />
+  </span>
+            </label>
+
             <span
+                class="ml-3"
                 :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
                 :title="todo.text"
             >
@@ -122,8 +130,9 @@ const handleCheckboxClick = (event, todo) => {
             {{ todo.text.slice(todo.text.lastIndexOf(' ', 75), todo.text.length) }}
           </p>
           <div class="relative flex justify-end mt-1">
-            <button @click="emit('delete-todo', todo.id)" class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
-              <Trash2 class="h-4 w-4 mr-1" />
+            <button @click="emit('delete-todo', todo.id)"
+                    class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
+              <Trash2 class="h-4 w-4 mr-1"/>
               Delete
             </button>
           </div>
