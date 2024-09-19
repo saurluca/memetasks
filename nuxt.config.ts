@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   target: 'static',
   robots: {
     UserAgent: '*',
-    Disallow: '/images, /backup',
+    Disallow: '/images',
     Sitemap: 'https://memetasks.com/sitemap.xml'
   },
   sitemap: {

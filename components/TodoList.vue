@@ -70,6 +70,12 @@ const handleCheckboxClick = (event, todo) => {
     emit('toggle-todo', todo);
   }
 }
+useSeoMeta({
+  title: 'Memetasks',
+  ogTitle: 'Memetasks',
+  description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
+  ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
+})
 </script>
 
 <template>
