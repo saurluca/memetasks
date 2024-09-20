@@ -2,8 +2,7 @@
 import {computed, ref} from 'vue'
 import type {Todo} from '~/composables/useIndexedDB'
 import {getTagColor} from '~/composables/getTagColor'
-import {Trash2} from 'lucide-vue-next'
-import CheckMark from "assets/svg/CheckMark.vue";
+import {Check, Trash2} from 'lucide-vue-next'
 
 const props = defineProps<{
   todos: Todo[]
@@ -103,8 +102,8 @@ useSeoMeta({
               <span
                   class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
               >
-    <CheckMark />
-  </span>
+                <Check class="w-5 h-5"/>
+            </span>
             </label>
 
             <span
