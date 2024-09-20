@@ -8,6 +8,7 @@ import {useDebounceFn} from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
+import {CircleUserRound} from 'lucide-vue-next';
 
 // State variables
 const todos = ref<Todo[]>([])
@@ -17,6 +18,7 @@ const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const timeToWait = 12000
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
+const profileIsOpen = ref(false)
 
 const numberOfCompletedTodos = computed(() => {
   return todos.value?.filter(todo => todo.completed).length
@@ -168,6 +170,14 @@ watch(isDarkMode, () => {
   applyDarkMode()
 })
 
+const openProfile = () => {
+  profileIsOpen.value = true
+}
+
+const closeProfile = () => {
+  profileIsOpen.value = false
+}
+
 useSeoMeta({
   title: 'Memetasks',
   ogTitle: 'Memetasks',
@@ -214,6 +224,30 @@ useSeoMeta({
           @delete-todo="deleteTodo"
           @update-positions="updateTodoPositions"
       />
+
+      <div class="absolute top-0 right-0">
+        <button class="mt-4 mr-4" @click="openProfile">
+          <CircleUserRound class="text-black h-12 w-12"/>
+        </button>
+      </div>
+
+      <div v-if="profileIsOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+        <div class="relative max-w-3xl w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+          <button
+              @click="closeProfile"
+              class="absolute -top-3 -right-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
+              aria-label="Close"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+          <div class="p-4 text-black">
+            Hello there
+          </div>
+        </div>
+      </div>
+
     </div>
     <ImagePopup ref="imagePopup"/>
   </div>

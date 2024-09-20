@@ -69,6 +69,9 @@ const handleCheckboxClick = (event, todo) => {
     emit('toggle-todo', todo);
   }
 }
+
+
+
 useSeoMeta({
   title: 'Memetasks',
   ogTitle: 'Memetasks',
