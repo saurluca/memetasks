@@ -99,7 +99,7 @@ const generateTodoImage = async (newTodo: Todo) => {
 
   try {
     const result = await generateImage(newTodo.text)
-    console.log("image received")
+    console.log("image received for", newTodo.text)
     if (result.imageBlob) {
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
@@ -174,9 +174,6 @@ useSeoMeta({
   description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
 })
-
-
-
 </script>
 
 <template>

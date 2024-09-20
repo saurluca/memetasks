@@ -12,11 +12,9 @@ export function useMemeGenerator() {
             imageUrl.value = ''
             imageBlob.value = null
             memeHeader.value = ''
-            const startTime = performance.now(); // Start timing
             try {
                 // Get meme prompt and header
-                console.log('awaiting memePromptResponse')
-                console.log('url', `https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`)
+                // console.log('url', `https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`)
                 const memePromptResponse = await fetch(`https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`, {
                     method: 'GET',
                     headers: {
@@ -24,16 +22,18 @@ export function useMemeGenerator() {
                     },
                 })
                 console.log('memePromptResponse', memePromptResponse)
-                const endTime1 = performance.now(); // End timing
-                console.log(`Meme generation took ${endTime1 - startTime} milliseconds.`);
 
                 if (!memePromptResponse.ok) {
                     const errorText = await memePromptResponse.text()
                     throw new Error(`Failed to get meme prompt: ${errorText}`)
                 }
 
-                const responseData = await memePromptResponse.json()
-                console.log('responseData', responseData)
+                try {
+                    const responseData = await memePromptResponse.json()
+                    console.log('responseData', responseData)
+                } catch {
+                    console.error('Problem in parsing prompt response', error.message)
+                }
 
                 const responseString = responseData.response
 
@@ -43,8 +43,18 @@ export function useMemeGenerator() {
                     throw new Error('No valid JSON found in response string');
                 }
 
-                const jsonString = jsonMatch[0]; // This will contain the JSON string
-                const data = JSON.parse(jsonString); // Parse the JSON string
+                const jsonString = jsonMatch[0];
+
+                let data;
+                try {
+                    data = JSON.parse(jsonString);
+                } catch (parseError) {
+                    throw new Error('Error parsing JSON: ' + parseError.message);
+                }
+
+                if (!data.enhancedPrompt || !data.memeHeader) {
+                    throw new Error('Parsed JSON is missing required fields: enhancedPrompt or memeHeader');
+                }
 
                 const finalPrompt = data.enhancedPrompt; // Access the enhancedPrompt
                 const memeHeader = data.memeHeader || ''
@@ -60,7 +70,7 @@ export function useMemeGenerator() {
 
                 if (!imageResponse.ok) throw new Error('Failed to generate image')
                 const blob = await imageResponse.blob()
-                
+
                 // Create a canvas to draw the image and the meme header
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
@@ -69,7 +79,7 @@ export function useMemeGenerator() {
                 // Create an image element to load the blob
                 const img = new Image();
                 img.src = URL.createObjectURL(blob);
-                
+
                 // Wait for the image to load
                 await new Promise((resolve) => {
                     img.onload = resolve;
@@ -118,7 +128,7 @@ export function useMemeGenerator() {
                         console.log('imageUrl', imageUrl.value);
 
                         // Resolve the promise with the imageBlob, imageUrl, and memeHeader
-                        resolve({ imageBlob: imageBlob.value, imageUrl: imageUrl.value, memeHeader: memeHeader.value });
+                        resolve({imageBlob: imageBlob.value, imageUrl: imageUrl.value, memeHeader: memeHeader.value});
                     });
                 });
             } catch (error) {
