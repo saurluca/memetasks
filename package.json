@@ -19,22 +19,23 @@
     "@capacitor/status-bar": "6.0.1",
     "@nuxthub/core": "^0.7.19",
     "@nuxtjs/ionic": "^0.15.1",
-    "@nuxtjs/sitemap": "^6.0.1",
+    "@nuxtjs/sitemap": "^6.1.0",
     "@vite-pwa/nuxt": "^0.10.5",
-    "@vueuse/core": "^11.0.3",
+    "@vueuse/core": "^11.1.0",
     "idb": "^8.0.0",
     "lucide-vue-next": "^0.438.0",
-    "nuxt": "^3.13.0",
+    "nuxt": "^3.13.2",
     "tailwind-scrollbar": "^3.1.0",
+    "unenv": "^1.10.0",
     "vue": "latest",
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
     "@capacitor/cli": "6.1.2",
-    "@vueuse/nuxt": "^11.0.3",
+    "@vueuse/nuxt": "^11.1.0",
     "autoprefixer": "^10.4.20",
-    "postcss": "^8.4.44",
-    "tailwindcss": "^3.4.10",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.12",
     "wrangler": "^3.78.7"
   }
 }
