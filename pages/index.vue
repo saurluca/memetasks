@@ -76,7 +76,6 @@ const toggleTodo = async (todo: Todo) => {
     todo.completed = true
     todo.completedAt = new Date()
     todo.updatedAt = new Date()
-    todo.deletedAt = new Date()
 
     if (todo.image instanceof Blob) {
       imagePopup.value?.open()

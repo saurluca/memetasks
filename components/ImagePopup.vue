@@ -33,8 +33,6 @@ const setImageBlob = (blob: Blob) => {
   imageUrl.value = URL.createObjectURL(blob)
 }
 
-const hasImage = computed(() => !!imageBlob.value)
-
 defineExpose({ open, close, setImageBlob })
 </script>
 

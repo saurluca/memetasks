@@ -17,7 +17,9 @@ const timeElapsed = (todo: Todo) => {
 
 const checkCheckOfTime = (todo: Todo) => {
   console.log("check of todo", todo)
-  const bools = new Date().getTime() - newtodo.updatedAt.getTime() < 1000000
+  const timeDif = new Date().getTime() - todo.updatedAt.getTime()
+  const bools = timeDif < 5000
+  console.log("time dif", timeDif)
   console.log("bools", bools)
   return bools
 }
@@ -39,10 +41,9 @@ const filteredTodos = computed(() => {
 })
 
 const displayedTodos = computed(() => {
-  // console.log("updatedAt", todo.updatedAt)
-  // console.log("current time", new Date().getTime())
-  // console.log("timeToWait", new Date().getTime() - todo.updatedAt)
-  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt &&  ( !todo.completed || checkCheckOfTime(todo)));
+  // show todos that either have not been check of yet or just checked of recently
+  // const activeTodos = filteredTodos.value.filter(x => !x.deletedAt && (checkCheckOfTime(x) ||  !x.completed));
+  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt && !todo.completed);
 
   if (showDeletedTodos.value) {
     const deletedTodos = filteredTodos.value
@@ -73,22 +74,13 @@ const {isLoading} = useInfiniteScroll(
 
 // Update the checkbox click handler to use timeElapsed
 const handleCheckboxClick = (event, todo) => {
-  console.log("checked todo", todo.imagechecked)
-
+  // toggle todo only if it is not completed and has an image or waiting time passed
   if (!todo.completed && ( timeElapsed(todo) > props.timeToWait || todo.image )) {
     emit('toggle-todo', todo);
   } else {
     event.preventDefault();
   }
 }
-
-
-//   if (todo.completed || ( !(timeElapsed(todo) < props.timeToWait) || !todo.image )) {
-//     event.preventDefault();
-//   } else {
-//     emit('toggle-todo', todo);
-//   }
-// }
 </script>
 
 <template>
