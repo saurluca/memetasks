@@ -15,51 +15,33 @@ export function useMemeGenerator() {
             try {
                 // Get meme prompt and header
                 // console.log('url', `https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`)
-                const memePromptResponse = await fetch(`https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`, {
+                const responsePrompt = await fetch(`https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
                     },
                 })
-                console.log('memePromptResponse', memePromptResponse)
 
-                if (!memePromptResponse.ok) {
-                    const errorText = await memePromptResponse.text()
+                if (!responsePrompt.ok) {
+                    const errorText = await responsePrompt.text()
                     throw new Error(`Failed to get meme prompt: ${errorText}`)
                 }
 
-                const responseData = await memePromptResponse.json()
+                const parsedResponse = await responsePrompt.json()
 
-                const responseString = responseData.response
+                const finalPrompt = parsedResponse.enhancedPrompt.response; // Accessing the response property
+                const memeHeader = parsedResponse.memeHeader.response; // Accessing the response property
 
-                const jsonMatch = responseString.match(/{.*}/s);
-
-                if (!jsonMatch || jsonMatch.length === 0) {
-                    throw new Error('No valid JSON found in response string');
-                }
-
-                const jsonString = jsonMatch[0];
-
-                let data;
-                try {
-                    data = JSON.parse(jsonString);
-                } catch (parseError) {
-                    throw new Error('Error parsing JSON: ' + parseError.message);
-                }
-
-                if (!data.enhancedPrompt || !data.memeHeader) {
-                    throw new Error('Parsed JSON is missing required fields: enhancedPrompt or memeHeader');
-                }
-
-                const finalPrompt = data.enhancedPrompt; // Access the enhancedPrompt
-                const memeHeader = data.memeHeader || ''
-                console.log(finalPrompt);
-                console.log(memeHeader);
+                console.log("enhanced", finalPrompt);
+                console.log("memeheader", memeHeader);
 
                 const imageResponse = await fetch(`https://memes.spuckteller.workers.dev/?prompt=${encodeURIComponent(finalPrompt)}`)
                 console.log('imageResponse', imageResponse)
 
-                if (!imageResponse.ok) throw new Error('Failed to generate image')
+                if (!imageResponse.ok) {
+                    throw new Error('Failed to generate image')
+                }
+
                 const blob = await imageResponse.blob()
 
                 // Create a canvas to draw the image and the meme header
