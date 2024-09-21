@@ -28,12 +28,7 @@ export function useMemeGenerator() {
                     throw new Error(`Failed to get meme prompt: ${errorText}`)
                 }
 
-                try {
-                    const responseData = await memePromptResponse.json()
-                    console.log('responseData', responseData)
-                } catch {
-                    console.error('Problem in parsing prompt response', error.message)
-                }
+                const responseData = await memePromptResponse.json()
 
                 const responseString = responseData.response
 
@@ -60,13 +55,9 @@ export function useMemeGenerator() {
                 const memeHeader = data.memeHeader || ''
                 console.log(finalPrompt);
                 console.log(memeHeader);
-                const endTime2 = performance.now(); // End timing
-                console.log(`Meme generation took ${endTime2 - endTime1} milliseconds.`);
 
                 const imageResponse = await fetch(`https://memes.spuckteller.workers.dev/?prompt=${encodeURIComponent(finalPrompt)}`)
                 console.log('imageResponse', imageResponse)
-                const endTime3 = performance.now(); // End timing
-                console.log(`Image generation took ${endTime3 - endTime2} milliseconds.`);
 
                 if (!imageResponse.ok) throw new Error('Failed to generate image')
                 const blob = await imageResponse.blob()
