@@ -4,22 +4,11 @@ export default defineNuxtConfig({
   modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic'],
   ssr: false,
   target: 'static',
-  hooks: {
-    'pages:extend'(pages) {
-      // add a route
-      pages.push({
-        name: 'tasks',
-        path: '/tasks',
-        file: '~/pages/index.vue'
-      })
-    }
-  },
   sitemap: {
     hostname: 'https://memetasks.com',
     gzip: true,
     routes: [
       '/',
-      '/tasks'
     ],
   },
   devtools: { enabled: true },
@@ -29,6 +18,25 @@ export default defineNuxtConfig({
     plugins: {
       tailwindcss: {},
       autoprefixer: {},
+    },
+  },
+  pwa: {
+    manifest: {
+      name: 'Memetasks',
+      short_name: 'Memetasks',
+      start_url: '/',
+      display: 'standalone',
+    },
+    workbox: {
+      runtimeCaching: [
+        {
+          urlPattern: '/*',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'pages-cache',
+          },
+        },
+      ],
     },
   },
   app: {
