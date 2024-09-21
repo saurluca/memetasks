@@ -13,7 +13,14 @@ const props = defineProps<{
 // Define timeElapsed as a computed property
 const timeElapsed = (todo: Todo) => {
   return new Date().getTime() - new Date(todo.createdAt).getTime();
-};
+} ;
+
+const checkCheckOfTime = (todo: Todo) => {
+  console.log("check of todo", todo)
+  const bools = new Date().getTime() - newtodo.updatedAt.getTime() < 1000000
+  console.log("bools", bools)
+  return bools
+}
 
 const showDeletedTodos = ref(false)
 
@@ -32,7 +39,10 @@ const filteredTodos = computed(() => {
 })
 
 const displayedTodos = computed(() => {
-  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt && !todo.completed);
+  // console.log("updatedAt", todo.updatedAt)
+  // console.log("current time", new Date().getTime())
+  // console.log("timeToWait", new Date().getTime() - todo.updatedAt)
+  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt &&  ( !todo.completed || checkCheckOfTime(todo)));
 
   if (showDeletedTodos.value) {
     const deletedTodos = filteredTodos.value
@@ -63,21 +73,22 @@ const {isLoading} = useInfiniteScroll(
 
 // Update the checkbox click handler to use timeElapsed
 const handleCheckboxClick = (event, todo) => {
-  if (todo.completed || timeElapsed(todo) < props.timeToWait) {
-    event.preventDefault();
-  } else {
+  console.log("checked todo", todo.imagechecked)
+
+  if (!todo.completed && ( timeElapsed(todo) > props.timeToWait || todo.image )) {
     emit('toggle-todo', todo);
+  } else {
+    event.preventDefault();
   }
 }
 
 
-
-useSeoMeta({
-  title: 'Memetasks',
-  ogTitle: 'Memetasks',
-  description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
-  ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
-})
+//   if (todo.completed || ( !(timeElapsed(todo) < props.timeToWait) || !todo.image )) {
+//     event.preventDefault();
+//   } else {
+//     emit('toggle-todo', todo);
+//   }
+// }
 </script>
 
 <template>
@@ -96,11 +107,6 @@ useSeoMeta({
                   :checked="todo.completed"
                   class="peer h-5 w-5 transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-green-600 checked:border-green-600"
                   @click="(event) => handleCheckboxClick(event, todo)"
-                  :class="{
-      'cursor-pointer text-blue-600': !todo.completed && timeElapsed(todo) >= props.timeToWait,
-      'cursor-not-allowed text-gray-400 opacity-50': todo.completed || timeElapsed(todo) < props.timeToWait
-    }"
-                  :disabled="todo.completed || timeElapsed(todo) < props.timeToWait"
               />
               <span
                   class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
