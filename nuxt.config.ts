@@ -1,13 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
-  modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic', '@nuxthub/core'],
+  modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic'],
   ssr: false,
   target: 'static',
-  hub: {
-    database: true,
-    kv: true,
-  },
   sitemap: {
     hostname: 'https://memetasks.com',
     gzip: true,

@@ -17,7 +17,6 @@
     "@capacitor/ios": "6.1.2",
     "@capacitor/keyboard": "6.0.2",
     "@capacitor/status-bar": "6.0.1",
-    "@nuxthub/core": "^0.7.19",
     "@nuxtjs/ionic": "^0.15.1",
     "@nuxtjs/sitemap": "^6.1.0",
     "@vite-pwa/nuxt": "^0.10.5",
