@@ -83,7 +83,7 @@ const addTag = () => {
               ref="newTagInput"
               v-model="newTagText"
               placeholder="New tag"
-              class="flex-grow px-3 py-1 text-sm border bg-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+              class="flex-grow text-black px-3 py-1 text-sm border bg-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
             />
             <button
               type="submit"
