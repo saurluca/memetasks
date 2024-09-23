@@ -5,8 +5,8 @@ export function useMemeGenerator() {
     const imageBlob = ref<Blob | null>(null)
     const isLoading = ref(false)
     const memeHeader = ref('')
-    const theme = ref('your mom')
-    const themeChance = 0.5
+    const theme = ref('halloween')
+    const themeChance = 0.25
 
     const generateImage = async (prompt: string) => {
         if (prompt) {
