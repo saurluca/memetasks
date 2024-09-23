@@ -33,6 +33,12 @@ export default defineNuxtConfig({
       display: 'standalone',
     },
     workbox: {
+      precaching: {
+        // Add the root URL to be precached
+        staticFileGlobs: [
+          '/*',
+        ],
+      },
       runtimeCaching: [
         {
           urlPattern: '/*',
