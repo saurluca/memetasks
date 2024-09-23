@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   target: 'static',
   hub: {
     database: true,
-    kv: true,
+    kv: true
     // cache: true,
   },
   sitemap: {
