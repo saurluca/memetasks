@@ -1,0 +1,26 @@
+name: Deploy with NuxtHub CLI
+
+on:
+  push:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 1.0.1
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Deploy to NuxtHub
+        run: npx nuxthub deploy
+        env:
+          NUXT_HUB_PROJECT_KEY: ${{ secrets.NUXT_HUB_PROJECT_KEY }}
+          NUXT_HUB_USER_TOKEN: ${{ secrets.NUXT_HUB_USER_TOKEN }}
