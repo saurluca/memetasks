@@ -4,6 +4,11 @@ export default defineNuxtConfig({
   modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic', '@nuxthub/core'],
   ssr: false,
   target: 'static',
+  hub: {
+    database: true,
+    kv: true,
+    cache: true,
+  },
   sitemap: {
     hostname: 'https://memetasks.com',
     gzip: true,
