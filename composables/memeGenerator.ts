@@ -16,7 +16,7 @@ export function useMemeGenerator() {
             memeHeader.value = ''
             try {
                 // Randomly set the theme or not
-                if (Math.random() < themeChance) {
+                if (Math.random() > themeChance) {
                     theme.value = '';
                 }
 
