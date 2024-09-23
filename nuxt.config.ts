@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   hub: {
     database: true,
     kv: true,
-    cache: true,
+    // cache: true,
   },
   sitemap: {
     hostname: 'https://memetasks.com',
