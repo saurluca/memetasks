@@ -5,6 +5,8 @@ export function useMemeGenerator() {
     const imageBlob = ref<Blob | null>(null)
     const isLoading = ref(false)
     const memeHeader = ref('')
+    const theme = ref('beach')
+    const themeChance = 0.4
 
     const generateImage = async (prompt: string) => {
         if (prompt) {
@@ -13,9 +15,12 @@ export function useMemeGenerator() {
             imageBlob.value = null
             memeHeader.value = ''
             try {
-                // Get meme prompt and header
-                // console.log('url', `https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`)
-                const responsePrompt = await fetch(`https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}`, {
+                // Randomly set the theme or not
+                if (Math.random() < themeChance) {
+                    theme.value = '';
+                }
+
+                const responsePrompt = await fetch(`https://memeprompt.spuckteller.workers.dev/?prompt=${encodeURIComponent(prompt)}&theme=${encodeURIComponent(theme.value)}`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
