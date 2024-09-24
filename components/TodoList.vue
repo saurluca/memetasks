@@ -9,15 +9,6 @@ const props = defineProps<{
   timeToWait: number
 }>()
 
-const checkCheckOfTime = (todo: Todo) => {
-  console.log("check of todo", todo)
-  const timeDif = new Date().getTime() - todo.updatedAt.getTime()
-  const bools = timeDif < 5000
-  console.log("time dif", timeDif)
-  console.log("bools", bools)
-  return bools
-}
-
 const showDeletedTodos = ref(false)
 
 const emit = defineEmits(['toggle-todo', 'delete-todo', 'update-positions'])
@@ -25,33 +16,40 @@ const emit = defineEmits(['toggle-todo', 'delete-todo', 'update-positions'])
 const maxDisplayedTasks = ref(10)
 const containerRef = ref<HTMLElement | null>(null)
 
-const displayedTodos = computed(() => {
-  let filteredTodos = props.todos;
-
-  // Filter todos based on current tags
-  if (props.currentTags.length > 0) {
-    filteredTodos = filteredTodos.filter(todo =>
-        todo.tags && todo.tags.some(tag => props.currentTags.includes(tag))
-    );
+const filterOutTags = (todos: Todo[]) => {
+  if (props.currentTags.length === 0) {
+    return todos
+  } else {
+    return todos.filter(todo => todo.tags && todo.tags.some(tag => props.currentTags.includes(tag)))
   }
+}
 
-  // show todos that either have not been check of yet or just checked of recently
-  // const activeTodos = filteredTodos.value.filter(x => !x.deletedAt && (checkCheckOfTime(x) ||  !x.completed));
-  const activeTodos = filteredTodos.filter(todo => !todo.deletedAt && !todo.completed);
+const filterForActiveTodos = (todos: Todo[]) => {
+  return todos.filter(todo => !todo.deletedAt && !todo.completed)
+}
+
+// filter and reverse sort
+const filterForDeletedTodos = (todos: Todo[]) => {
+  return todos.filter(todo => todo.deletedAt && todo.completed).sort((a, b) => b.position - a.position);
+}
+
+const filteredTodos = computed(() => {
+  const tagFilteredTodos = filterOutTags(props.todos)
+  const activeTodos = filterForActiveTodos(tagFilteredTodos)
 
   if (showDeletedTodos.value) {
-    const deletedTodos = filteredTodos
-        .filter(todo => todo.deletedAt && todo.completed)
-        .sort((a, b) => b.position - a.position);
-
-    return [...activeTodos, ...deletedTodos].slice(0, maxDisplayedTasks.value);
+    const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
+    return [...activeTodos, ...deletedTodos];
   } else {
-    return activeTodos.slice(0, maxDisplayedTasks.value)
+    return activeTodos
   }
 })
 
+const displayedTodos = computed(() => {
+  return filteredTodos.value.slice(0, maxDisplayedTasks.value)
+})
+
 const toggleShowDeletedTodos = () => {
-  console.log("toggeling", showDeletedTodos.value)
   showDeletedTodos.value = !showDeletedTodos.value;
   displayedTodos.value;
 }
@@ -59,9 +57,12 @@ const toggleShowDeletedTodos = () => {
 const {isLoading} = useInfiniteScroll(
     containerRef,
     () => {
-      if (maxDisplayedTasks.value < displayedTodos.value.length) {
+      if (maxDisplayedTasks.value < filteredTodos.value.length) {
+        console.log("loading more")
         maxDisplayedTasks.value += 10
       }
+
+      displayedTodos.value
     },
     {distance: 10}
 )
