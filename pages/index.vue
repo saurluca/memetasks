@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from 'vue'
-import {nanoid} from 'nanoid'
-import type {Tag, Todo} from '~/composables/useIndexedDB'
-import {loadDataFromIndexedDB, updateLocalTags, updateLocalTodos} from '~/composables/useIndexedDB'
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
+import { nanoid } from 'nanoid'
+import type { Tag, Todo } from '~/composables/useIndexedDB'
+import { loadDataFromIndexedDB, updateLocalTags, updateLocalTodos } from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/ImagePopup.vue'
-import {useDebounceFn} from '@vueuse/core'
+import { useDebounceFn } from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
-import {CircleUserRound} from 'lucide-vue-next';
+import { Settings } from 'lucide-vue-next';
+import SettingsPopup from "~/components/SettingsPopup.vue";
 
 // State variables
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 30000
+const timeToWait = 10000
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
 const profileIsOpen = ref(false)
@@ -26,7 +27,7 @@ const numberOfCompletedTodos = computed(() => {
 
 // Lifecycle hooks
 onMounted(async () => {
-  const {todos: loadedTodos, tags: loadedTags} = await loadDataFromIndexedDB()
+  const { todos: loadedTodos, tags: loadedTags } = await loadDataFromIndexedDB()
   todos.value = loadedTodos
   tags.value = loadedTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
@@ -95,7 +96,7 @@ const updateTodoPositions = useDebounceFn(async () => {
 }, 300)
 
 const generateTodoImage = async (newTodo: Todo) => {
-  const {generateImage} = memeMode.value ? useMemeGenerator() : useImageGenerator();
+  const { generateImage } = memeMode.value ? useMemeGenerator() : useImageGenerator();
 
   try {
     const result = await generateImage(newTodo.text)
@@ -159,6 +160,7 @@ const applyDarkMode = () => {
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     imagePopup.value?.close()
+    closeProfile(); // Close the profile if Escape is pressed
   }
 }
 
@@ -168,12 +170,13 @@ watch(isDarkMode, () => {
   applyDarkMode()
 })
 
+// Methods
 const openProfile = () => {
-  profileIsOpen.value = true
+  profileIsOpen.value = true; // Open the profile
 }
 
 const closeProfile = () => {
-  profileIsOpen.value = false
+  profileIsOpen.value = false; // Close the profile
 }
 
 useSeoMeta({
@@ -183,31 +186,24 @@ useSeoMeta({
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
 })
 
-
-// <div class="absolute top-0 right-0">
-// <button class="mt-4 mr-4" @click="openProfile">
-// <CircleUserRound class="text-black h-12 w-12"/>
-// </button>
-// </div>
-
 </script>
 
 <template>
-  <div class="h-screen bg-gray-100 dark:bg-slate-700 transition-colors duration-300 flex p-4 items-center justify-center">
-    <div class="h-full max-h-[673px] w-full mx-auto flex flex-col max-w-2xl p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
+  <div class="h-screen bg-slate-100 dark:bg-slate-700 transition-colors duration-300 flex p-4 items-center justify-center">
+    <div
+        class="h-full max-h-[673px] w-full mx-auto flex flex-col max-w-2xl p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
           <div
               class="bg-amber-300 text-black rounded-full font-bold text-xl p-0.5 text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
             {{ numberOfCompletedTodos }}
           </div>
-          <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Meme your tasks!</h1>
+          <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Meme your tasks!</h1>
         </div>
 
-        <div class="flex items-center">
-          <button @click="toggleDarkMode" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 transition-colors duration-300 text-xl">
-            <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
-            <span v-else class="text-gray-800">🌙</span>
+        <div class="dark:text-white">
+          <button class="mt-3 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
+            <Settings class="text-black dark:text-slate-200 h-8 w-8"/>
           </button>
         </div>
       </div>
@@ -229,24 +225,12 @@ useSeoMeta({
           @update-positions="updateTodoPositions"
       />
 
-
-      <div v-if="profileIsOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-        <div class="relative max-w-3xl w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-          <button
-              @click="closeProfile"
-              class="absolute -top-3 -right-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
-              aria-label="Close"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-          <div class="p-4 text-black">
-            Hello there
-          </div>
-        </div>
-      </div>
-
+      <SettingsPopup
+          :profile-is-open="profileIsOpen"
+          @close-profile="closeProfile"
+          @toggle-dark-mode="toggleDarkMode"
+          :is-dark-mode="isDarkMode"
+      />
     </div>
     <ImagePopup ref="imagePopup"/>
   </div>
