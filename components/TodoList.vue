@@ -46,7 +46,7 @@ const displayedTodos = computed(() => {
   const activeTodos = filteredTodos.filter(todo => !todo.deletedAt && !todo.completed);
 
   if (showDeletedTodos.value) {
-    const deletedTodos = filteredTodos.value
+    const deletedTodos = filteredTodos
         .filter(todo => todo.deletedAt && todo.completed)
         .sort((a, b) => b.position - a.position);
 
