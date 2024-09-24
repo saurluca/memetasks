@@ -37,11 +37,11 @@ defineExpose({ open, close, setImageBlob })
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-    <div class="relative max-w-3xl w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl">
+  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-50">
+    <div class="relative max-w-3xl w-full bg-white dark:bg-gray-500 rounded-lg shadow-xl">
       <button 
         @click="close" 
-        class="absolute -top-3 -right-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
+        class="absolute -top-3 -right-3 bg-gray-200 dark:bg-black text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
         aria-label="Close"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
