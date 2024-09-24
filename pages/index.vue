@@ -99,14 +99,14 @@ const generateTodoImage = async (newTodo: Todo) => {
 
   try {
     const result = await generateImage(newTodo.text)
-    console.log("image received for", newTodo.text)
+    console.log("image generation finished")
     if (result.imageBlob) {
+      console.log("image received for", newTodo.text)
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
         todos.value[todoIndex].image = result.imageBlob
         await updateLocalTodos(todos.value)
       }
-      console.log("image generated")
     }
   } catch (error) {
     console.error('Error generating image:', error)
