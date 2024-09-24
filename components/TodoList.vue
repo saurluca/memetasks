@@ -43,7 +43,9 @@ const filteredTodos = computed(() => {
   } else {
     return activeTodos
   }
-})
+}, {
+  deep: true
+});
 
 const displayedTodos = computed(() => {
   return filteredTodos.value.slice(0, maxDisplayedTasks.value)
