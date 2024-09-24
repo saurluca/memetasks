@@ -37,11 +37,11 @@ export function useMemeGenerator() {
                 const finalPrompt = parsedResponse.enhancedPrompt.response; // Accessing the response property
                 const memeHeader = parsedResponse.memeHeader.response; // Accessing the response property
 
-                console.log("enhanced", finalPrompt);
-                console.log("memeheader", memeHeader);
+                // console.log("enhanced", finalPrompt);
+                // console.log("memeheader", memeHeader);
 
                 const imageResponse = await fetch(`https://memes.spuckteller.workers.dev/?prompt=${encodeURIComponent(finalPrompt)}`)
-                console.log('imageResponse', imageResponse)
+                // console.log('imageResponse', imageResponse)
 
                 if (!imageResponse.ok) {
                     throw new Error('Failed to generate image')
@@ -111,6 +111,7 @@ export function useMemeGenerator() {
                 });
             } catch (error) {
                 console.error('Error generating image:', error)
+                // alert('Failed to generate image. Please try again.', error)
                 throw error // Re-throw the error to be handled by the caller
             } finally {
                 isLoading.value = false

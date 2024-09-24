@@ -90,7 +90,7 @@ const handleCheckboxClick = (event, todo) => {
   >
     <ul class="space-y-3">
       <li v-for="todo in displayedTodos" :key="todo.id"
-          class="flex flex-col p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
+          class="flex flex-col p-3.5 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
         <div class="flex items-center justify-between" @click="todo.isExpanded = !todo.isExpanded">
           <div class="flex items-center flex-grow mr-4 min-w-0">
             <label class="flex items-center relative">
@@ -149,7 +149,7 @@ const handleCheckboxClick = (event, todo) => {
   <div>
     <button
         @click="toggleShowDeletedTodos"
-        class="mt-4 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 rounded-full p-1">
+        class="mt-4 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-gray-100 rounded-full p-1">
       {{ showDeletedTodos ? 'Hide completed tasks' : 'Show completed tasks' }}
     </button>
   </div>
