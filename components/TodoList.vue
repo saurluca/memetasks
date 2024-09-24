@@ -13,7 +13,7 @@ const props = defineProps<{
 // Define timeElapsed as a computed property
 const timeElapsed = (todo: Todo) => {
   return new Date().getTime() - new Date(todo.createdAt).getTime();
-} ;
+};
 
 const checkCheckOfTime = (todo: Todo) => {
   console.log("check of todo", todo)
@@ -31,19 +31,19 @@ const emit = defineEmits(['toggle-todo', 'delete-todo', 'update-positions'])
 const maxDisplayedTasks = ref(10)
 const containerRef = ref<HTMLElement | null>(null)
 
-const filteredTodos = computed(() => {
-  if (props.currentTags.length === 0) {
-    return props.todos;
-  }
-  return props.todos.filter(todo =>
-      todo.tags && todo.tags.some(tag => props.currentTags.includes(tag))
-  );
-})
-
 const displayedTodos = computed(() => {
+  let filteredTodos = props.todos;
+
+  // Filter todos based on current tags
+  if (props.currentTags.length > 0) {
+    filteredTodos = filteredTodos.filter(todo =>
+        todo.tags && todo.tags.some(tag => props.currentTags.includes(tag))
+    );
+  }
+
   // show todos that either have not been check of yet or just checked of recently
   // const activeTodos = filteredTodos.value.filter(x => !x.deletedAt && (checkCheckOfTime(x) ||  !x.completed));
-  const activeTodos = filteredTodos.value.filter(todo => !todo.deletedAt && !todo.completed);
+  const activeTodos = filteredTodos.filter(todo => !todo.deletedAt && !todo.completed);
 
   if (showDeletedTodos.value) {
     const deletedTodos = filteredTodos.value
@@ -65,7 +65,7 @@ const toggleShowDeletedTodos = () => {
 const {isLoading} = useInfiniteScroll(
     containerRef,
     () => {
-      if (maxDisplayedTasks.value < filteredTodos.value.length) {
+      if (maxDisplayedTasks.value < displayedTodos.value.length) {
         maxDisplayedTasks.value += 10
       }
     },
@@ -75,7 +75,7 @@ const {isLoading} = useInfiniteScroll(
 // Update the checkbox click handler to use timeElapsed
 const handleCheckboxClick = (event, todo) => {
   // toggle todo only if it is not completed and has an image or waiting time passed
-  if (!todo.completed && ( timeElapsed(todo) > props.timeToWait || todo.image )) {
+  if (!todo.completed && (timeElapsed(todo) > props.timeToWait || todo.image)) {
     emit('toggle-todo', todo);
   } else {
     event.preventDefault();
@@ -84,38 +84,39 @@ const handleCheckboxClick = (event, todo) => {
 </script>
 
 <template>
-  <div
-      ref="containerRef"
-      class="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
-  >
-    <ul class="space-y-3">
-      <li v-for="todo in displayedTodos" :key="todo.id"
-          class="flex flex-col p-3.5 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
-        <div class="flex items-center justify-between" @click="todo.isExpanded = !todo.isExpanded">
-          <div class="flex items-center flex-grow mr-4 min-w-0">
-            <label class="flex items-center relative">
-              <input
-                  type="checkbox"
-                  :checked="todo.completed"
-                  class="peer h-5 w-5 transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-green-600 checked:border-green-600"
-                  @click="(event) => handleCheckboxClick(event, todo)"
-              />
-              <span
-                  class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              >
+  <div class="h-full flex flex-col">
+    <div
+        ref="containerRef"
+        class="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
+    >
+      <ul class="space-y-3">
+        <li v-for="todo in displayedTodos" :key="todo.id"
+            class="flex flex-col p-3.5 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
+          <div class="flex items-center justify-between" @click="todo.isExpanded = !todo.isExpanded">
+            <div class="flex items-center flex-grow mr-4 min-w-0">
+              <label class="flex items-center relative">
+                <input
+                    type="checkbox"
+                    :checked="todo.completed"
+                    class="peer h-5 w-5 transition-all appearance-none rounded shadow hover:shadow-md border border-slate-300 checked:bg-green-600 checked:border-green-600"
+                    @click="(event) => handleCheckboxClick(event, todo)"
+                />
+                <span
+                    class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                >
                 <Check class="w-5 h-5"/>
             </span>
-            </label>
+              </label>
 
-            <span
-                class="ml-3"
-                :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
-                :title="todo.text"
-            >
+              <span
+                  class="ml-3"
+                  :class="['truncate', { 'line-through': todo.completed, 'opacity-50': todo.completed }, 'text-gray-800 dark:text-white']"
+                  :title="todo.text"
+              >
               {{ todo.text.length > 75 ? todo.text.slice(0, todo.text.lastIndexOf(' ', 75)) + '...' : todo.text }}
             </span>
-          </div>
-          <div class="flex flex-wrap gap-1">
+            </div>
+            <div class="flex flex-wrap gap-1">
             <span
                 v-for="tag in todo.tags"
                 :key="tag"
@@ -129,24 +130,23 @@ const handleCheckboxClick = (event, todo) => {
             >
               {{ tag }}
             </span>
+            </div>
           </div>
-        </div>
-        <div v-if="todo.isExpanded" class="mt-2" @click="todo.isExpanded = !todo.isExpanded">
-          <p v-if="todo.text.length > 75" class="text-gray-700 dark:text-gray-300">
-            {{ todo.text.slice(todo.text.lastIndexOf(' ', 75), todo.text.length) }}
-          </p>
-          <div class="relative flex justify-end mt-1">
-            <button @click="emit('delete-todo', todo.id)"
-                    class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
-              <Trash2 class="h-4 w-4 mr-1"/>
-              Delete
-            </button>
+          <div v-if="todo.isExpanded" class="mt-2" @click="todo.isExpanded = !todo.isExpanded">
+            <p v-if="todo.text.length > 75" class="text-gray-700 dark:text-gray-300">
+              {{ todo.text.slice(todo.text.lastIndexOf(' ', 75), todo.text.length) }}
+            </p>
+            <div class="relative flex justify-end mt-1">
+              <button @click="emit('delete-todo', todo.id)"
+                      class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
+                <Trash2 class="h-4 w-4 mr-1"/>
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
-      </li>
-    </ul>
-  </div>
-  <div>
+        </li>
+      </ul>
+    </div>
     <button
         @click="toggleShowDeletedTodos"
         class="mt-4 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-gray-100 rounded-full p-1">
