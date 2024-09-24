@@ -193,8 +193,8 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="h-dvh bg-gray-100 dark:bg-slate-700 transition-colors duration-300 flex flex-col items-center justify-center">
-    <div class="w-full flex flex-col max-w-2xl mx-auto p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
+  <div class="h-screen bg-gray-100 dark:bg-slate-700 transition-colors duration-300 flex p-4 items-center justify-center">
+    <div class="h-full max-h-[673px] w-full mx-auto flex flex-col max-w-2xl p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-6">
         <div class="flex items-center">
           <div

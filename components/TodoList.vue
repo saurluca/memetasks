@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue'
 import type {Todo} from '~/composables/useIndexedDB'
-import {getTagColor} from '~/composables/getTagColor'
-import {Check, Trash2} from 'lucide-vue-next'
 import TodoItem from "~/components/TodoItem.vue";
 
 const props = defineProps<{
@@ -70,10 +68,10 @@ const {isLoading} = useInfiniteScroll(
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
+  <div class="h-full flex flex-col overflow-hidden">
     <div
         ref="containerRef"
-        class="max-h-[450px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
+        class="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
     >
       <ul class="space-y-3">
         <TodoItem
