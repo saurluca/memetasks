@@ -44,7 +44,7 @@ const resetImageBlob = () => {
   imageUrl.value = ''
 }
 
-defineExpose({ open, close, setImageBlob, resetImageBlob })
+defineExpose({ open, close, setImageBlob, resetImageBlob, setError })
 </script>
 
 <template>
