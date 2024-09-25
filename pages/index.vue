@@ -92,7 +92,10 @@ const toggleTodo = async (todo: Todo) => {
     imagePopup.value?.resetImageBlob()
     if (todo.image) {
       const imageBlob = arrayBufferToBlob(todo.image, 'image/png')
+      imagePopup.value?.setError("There is an image")
       imagePopup.value?.setImageBlob(imageBlob)
+    } else {
+      imagePopup.value?.setError("There was no image")
     }
 
     imagePopup.value?.open()

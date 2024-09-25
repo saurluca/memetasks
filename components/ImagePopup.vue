@@ -4,6 +4,8 @@ import { ref } from 'vue'
 const isOpen = ref(false)
 const imageBlob = ref<Blob | null>(null)
 const imageUrl = ref('')
+const errorMessage = ref("")
+
 
 onMounted(() => {
   if (imageBlob.value) {
@@ -16,6 +18,10 @@ onUnmounted(() => {
     URL.revokeObjectURL(imageUrl.value)
   }
 })
+
+const setError = (error: string) => {
+  errorMessage.value = error
+}
 
 const open = () => {
   isOpen.value = true
@@ -56,9 +62,10 @@ defineExpose({ open, close, setImageBlob, resetImageBlob })
       <div class="p-4">
         <img v-if="imageUrl" :src="imageUrl" alt="Todo image" class="w-full h-auto rounded-lg" />
         <p v-else-if="!imageBlob" class="max-w-xl h-auto rounded-lg text-gray-500">
-          No image provided. <br/>Either you don't give the memes enough time to fully grow, or there was an error while generating the image.
+          No image provided. <br/>Either you don't give the memes enough time to fully grow, you don't have internet or there was an error .
           {{imageUrl}}
           {{imageBlob}}
+          {{errorMessage}}
           ---
         </p>
         <p v-else class="text-gray-500">Loading image...</p>
