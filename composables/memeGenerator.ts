@@ -35,7 +35,7 @@ export function useMemeGenerator() {
             if (!responsePrompt.ok) {
                 const errorText = await responsePrompt.text()
                 console.error(`Failed to get meme prompt: ${errorText}`)
-                alert('Failed to get meme prompt. Please try again.', errorText)
+                // alert('Failed to get meme prompt. Please try again.', errorText)
                 return
             }
 
@@ -53,7 +53,7 @@ export function useMemeGenerator() {
             if (!imageResponse.ok) {
                 const errorText = await responsePrompt.text()
                 console.error('Failed to fetch image', errorText)
-                alert('Failed to fetch image. Please try again.', errorText)
+                // alert('Failed to fetch image. Please try again.', errorText)
                 return
             }
 
@@ -65,7 +65,7 @@ export function useMemeGenerator() {
 
             if (!ctx) {
                 console.error('Failed to get canvas context');
-                alert('Failed to generate image. Please try again. ctx')
+                // alert('Failed to generate image. Please try again. ctx')
                 return
             }
 
@@ -124,7 +124,7 @@ export function useMemeGenerator() {
             });
         } catch (error) {
             console.error('Error generating image:', error)
-            alert('Failed to generate image. Please try again.', error)
+            // alert('Failed to generate image. Please try again.', error)
             return
         } finally {
             isLoading.value = false
