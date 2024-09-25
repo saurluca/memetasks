@@ -9,7 +9,7 @@ const props = defineProps<{
   timeToWait: number
 }>()
 
-const emit = defineEmits(['toggle-todo', 'delete-todo', 'update-positions'])
+const emit = defineEmits(['toggle-todo', 'delete-todo'])
 
 const showDeletedTodos = ref(false)
 const maxDisplayedTasks = ref(10)

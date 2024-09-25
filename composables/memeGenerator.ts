@@ -1,7 +1,6 @@
 import {ref} from 'vue'
 
 export function useMemeGenerator() {
-    const imageUrl = ref('')
     const imageBlob = ref<Blob | null>(null)
     const isLoading = ref(false)
     const memeHeader = ref('')
@@ -12,11 +11,10 @@ export function useMemeGenerator() {
         if (!prompt) {
             // Return null if no prompt was provided
             console.error('no prompt provided')
-            return {imageBlob: null, imageUrl: '', memeHeader: ''}
+            return null
         }
 
         isLoading.value = true
-        imageUrl.value = ''
         imageBlob.value = null
         memeHeader.value = ''
         try {
@@ -115,11 +113,7 @@ export function useMemeGenerator() {
             // Convert canvas to blob
             return new Promise((resolve) => {
                 canvas.toBlob((newBlob) => {
-                    imageBlob.value = newBlob;
-                    imageUrl.value = URL.createObjectURL(newBlob as Blob);
-
-                    // Resolve the promise with the imageBlob, imageUrl, and memeHeader
-                    resolve({imageBlob: imageBlob.value, imageUrl: imageUrl.value, memeHeader: memeHeader.value});
+                    resolve(newBlob);
                 });
             });
         } catch (error) {
@@ -131,10 +125,8 @@ export function useMemeGenerator() {
         }
     }
     return {
-        imageUrl,
         imageBlob,
         isLoading,
-        memeHeader,
         generateImage
     }
 }

@@ -4,7 +4,6 @@ import {nanoid} from 'nanoid'
 import type {Tag, Todo} from '~/composables/useIndexedDB'
 import {loadDataFromIndexedDB, updateLocalTags, updateLocalTodos} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/ImagePopup.vue'
-import {useDebounceFn} from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
@@ -18,7 +17,6 @@ const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const timeToWait = 12000
 const currentTags = ref<string[]>([])
-const memeMode = ref(true)
 const profileIsOpen = ref(false)
 
 const numberOfCompletedTodos = computed(() => {
@@ -71,7 +69,6 @@ const deleteTodo = async (id: string) => {
 }
 
 const toggleTodo = async (todo: Todo) => {
-  console.log("toggeling todo", todo.completed)
   if (!todo.completed) {
     todo.completed = true
     todo.completedAt = new Date()
@@ -87,25 +84,17 @@ const toggleTodo = async (todo: Todo) => {
   }
 }
 
-const updateTodoPositions = useDebounceFn(async () => {
-  todos.value.forEach((todo, index) => {
-    todo.position = index
-    todo.updatedAt = new Date()
-  })
-  await updateLocalTodos(todos.value)
-}, 300)
-
 const generateTodoImage = async (newTodo: Todo) => {
-  const {generateImage} = memeMode.value ? useMemeGenerator() : useImageGenerator();
+  const {generateImage} = useMemeGenerator() ;
 
   try {
     const result = await generateImage(newTodo.text)
-    console.log("image generation finished")
-    if (result.imageBlob) {
+    console.log("image generation finished result", result)
+    if (result) {
       console.log("image received for", newTodo.text)
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
-        todos.value[todoIndex].image = result.imageBlob
+        todos.value[todoIndex].image = result
         await updateLocalTodos(todos.value)
       }
     }
@@ -160,7 +149,7 @@ const applyDarkMode = () => {
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     imagePopup.value?.close()
-    closeProfile(); // Close the profile if Escape is pressed
+    closeProfile();
   }
 }
 
@@ -172,11 +161,11 @@ watch(isDarkMode, () => {
 
 // Methods
 const openProfile = () => {
-  profileIsOpen.value = true; // Open the profile
+  profileIsOpen.value = true;
 }
 
 const closeProfile = () => {
-  profileIsOpen.value = false; // Close the profile
+  profileIsOpen.value = false;
 }
 
 useSeoMeta({
@@ -185,7 +174,6 @@ useSeoMeta({
   description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
 })
-
 </script>1
 
 <template>
@@ -219,7 +207,6 @@ useSeoMeta({
           :time-to-wait="timeToWait"
           @toggle-todo="toggleTodo"
           @delete-todo="deleteTodo"
-          @update-positions="updateTodoPositions"
       />
 
       <SettingsPopup
