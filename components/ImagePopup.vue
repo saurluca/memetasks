@@ -55,7 +55,12 @@ defineExpose({ open, close, setImageBlob, resetImageBlob })
       </button>
       <div class="p-4">
         <img v-if="imageUrl" :src="imageUrl" alt="Todo image" class="w-full h-auto rounded-lg" />
-        <p v-else-if="!imageBlob" class="max-w-xl h-auto rounded-lg text-gray-500">No image provided. <br/>Either you don't give the memes enough time to fully grow, or there was an error while generating the image.</p>
+        <p v-else-if="!imageBlob" class="max-w-xl h-auto rounded-lg text-gray-500">
+          No image provided. <br/>Either you don't give the memes enough time to fully grow, or there was an error while generating the image.
+          {{imageUrl}}
+          {{imageBlob}}
+          ---
+        </p>
         <p v-else class="text-gray-500">Loading image...</p>
       </div>
     </div>
