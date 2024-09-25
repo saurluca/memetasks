@@ -89,7 +89,7 @@ const {isLoading} = useInfiniteScroll(
     </div>
     <button
         @click="toggleShowDeletedTodos"
-        class="mt-4 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-gray-100 rounded-full p-1">
+        class="mt-2 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-gray-100 rounded-full p-1">
       {{ showDeletedTodos ? 'Hide completed tasks' : 'Show completed tasks' }}
     </button>
   </div>

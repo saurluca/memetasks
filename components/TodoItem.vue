@@ -25,10 +25,10 @@ const handleCheckboxClick = (event, todo) => {
 </script>
 
 <template>
-  <li :key="todo.id" class="flex flex-col p-3.5 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
+  <li :key="todo.id" class="flex flex-col p-3 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-sm transition-all duration-300">
     <div class="flex items-center justify-between" @click="todo.isExpanded = !todo.isExpanded">
       <div class="flex items-center flex-grow mr-4 min-w-0">
-        <label class="flex items-center relative">
+        <label class="flex items-center relative p-1">
           <input
               type="checkbox"
               :checked="todo.completed"

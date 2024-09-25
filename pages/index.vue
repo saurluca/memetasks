@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
-import { nanoid } from 'nanoid'
-import type { Tag, Todo } from '~/composables/useIndexedDB'
-import { loadDataFromIndexedDB, updateLocalTags, updateLocalTodos } from '~/composables/useIndexedDB'
+import {onMounted, onUnmounted, ref, computed, watch} from 'vue'
+import {nanoid} from 'nanoid'
+import type {Tag, Todo} from '~/composables/useIndexedDB'
+import {loadDataFromIndexedDB, updateLocalTags, updateLocalTodos} from '~/composables/useIndexedDB'
 import ImagePopup from '~/components/ImagePopup.vue'
-import { useDebounceFn } from '@vueuse/core'
+import {useDebounceFn} from '@vueuse/core'
 import TodoInput from '~/components/TodoInput.vue'
 import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
-import { Settings } from 'lucide-vue-next';
+import {Settings} from 'lucide-vue-next';
 import SettingsPopup from "~/components/SettingsPopup.vue";
 
 // State variables
@@ -27,7 +27,7 @@ const numberOfCompletedTodos = computed(() => {
 
 // Lifecycle hooks
 onMounted(async () => {
-  const { todos: loadedTodos, tags: loadedTags } = await loadDataFromIndexedDB()
+  const {todos: loadedTodos, tags: loadedTags} = await loadDataFromIndexedDB()
   todos.value = loadedTodos
   tags.value = loadedTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
@@ -96,7 +96,7 @@ const updateTodoPositions = useDebounceFn(async () => {
 }, 300)
 
 const generateTodoImage = async (newTodo: Todo) => {
-  const { generateImage } = memeMode.value ? useMemeGenerator() : useImageGenerator();
+  const {generateImage} = memeMode.value ? useMemeGenerator() : useImageGenerator();
 
   try {
     const result = await generateImage(newTodo.text)
@@ -186,26 +186,23 @@ useSeoMeta({
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
 })
 
-</script>
+</script>1
 
 <template>
-  <div class="h-screen bg-slate-100 dark:bg-slate-700 transition-colors duration-300 flex p-4 items-center justify-center">
-    <div
-        class="h-full max-h-[673px] w-full mx-auto flex flex-col max-w-2xl p-6 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
-      <div class="flex justify-between items-center mb-6">
+  <div class="h-dvh bg-slate-100 dark:bg-slate-700 transition-colors duration-300 flex p-1 items-center justify-center">
+    <div class="h-full max-h-[620px] w-full mx-auto flex flex-col max-w-2xl p-5 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
+      <div class="flex justify-between items-center mb-4">
         <div class="flex items-center">
           <div
-              class="bg-amber-300 text-black rounded-full font-bold text-xl p-0.5 text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
+              class="bg-amber-300 text-black rounded-full p-0.5 font-bold text-xl text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
             {{ numberOfCompletedTodos }}
           </div>
           <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Meme your tasks!</h1>
         </div>
 
-        <div class="dark:text-white">
-          <button class="mt-3 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
-            <Settings class="text-black dark:text-slate-200 h-8 w-8"/>
-          </button>
-        </div>
+        <button class="dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
+          <Settings class="text-black dark:text-slate-200 h-7 w-7"/>
+        </button>
       </div>
 
       <TodoInput @add-todo="addTodo"/>
