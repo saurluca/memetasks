@@ -15,7 +15,7 @@ const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 12000
+const timeToWait = 12
 const currentTags = ref<string[]>([])
 const profileIsOpen = ref(false)
 
@@ -89,11 +89,13 @@ const toggleTodo = async (todo: Todo) => {
     todo.completedAt = new Date()
     todo.updatedAt = new Date()
 
+    imagePopup.value?.resetImageBlob()
     if (todo.image) {
       const imageBlob = arrayBufferToBlob(todo.image, 'image/png')
-      imagePopup.value?.open()
       imagePopup.value?.setImageBlob(imageBlob)
     }
+
+    imagePopup.value?.open()
 
     await updateLocalTodos(todos.value);
   }

@@ -34,7 +34,7 @@ export default defineComponent({
 
 <template>
   <div v-if="profileIsOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-    <div class="relative max-w-2xl w-full bg-slate-100 dark:bg-slate-700 rounded-lg shadow-xl min-h-[300px] p-2 flex-col flex">
+    <div class="relative max-w-xl w-full bg-slate-100 dark:bg-slate-700 rounded-lg shadow-xl min-h-[300px] p-2 flex-col flex">
       <div class="flex justify-between ">
         <div class="text-black dark:text-slate-200 text-3xl p-3 underline">
           Settings

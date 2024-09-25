@@ -33,12 +33,17 @@ const setImageBlob = (blob: Blob) => {
   imageUrl.value = URL.createObjectURL(blob)
 }
 
-defineExpose({ open, close, setImageBlob })
+const resetImageBlob = () => {
+  imageBlob.value = null
+  imageUrl.value = ''
+}
+
+defineExpose({ open, close, setImageBlob, resetImageBlob })
 </script>
 
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-50">
-    <div class="relative max-w-3xl w-full bg-white dark:bg-gray-500 rounded-lg shadow-xl">
+  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+    <div class="relative max-w-xl w-full bg-slate-100 dark:bg-gray-500 rounded-lg shadow-xl">
       <button 
         @click="close" 
         class="absolute -top-3 -right-3 bg-gray-200 dark:bg-black text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-full p-2 transition-colors duration-200"
@@ -50,7 +55,7 @@ defineExpose({ open, close, setImageBlob })
       </button>
       <div class="p-4">
         <img v-if="imageUrl" :src="imageUrl" alt="Todo image" class="w-full h-auto rounded-lg" />
-        <p v-else-if="!imageBlob" class="text-gray-500">No image provided</p>
+        <p v-else-if="!imageBlob" class="w-full h-auto rounded-lg text-gray-500">No image provided. <br/>Either you are checking your tasks to quickly, or there was an error while generating the image.</p>
         <p v-else class="text-gray-500">Loading image...</p>
       </div>
     </div>
