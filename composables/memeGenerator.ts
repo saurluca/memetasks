@@ -56,6 +56,7 @@ export function useMemeGenerator() {
             }
 
             const blob = await imageResponse.blob()
+            return blob
 
             // Create a canvas to draw the image and the meme header
             const canvas = document.createElement('canvas');
