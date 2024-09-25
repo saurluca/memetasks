@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref, computed, watch} from 'vue'
+import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {nanoid} from 'nanoid'
 import type {Tag, Todo} from '~/composables/useIndexedDB'
 import {loadDataFromIndexedDB, updateLocalTags, updateLocalTodos} from '~/composables/useIndexedDB'
@@ -38,6 +38,21 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
 })
 
+function arrayBufferToBlob(buffer, type) {
+  return new Blob([buffer], { type: type });
+}
+
+function blobToArrayBuffer(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener('loadend', () => {
+      resolve(reader.result);
+    });
+    reader.addEventListener('error', reject);
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
 // Methods
 const addTodo = async (text: string) => {
   const newTodo: Todo = {
@@ -74,10 +89,10 @@ const toggleTodo = async (todo: Todo) => {
     todo.completedAt = new Date()
     todo.updatedAt = new Date()
 
-    if (todo.image instanceof Blob) {
+    if (todo.image) {
+      const imageBlob = arrayBufferToBlob(todo.image, 'image/png')
       imagePopup.value?.open()
-      console.log("todo image", todo.image)
-      imagePopup.value?.setImageBlob(todo.image)
+      imagePopup.value?.setImageBlob(imageBlob)
     }
 
     await updateLocalTodos(todos.value);
@@ -89,12 +104,11 @@ const generateTodoImage = async (newTodo: Todo) => {
 
   try {
     const result = await generateImage(newTodo.text)
-    console.log("image generation finished result", result)
     if (result) {
       console.log("image received for", newTodo.text)
       const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
       if (todoIndex !== -1) {
-        todos.value[todoIndex].image = result
+        todos.value[todoIndex].image = await blobToArrayBuffer(result)
         await updateLocalTodos(todos.value)
       }
     }
