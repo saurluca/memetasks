@@ -42,8 +42,7 @@ const addTag = () => {
 </script>
 
 <template>
-  <div class="mb-4">
-    <div class="flex items-center justify-between">
+    <div class="mb-4 flex items-center justify-between">
       <div class="flex flex-wrap gap-2 flex-grow">
         <span
           v-for="tag in tags"
@@ -60,7 +59,23 @@ const addTag = () => {
           {{ tag.text }}
         </span>
       </div>
-      <div class="relative ml-2">
+      <div class="flex items-center">
+        <div v-if="showTagPopup" class="bg-white dark:bg-gray-800 rounded-xl shadow p-0  mr-2">
+          <form @submit.prevent="addTag" class="flex">
+            <input
+              ref="newTagInput"
+              v-model="newTagText"
+              placeholder="Add new tag ..."
+              class="flex-grow text-black p-1.5 text-sm border bg-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+            />
+            <button
+              type="submit"
+              class="px-3 py-1 text-sm bg-green-500 text-white rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300 flex items-center"
+            >
+              Add
+            </button>
+          </form>
+        </div>
         <div class="flex space-x-2">
           <button
             @click="toggleTagPopup"
@@ -77,24 +92,7 @@ const addTag = () => {
             <Minus class="w-4 h-4"/>
           </button>
         </div>
-        <div v-if="showTagPopup" class="absolute right-0 z-10 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2">
-          <form @submit.prevent="addTag" class="flex">
-            <input
-              ref="newTagInput"
-              v-model="newTagText"
-              placeholder="New tag"
-              class="flex-grow text-black px-3 py-1 text-sm border bg-white rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
-            />
-            <button
-              type="submit"
-              class="px-3 py-1 text-sm bg-green-500 text-white rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors duration-300 flex items-center"
-            >
-              <Plus class="w-4 h-4 mr-1"/>
-              Add
-            </button>
-          </form>
-        </div>
+
       </div>
     </div>
-  </div>
 </template>

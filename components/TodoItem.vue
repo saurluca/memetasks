@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
-import { Check, Trash2 } from 'lucide-vue-next';
-import { getTagColor } from '~/composables/getTagColor';
+import {defineProps, defineEmits} from 'vue';
+import {Check, Trash2} from 'lucide-vue-next';
+import {getTagColor} from '~/composables/getTagColor';
 import type {Todo} from "~/composables/useIndexedDB";
 
 const props = defineProps<{
   todo: Todo,
   currentTags: string[]
+  timeToWait: number
 }>();
 
 const emit = defineEmits(['toggle-todo', 'delete-todo']);
@@ -39,7 +40,8 @@ const handleCheckboxClick = (event, todo) => {
             <Check class="w-5 h-5"/>
           </span>
         </label>
-        <span class="ml-3 truncate text-gray-800 dark:text-white" :class="{ 'line-through': todo.completed, 'opacity-50': todo.completed }" :title="todo.text">
+        <span class="ml-3 truncate text-gray-800 dark:text-slate-200" :class="{ 'line-through': todo.completed, 'opacity-50': todo.completed }"
+              :title="todo.text">
           {{ todo.text.length > 75 ? todo.text.slice(0, todo.text.lastIndexOf(' ', 75)) + '...' : todo.text }}
         </span>
       </div>
@@ -59,7 +61,8 @@ const handleCheckboxClick = (event, todo) => {
         {{ todo.text.slice(todo.text.lastIndexOf(' ', 75), todo.text.length) }}
       </p>
       <div class="relative flex justify-end mt-1">
-        <button @click="emit('delete-todo', todo.id)" class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
+        <button @click="emit('delete-todo', todo.id)"
+                class="px-2 py-1.5 text-ml font-medium rounded-full text-red-600 hover:bg-red-200 dark:text-red-400 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300 flex items-center">
           <Trash2 class="h-4 w-4 mr-1"/>
           Delete
         </button>

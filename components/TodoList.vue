@@ -9,10 +9,9 @@ const props = defineProps<{
   timeToWait: number
 }>()
 
-const showDeletedTodos = ref(false)
-
 const emit = defineEmits(['toggle-todo', 'delete-todo', 'update-positions'])
 
+const showDeletedTodos = ref(false)
 const maxDisplayedTasks = ref(10)
 const containerRef = ref<HTMLElement | null>(null)
 
@@ -30,7 +29,7 @@ const filterForActiveTodos = (todos: Todo[]) => {
 
 // filter and reverse sort
 const filterForDeletedTodos = (todos: Todo[]) => {
-  return todos.filter(todo => todo.deletedAt && todo.completed).sort((a, b) => b.position - a.position);
+  return todos.filter(todo => todo.completed).sort((a, b) => b.position - a.position);
 }
 
 const filteredTodos = computed(() => {
@@ -38,6 +37,7 @@ const filteredTodos = computed(() => {
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
 
   if (showDeletedTodos.value) {
+    console.log("showDeleted ", showDeletedTodos.value)
     const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
     return [...activeTodos, ...deletedTodos];
   } else {
@@ -53,17 +53,14 @@ const displayedTodos = computed(() => {
 
 const toggleShowDeletedTodos = () => {
   showDeletedTodos.value = !showDeletedTodos.value;
-  displayedTodos.value;
 }
 
 const {isLoading} = useInfiniteScroll(
     containerRef,
     () => {
       if (maxDisplayedTasks.value < filteredTodos.value.length) {
-        console.log("loading more")
         maxDisplayedTasks.value += 10
       }
-
       displayedTodos.value
     },
     {distance: 10}
@@ -82,6 +79,7 @@ const {isLoading} = useInfiniteScroll(
             :key="todo.id"
             :todo="todo"
             :currentTags="props.currentTags"
+            :time-to-wait="props.timeToWait"
             @toggle-todo="emit('toggle-todo', $event)"
             @delete-todo="emit('delete-todo', $event)"
         />

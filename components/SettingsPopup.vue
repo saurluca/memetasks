@@ -34,7 +34,7 @@ export default defineComponent({
 
 <template>
   <div v-if="profileIsOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-    <div class="relative max-w-2xl w-full bg-slate-200 dark:bg-slate-800 rounded-lg shadow-xl min-h-[300px] p-2 flex-col flex">
+    <div class="relative max-w-2xl w-full bg-slate-100 dark:bg-slate-700 rounded-lg shadow-xl min-h-[300px] p-2 flex-col flex">
       <div class="flex justify-between ">
         <div class="text-black dark:text-slate-200 text-3xl p-3 underline">
           Settings
@@ -42,7 +42,7 @@ export default defineComponent({
 
         <div class="flex items-center p-4">
           <button @click="toggleDarkMode"
-                  class="p-2 rounded-full bg-slate-400 dark:bg-slate-600 hover:bg-slate-500 dark:hover:bg-gray-500 transition-colors duration-300 text-xl">
+                  class="p-2 rounded-full bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-gray-500 transition-colors duration-300 text-xl">
             <span v-if="isDarkMode" class="text-yellow-400">Lightmode ☀️</span>
             <span v-else class="text-gray-800">Darkmode  🌙</span>
           </button>

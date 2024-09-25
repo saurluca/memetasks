@@ -16,7 +16,7 @@ const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 10000
+const timeToWait = 12000
 const currentTags = ref<string[]>([])
 const memeMode = ref(true)
 const profileIsOpen = ref(false)
@@ -190,17 +190,17 @@ useSeoMeta({
 
 <template>
   <div class="h-dvh bg-slate-100 dark:bg-slate-700 transition-colors duration-300 flex p-1 items-center justify-center">
-    <div class="h-full max-h-[620px] w-full mx-auto flex flex-col max-w-2xl p-5 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
+    <div class="h-full max-h-[618px] w-full mx-auto flex flex-col max-w-2xl p-5 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center">
           <div
               class="bg-amber-300 text-black rounded-full p-0.5 font-bold text-xl text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
             {{ numberOfCompletedTodos }}
           </div>
-          <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Meme your tasks!</h1>
+          <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Meme your tasks!</h1>
         </div>
 
-        <button class="dark:text-white hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
+        <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
           <Settings class="text-black dark:text-slate-200 h-7 w-7"/>
         </button>
       </div>
