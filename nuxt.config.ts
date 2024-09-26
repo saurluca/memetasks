@@ -1,13 +1,16 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
-    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic', '@nuxthub/core'],
+    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic', '@nuxthub/core', '@nuxtjs/supabase'],
     ssr: false,
     target: 'static',
     hub: {
         database: true,
         kv: true,
         // cache: true,
+    },
+    supabase: {
+        redirect: false
     },
     runtimeConfig: {
         public: {
@@ -69,12 +72,4 @@ export default defineNuxtConfig({
             ]
         }
     },
-    pwa: {
-        manifest: {
-            name: 'Memetasks',
-            short_name: 'Memetasks',
-            start_url: '/',
-            display: 'standalone',
-        }
-    }
 })

@@ -9,6 +9,7 @@ import TagManager from '~/components/TagManager.vue'
 import TodoList from '~/components/TodoList.vue'
 import {Settings} from 'lucide-vue-next';
 import SettingsPopup from "~/components/SettingsPopup.vue";
+import DPage from "~/components/d-page.vue";
 
 // State variables
 const todos = ref<Todo[]>([])
@@ -197,8 +198,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="h-dvh bg-slate-100 dark:bg-slate-700 transition-colors duration-300 flex p-1 items-center justify-center">
-    <div class="h-full max-h-[618px] w-full mx-auto flex flex-col max-w-2xl p-5 bg-white dark:bg-slate-800 rounded-lg shadow-md transition-colors duration-300">
+  <d-page>
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center">
           <div
@@ -235,7 +235,6 @@ useSeoMeta({
           @toggle-dark-mode="toggleDarkMode"
           :is-dark-mode="isDarkMode"
       />
-    </div>
-    <ImagePopup ref="imagePopup"/>
-  </div>
+    </d-page>
+  <ImagePopup ref="imagePopup"/>
 </template>
