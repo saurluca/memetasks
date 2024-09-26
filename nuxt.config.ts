@@ -9,7 +9,7 @@ export default defineNuxtConfig({
         kv: true,
     },
     supabase: {
-        redirect: true,
+        redirect: false,
         exclude: ["/login", "/sign_up"],
     },
     runtimeConfig: {
@@ -42,23 +42,6 @@ export default defineNuxtConfig({
             start_url: '/',
             display: 'standalone',
         },
-        // workbox: {
-        //     precaching: {
-        //         // Add the root URL to be precached
-        //         staticFileGlobs: [
-        //             '/*',
-        //         ],
-        //     },
-        //     runtimeCaching: [
-        //         {
-        //             urlPattern: '/*',
-        //             handler: 'NetworkFirst',
-        //             options: {
-        //                 cacheName: 'pages-cache',
-        //             },
-        //         },
-        //     ],
-        // },
     },
     app: {
         head: {
