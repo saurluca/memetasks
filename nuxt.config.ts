@@ -42,23 +42,23 @@ export default defineNuxtConfig({
             start_url: '/',
             display: 'standalone',
         },
-        workbox: {
-            precaching: {
-                // Add the root URL to be precached
-                staticFileGlobs: [
-                    '/*',
-                ],
-            },
-            runtimeCaching: [
-                {
-                    urlPattern: '/*',
-                    handler: 'NetworkFirst',
-                    options: {
-                        cacheName: 'pages-cache',
-                    },
-                },
-            ],
-        },
+        // workbox: {
+        //     precaching: {
+        //         // Add the root URL to be precached
+        //         staticFileGlobs: [
+        //             '/*',
+        //         ],
+        //     },
+        //     runtimeCaching: [
+        //         {
+        //             urlPattern: '/*',
+        //             handler: 'NetworkFirst',
+        //             options: {
+        //                 cacheName: 'pages-cache',
+        //             },
+        //         },
+        //     ],
+        // },
     },
     app: {
         head: {
