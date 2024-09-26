@@ -1,22 +1,22 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
-    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxtjs/ionic', '@nuxthub/core', '@nuxtjs/supabase'],
+    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase'],
     ssr: false,
     target: 'static',
     hub: {
         database: true,
         kv: true,
-        // cache: true,
     },
     supabase: {
-        redirect: false
+        redirect: true,
+        exclude: ["/login", "/sign_up"],
     },
     runtimeConfig: {
         public: {
-            supabaseUrl: process.env.NUXT_SUPABASE_URL,
-            test: process.env.NUXT_TEST,
-            supabaseAnonKey: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY
+            supabaseUrl: "" ,
+            test: "",
+            supabaseAnonKey: ""
         }
     },
     sitemap: {

@@ -15,7 +15,7 @@ async function login() {
     if (error) {
       throw error;
     }
-    router.push("/");
+    await router.push("/");
   } catch (error) {
     errorMsg.value = error.message;
   }
@@ -32,12 +32,13 @@ async function login() {
     </div>
     <form @submit.prevent="login">
       <div class="mb-4">
-        <input type="email" id="email" v-model="email"
-               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        <input type="email" id="email" v-model="email" autocomplete="username"
+               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                placeholder="Enter your email">
       </div>
       <div class="mb-6">
-        <input type="password" id="password" v-model="password" class="bg-gray-50 border border-gray-30>0 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        <input type="password" id="password" v-model="password" autocomplete="current-password"
+               class="bg-gray-50 border border-gray-30>0 text-gray-900 text-sm rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500 block w-full  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                placeholder="Enter your password">
       </div>
       <div class="mb-4 flex justify-center text-red-500">
@@ -51,7 +52,7 @@ async function login() {
 
     <div class="flex mt-2 justify-center text-slate-500 text-sm">
       <div class="text">
-        <NuxtLink to="/sign_up">No account yet? Sign up</NuxtLink>
+        <nuxt-link to="/sign_up">No account yet? Sign up</nuxt-link>
       </div>
     </div>
   </d-auth-page>

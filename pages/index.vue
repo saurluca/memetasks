@@ -10,7 +10,6 @@ import TodoList from '~/components/TodoList.vue'
 import {Settings} from 'lucide-vue-next';
 import SettingsPopup from "~/components/SettingsPopup.vue";
 import DPage from "~/components/d-page.vue";
-
 // State variables
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
@@ -187,6 +186,8 @@ const openProfile = () => {
 const closeProfile = () => {
   profileIsOpen.value = false;
 }
+
+const config = useRuntimeConfig()
 
 
 useSeoMeta({

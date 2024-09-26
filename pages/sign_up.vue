@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import {defineComponent} from "vue";
-import {Settings} from "lucide-vue-next";
-
 const client = useSupabaseClient();
 const email = ref("");
 const password = ref("");
@@ -30,43 +27,43 @@ async function sign_up() {
 
 <template>
   <d-auth-page>
-  <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center">
-          <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Sign up</h1>
-        </div>
-
+    <div class="flex justify-between items-center mb-4">
+      <div class="flex items-center">
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Sign up</h1>
       </div>
-      <form @submit.prevent="sign_up" class="flex flex-col ">
-        <div class="mb-4">
-          <input type="email" id="email" v-model="email"
-                 class="bg-gray-50 border text-slate-900  rounded-lg text-sm  block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white  "
-                 placeholder="Enter your email">
-        </div>
-        <div class="mb-6">
-          <input type="password" id="password" v-model="password"
-                 class="bg-gray-50 border text-gray-900  rounded-lg text-sm block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                 placeholder="Enter your password">
-        </div>
 
-        <div class="mb-4 flex justify-center text-sm">
-          <div class=" text-red-500">
-            {{ errorMsg }}
-          </div>
-          <div class="text-green-500">
-            {{ successMsg }}
-          </div>
-        </div>
-        <button type="submit"
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-         Sign up
-        </button>
-      </form>
+    </div>
+    <form @submit.prevent="sign_up" class="flex flex-col ">
+      <div class="mb-4">
+        <input type="email" id="email" v-model="email" autocomplete="username"
+               class="bg-gray-50 border text-slate-900  rounded-lg text-sm  block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white  "
+               placeholder="Enter your email">
+      </div>
+      <div class="mb-6">
+        <input type="password" id="password" v-model="password" autocomplete="new-password"
+               class="bg-gray-50 border text-gray-900  rounded-lg text-sm block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+               placeholder="Enter your password">
+      </div>
 
-      <div class="flex mt-2 justify-center text-slate-500 text-sm">
-        <div class="text">
-          <NuxtLink to="/login">Already have an account? Login</NuxtLink>
+      <div class="mb-4 flex justify-center text-sm">
+        <div class=" text-red-500">
+          {{ errorMsg }}
+        </div>
+        <div class="text-green-500">
+          {{ successMsg }}
         </div>
       </div>
+      <button type="submit"
+              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        Sign up
+      </button>
+    </form>
+
+    <div class="flex mt-2 justify-center text-slate-500 text-sm">
+      <div class="text">
+        <nuxt-link to="/login">Already have an account? Login</nuxt-link>
+      </div>
+    </div>
   </d-auth-page>
 </template>
 
