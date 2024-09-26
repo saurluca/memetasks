@@ -187,13 +187,14 @@ const closeProfile = () => {
   profileIsOpen.value = false;
 }
 
+
 useSeoMeta({
   title: 'Memetasks',
   ogTitle: 'Memetasks',
   description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
 })
-</script>1
+</script>
 
 <template>
   <div class="h-dvh bg-slate-100 dark:bg-slate-700 transition-colors duration-300 flex p-1 items-center justify-center">
