@@ -20,7 +20,7 @@ export interface Todo {
     updated_at: Date
     deleted_at: Date | null
     position: number
-    image: Blob | null
+    image: Blob | ArrayBuffer | null
     tags: string[]
 }
 
@@ -38,7 +38,7 @@ interface TodoDB extends DBSchema {
 
 export default defineNuxtPlugin(async (nuxtApp) => {
     // Initialize the IndexedDB database
-    const db = await openDB<TodoDB>('todo-app-db2', 3, {
+    const db = await openDB<TodoDB>('todo-app-db', 3, {
         upgrade(db, oldVersion, newVersion, transaction) {
             if (oldVersion < 1) {
                 if (!db.objectStoreNames.contains('todos')) {
@@ -114,32 +114,6 @@ export default defineNuxtPlugin(async (nuxtApp) => {
         },
     })
 
-    async function load(type: 'todos' | 'tags') {
-        const transaction = db.transaction(type, 'readonly')
-        const store = transaction.objectStore(type)
-        return await store.getAll()
-    }
-
-    async function put(type: 'todos' | 'tags', data: any) {
-        const transaction = db.transaction(type, 'readwrite')
-        const store = transaction.objectStore(type)
-        await store.put(data)
-    }
-
-    async function remove(type: 'todos' | 'tags', id: string) {
-        const transaction = db.transaction(type, 'readwrite')
-        const store = transaction.objectStore(type)
-        const data = await store.get(id)
-        if (data) {
-            data.deleted_at = new Date()
-            await store.put(data)
-        }
-    }
-
-
     // Inject the `db` instance globally into the Nuxt app
     nuxtApp.provide('db', db)
-    nuxtApp.provide('load', load)
-    nuxtApp.provide('put', put)
-    nuxtApp.provide('remove', remove)
 })

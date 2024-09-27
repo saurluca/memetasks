@@ -1,152 +1,43 @@
 <script setup lang="ts">
-import {computed, onMounted, onUnmounted, ref, watch} from 'vue'
 import {nanoid} from 'nanoid'
-import type {Tag, Todo} from '~/composables/useIndexedDB'
-import {loadDataFromIndexedDB, updateLocalTags, updateLocalTodos} from '~/composables/useIndexedDB'
-import ImagePopup from '~/components/ImagePopup.vue'
-import TodoInput from '~/components/TodoInput.vue'
-import TagManager from '~/components/TagManager.vue'
-import TodoList from '~/components/TodoList.vue'
+import {updateLocalTags} from '~/composables/useIndexedDB'
 import {Settings} from 'lucide-vue-next';
 import SettingsPopup from "~/components/SettingsPopup.vue";
-import DPage from "~/components/d-page.vue";
-
 
 // State variables
+const {$db} = useNuxtApp()
 const client = useSupabaseClient()
 const user = useSupabaseUser()
 
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
+const showDeletedTodos = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 12
 const currentTags = ref<string[]>([])
 const profileIsOpen = ref(false)
 
-const numberOfCompletedTodos = computed(() => {
-  return todos.value?.filter(todo => todo.completed).length
-})
+async function load() {
+  todos.value = await $db.getAll('todos')
+  tags.value = await $db.getAll('tags')
+}
 
 // Lifecycle hooks
 onMounted(async () => {
-  const {todos: localTodos, tags: localTags} = await loadDataFromIndexedDB()
-  todos.value = localTodos
-  tags.value = localTags
+  await load()
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
-  //
-  // if (user.value) {
-  //   console.log("user", user.value)
-  //   const { data: supabaseTodos } = await client
-  //       .from('todos')
-  //       .select('*')
-  //       .eq('user_id', user.value.id);
-  //
-  //   // console.log("supabase todos", supabaseTodos)
-  //   // Merge todos (local first, then Supabase)
-  //   const mergedTodos = mergeTodos(todos.value, supabaseTodos);
-  //   todos.value = mergedTodos;
-  //
-  //   // console.log("merged todos", todos.value)
-  //   // Save updated todos to IndexedDB
-  //   await updateLocalTodos(todos.value);
-  //
-  //   // After merging, update Supabase with merged todos
-  //   await syncSupabaseTodos(mergedTodos);
-  //
-  //   supabaseTodos.forEach((todo) => {
-  //     if (!localTodos.some((t) => t.id === todo.id) && !todo.deleted_at && !todo.completed) {
-  //       console.log("supabase todo", todo)
-  //       generateTodoImage(todo);
-  //     }
-  //   });
-  // }
-
   document.addEventListener('keydown', handleKeyDown)
 })
-
-// Merge local todos with Supabase todos
-const mergeTodos = (localTodos: Todo[], supabaseTodos: Todo[]) => {
-  const todoMap = new Map<string, Todo>();
-
-  // Add local todos to map
-  localTodos.forEach((todo) => {
-    todoMap.set(todo.id, todo);
-  });
-
-  // Merge Supabase todos
-  supabaseTodos.forEach((todo) => {
-    if (todoMap.has(todo.id)) {
-      const localTodo = todoMap.get(todo.id);
-
-      // If either is completed or deleted, prefer the completed/deleted state
-      if (localTodo.completed || todo.completed) {
-        localTodo.completed = true;
-        localTodo.image = null;
-        localTodo.completed_at = todo.completed_at;
-        localTodo.updated_at = todo.updated_at;
-      }
-      if (localTodo.deleted_at || todo.deleted_at) {
-        localTodo.deleted_at = localTodo.deleted_at || todo.deleted_at;
-        localTodo.image = null;
-      }
-
-      todoMap.set(todo.id, localTodo);
-    } else {
-      // Add missing Supabase task to local
-      todoMap.set(todo.id, todo);
-    }
-  });
-
-  return Array.from(todoMap.values());
-};
-
-// Sync merged todos to Supabase
-const syncSupabaseTodos = async (mergedTodos: Todo[]) => {
-  // Create an array of todos to upsert
-  const todosToUpsert = mergedTodos.map(todo => ({
-    id: todo.id,
-    user_id: user.value.id,
-    text: todo.text,
-    completed: todo.completed,
-    completed_at: todo.completed_at,
-    updated_at: todo.updated_at,
-    deleted_at: todo.deleted_at,
-    position: todo.position,
-    tags: todo.tags,
-  }));
-
-  // Perform bulk upsert
-  const { data, error } = await client
-      .from('todos')
-      .upsert(todosToUpsert, { onConflict: ['id'] }); // 'id' is used to avoid duplicates
-
-  if (error) {
-    console.error('Error upserting todos:', error);
-  } else {
-    console.log('Todos synced successfully:', data);
-  }
-};
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
 })
 
 function arrayBufferToBlob(buffer, type) {
-  return new Blob([buffer], { type: type });
+  return new Blob([buffer], {type: type});
 }
 
-function blobToArrayBuffer(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.addEventListener('loadend', () => {
-      resolve(reader.result);
-    });
-    reader.addEventListener('error', reject);
-    reader.readAsArrayBuffer(blob);
-  });
-}
 
 // Methods
 const addTodo = async (text: string) => {
@@ -162,88 +53,93 @@ const addTodo = async (text: string) => {
     image: null,
     tags: currentTags.value.length > 0 ? [...currentTags.value] : [],
   }
-
-  todos.value.push(newTodo)
-  await updateLocalTodos(todos.value)
-
-  // add task to supabase
-  if (user.value) {
-    await client.from('todos').insert({
-      id: newTodo.id,
-      user_id: user.value.id,
-      text: newTodo.text,
-      completed: false,
-      tags: currentTags.value.length == 0 ? currentTags.value : "",
-    })
-    console.log("added task to supabase")
-  }
+  await $db.put('todos', newTodo)
+  await load()
 
   await generateTodoImage(newTodo)
 }
 
 const deleteTodo = async (id: string) => {
-  const index = todos.value.findIndex(t => t.id === id)
-  if (index !== -1) {
-    // Soft delete by setting deletedAt to the current date
-    todos.value[index].deleted_at = new Date()
-    await updateLocalTodos(todos.value)
-
-    // delete task from supabase
-    if (user.value) {
-      await client.from('todos').delete().match({ id: id })
-      console.log("deleted task from supabase")
-    }
-  }
+  let todo = await $db.get('todos', id)
+  if (!todo) return
+  todo.deleted_at = new Date()
+  await $db.put('todos', todo)
+  await load()
 }
 
-const toggleTodo = async (todo: Todo) => {
-  if (!todo.completed) {
-    todo.completed = true
-    todo.completed_at = new Date()
-    todo.updated_at = new Date()
+const completeTodo = async (id: string) => {
+  let todo = await $db.get('todos', id)
+  if (!todo || todo.completed) return
+  const image = todo.image
 
-    imagePopup.value?.resetImageBlob()
-    if (todo.image) {
-      const imageBlob = arrayBufferToBlob(todo.image, 'image/png')
-      imagePopup.value?.setError("There is an image")
-      imagePopup.value?.setImageBlob(imageBlob)
-    } else {
-      imagePopup.value?.setError("There was no image")
-    }
+  todo.completed = true
+  todo.completed_at = new Date()
+  todo.updated_at = new Date()
+  todo.image = null // delete image, no longer needed
 
-    imagePopup.value?.open()
+  await $db.put('todos', todo)
+  await load()
 
-    await updateLocalTodos(todos.value);
-
-    // update task in supabase
-    if (user.value) {
-      await client.from('todos').update({
-        completed: todo.completed,
-        completed_at: todo.completed ? todo.completed_at : null,
-        updated_at: todo.updated_at,
-      }).match({ id: todo.id })
-      console.log("updated task in supabase")
-    }
+  imagePopup.value?.resetImageBlob()
+  if (image) {
+    const imageBlob = arrayBufferToBlob(image, 'image/png')
+    imagePopup.value?.setError("There is an image")
+    imagePopup.value?.setImageBlob(imageBlob)
+  } else {
+    imagePopup.value?.setError("There was no image")
   }
+  imagePopup.value?.open()
 }
 
-const generateTodoImage = async (newTodo: Todo) => {
-  const {generateImage} = useMemeGenerator() ;
-
+const generateTodoImage = async (todo: Todo) => {
+  const {generateImage} = useMemeGenerator();
   try {
-    const result = await generateImage(newTodo.text)
-    if (result) {
-      console.log("image received for", newTodo.text)
-      const todoIndex = todos.value.findIndex(todo => todo.id === newTodo.id)
-      if (todoIndex !== -1) {
-        todos.value[todoIndex].image = await blobToArrayBuffer(result)
-        await updateLocalTodos(todos.value)
-      }
-    }
+    console.log(`generate image for ${todo.text}`)
+    const result = await generateImage(todo.text)
+    if (!result) return
+    console.log("image received for", todo.text)
+    todo.image = result
+    await $db.put('todos', todo)
+    await load()
   } catch (error) {
     console.error('Error generating image:', error)
   }
 }
+
+const numberOfCompletedTodos = computed(() => {
+  return todos.value?.filter(todo => todo.completed).length
+})
+
+const filterOutTags = (todos: Todo[]) => {
+  if (currentTags.value.length === 0) {
+    return todos
+  } else {
+    return todos.filter(todo => todo.tags && todo.tags.some(tag => currentTags.value.includes(tag)))
+  }
+}
+
+const filterForActiveTodos = (todos: Todo[]) => {
+  return todos.filter(todo => !todo.deleted_at && !todo.completed)
+}
+
+// filter and reverse sort
+const filterForDeletedTodos = (todos: Todo[]) => {
+  return todos.filter(todo => todo.completed).sort((a, b) => b.position - a.position);
+}
+
+const filteredTodos = computed(() => {
+  const tagFilteredTodos = filterOutTags(todos.value)
+  const activeTodos = filterForActiveTodos(tagFilteredTodos)
+
+  if (showDeletedTodos.value) {
+    const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
+    return [...activeTodos, ...deletedTodos];
+  } else {
+    return activeTodos
+  }
+}, {
+  deep: true
+});
 
 const addTag = async (text: string) => {
   const newTag: Tag = {
@@ -282,7 +178,7 @@ const removeSelectedTags = async () => {
   await updateLocalTags(tags.value)
 
   if (user.value) {
-    await client.from('tags').delete().match({ id: currentTags.value })
+    await client.from('tags').delete().match({id: currentTags.value})
   }
 }
 
@@ -322,52 +218,57 @@ const closeProfile = () => {
   profileIsOpen.value = false;
 }
 
+const toggleShowDeletedTodos = () => {
+  showDeletedTodos.value = !showDeletedTodos.value;
+}
+
 useSeoMeta({
   title: 'Memetasks',
   ogTitle: 'Memetasks',
   description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
 })
+
 </script>
 
 <template>
   <d-page>
-      <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center">
-          <div
-              class="bg-amber-300 text-black rounded-full p-0.5 font-bold text-xl text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
-            {{ numberOfCompletedTodos }}
-          </div>
-          <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Meme your tasks!</h1>
+    <div class="flex justify-between items-center mb-4">
+      <div class="flex items-center">
+        <div
+            class="bg-amber-300 text-black rounded-full p-0.5 font-bold text-xl text-center shadow-lg border-2 border-amber-500 w-{{Math.max(1, numberOfCompletedTodos / 10) + 8 }} h-{{ Math.max(1, numberOfCompletedTodos / 10) + 4 }} flex items-center justify-center mr-2">
+          {{ numberOfCompletedTodos }}
         </div>
-
-        <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
-          <Settings class="text-black dark:text-slate-200 h-7 w-7"/>
-        </button>
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Meme your tasks!</h1>
       </div>
 
-      <TodoInput @add-todo="addTodo"/>
-      <TagManager
-          :tags="tags"
-          :current-tags="currentTags"
-          @toggle-tag="toggleTag"
-          @add-tag="addTag"
-          @remove-selected-tags="removeSelectedTags"
-      />
-      <TodoList
-          :todos="todos"
-          :current-tags="currentTags"
-          :time-to-wait="timeToWait"
-          @toggle-todo="toggleTodo"
-          @delete-todo="deleteTodo"
-      />
+      <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
+        <Settings class="text-black dark:text-slate-200 h-7 w-7"/>
+      </button>
+    </div>
 
-      <SettingsPopup
-          :profile-is-open="profileIsOpen"
-          @close-profile="closeProfile"
-          @toggle-dark-mode="toggleDarkMode"
-          :is-dark-mode="isDarkMode"
-      />
-    </d-page>
+    <TodoInput @add-todo="addTodo"/>
+    <TagManager
+        :tags="tags"
+        :current-tags="currentTags"
+        @toggle-tag="toggleTag"
+        @add-tag="addTag"
+        @remove-selected-tags="removeSelectedTags"
+    />
+    <TodoList
+        :filteredTodos="filteredTodos"
+        :current-tags="currentTags"
+        :showDeletedTodos="showDeletedTodos"
+        @toggle-show-deleted-todos="toggleShowDeletedTodos"
+        @toggle-todo="completeTodo"
+        @delete-todo="deleteTodo"
+    />
+    <SettingsPopup
+        :profile-is-open="profileIsOpen"
+        @close-profile="closeProfile"
+        @toggle-dark-mode="toggleDarkMode"
+        :is-dark-mode="isDarkMode"
+    />
+  </d-page>
   <ImagePopup ref="imagePopup"/>
 </template>

@@ -1,5 +1,17 @@
 import {ref} from 'vue'
 
+
+function blobToArrayBuffer(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener('loadend', () => {
+            resolve(reader.result);
+        });
+        reader.addEventListener('error', reject);
+        reader.readAsArrayBuffer(blob);
+    });
+}
+
 export function useMemeGenerator() {
     const imageBlob = ref<Blob | null>(null)
     const isLoading = ref(false)
@@ -33,25 +45,18 @@ export function useMemeGenerator() {
             if (!responsePrompt.ok) {
                 const errorText = await responsePrompt.text()
                 console.error(`Failed to get meme prompt: ${errorText}`)
-                // alert('Failed to get meme prompt. Please try again.', errorText)
                 return
             }
 
             const parsedResponse = await responsePrompt.json()
-
             const finalPrompt = parsedResponse.enhancedPrompt.response; // Accessing the response property
             const memeHeader = parsedResponse.memeHeader.response; // Accessing the response property
 
-            // console.log("enhanced", finalPrompt);
-            // console.log("memeheader", memeHeader);
-
             const imageResponse = await fetch(`https://memes.spuckteller.workers.dev/?prompt=${encodeURIComponent(finalPrompt)}`)
-            // console.log('imageResponse', imageResponse)
 
             if (!imageResponse.ok) {
                 const errorText = await responsePrompt.text()
                 console.error('Failed to fetch image', errorText)
-                // alert('Failed to fetch image. Please try again.', errorText)
                 return
             }
 
@@ -63,7 +68,6 @@ export function useMemeGenerator() {
 
             if (!ctx) {
                 console.error('Failed to get canvas context');
-                // alert('Failed to generate image. Please try again. ctx')
                 return
             }
 
@@ -111,14 +115,14 @@ export function useMemeGenerator() {
             drawWrappedText(memeHeader, canvas.width / 2, 30, canvas.width - 20); // Draw wrapped header
 
             // Convert canvas to blob
-            return new Promise((resolve) => {
+            const finalBlob= await new Promise((resolve) => {
                 canvas.toBlob((newBlob) => {
                     resolve(newBlob);
                 });
             });
+            return blobToArrayBuffer(finalBlob)
         } catch (error) {
             console.error('Error generating image:', error)
-            // alert('Failed to generate image. Please try again.', error)
             return
         } finally {
             isLoading.value = false

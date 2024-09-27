@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import {ref, onMounted, watch, computed, nextTick, onUnmounted, shallowRef} from 'vue'
+import {ref, onMounted, watch, computed, nextTick, onUnmounted } from 'vue'
 import {nanoid} from 'nanoid'
 import draggable from 'vuedraggable'
 import {loadDataFromIndexedDB, updateLocalTodos} from '~/composables/useIndexedDB'
@@ -16,7 +16,6 @@ const tags = ref<Tag[]>([])
 const newTodoText = ref('')
 const isDarkMode = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const timeToWait = 12000
 const isOnline = useOnline()
 const newTagText = ref('')
 const showTagPopup = ref(false)
@@ -110,7 +109,7 @@ const deleteTodo = async (id: string) => {
 
 const toggleTodo = async (todo: Todo) => {
   const currentTime = new Date().getTime()
-  if (currentTime - new Date(todo.created_at).getTime() < timeToWait) {
+  if (currentTime - new Date(todo.created_at).getTime() < 1) {
     return;
   }
 

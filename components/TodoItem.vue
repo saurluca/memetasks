@@ -1,25 +1,17 @@
 <script setup lang="ts">
-import {defineEmits} from 'vue';
 import {Check, Trash2} from 'lucide-vue-next';
 import {getTagColor} from '~/composables/getTagColor';
-import type {Todo} from "~/composables/useIndexedDB";
 
 const props = defineProps<{
   todo: Todo,
   currentTags: string[]
-  timeToWait: number
 }>();
 
 const emit = defineEmits(['toggle-todo', 'delete-todo']);
 
-const timeElapsed = (todo: Todo) => {
-  return new Date().getTime() - new Date(todo.created_at).getTime();
-};
-
 const handleCheckboxClick = (event, todo) => {
-  console.log("check")
   if (!todo.completed ) {
-    emit('toggle-todo', todo);
+    emit('toggle-todo', todo.id);
   } else {
     event.preventDefault();
   }

@@ -66,7 +66,6 @@ defineExpose({ open, close, setImageBlob, resetImageBlob, setError })
           {{imageUrl}}
           {{imageBlob}}
           {{errorMessage}}
-          ---
         </p>
         <p v-else class="text-gray-500">Loading image...</p>
       </div>

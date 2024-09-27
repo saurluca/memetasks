@@ -1,65 +1,26 @@
 <script setup lang="ts">
-import {computed, ref} from 'vue'
-import type {Todo} from '~/composables/useIndexedDB'
-import TodoItem from "~/components/TodoItem.vue";
-
 const props = defineProps<{
-  todos: Todo[]
+  filteredTodos: Todo[]
   currentTags: string[]
-  timeToWait: number
+  showDeletedTodos: boolean
 }>()
 
-const emit = defineEmits(['toggle-todo', 'delete-todo'])
+const emit = defineEmits(['toggle-todo', 'delete-todo', 'toggle-show-deleted-todos'])
 
-const showDeletedTodos = ref(false)
-const maxDisplayedTasks = ref(10)
+const maxDisplayedTasks = ref(12)
 const containerRef = ref<HTMLElement | null>(null)
 
-const filterOutTags = (todos: Todo[]) => {
-  if (props.currentTags.length === 0) {
-    return todos
-  } else {
-    return todos.filter(todo => todo.tags && todo.tags.some(tag => props.currentTags.includes(tag)))
-  }
-}
-
-const filterForActiveTodos = (todos: Todo[]) => {
-  return todos.filter(todo => !todo.deleted_at && !todo.completed)
-}
-
-// filter and reverse sort
-const filterForDeletedTodos = (todos: Todo[]) => {
-  return todos.filter(todo => todo.completed).sort((a, b) => b.position - a.position);
-}
-
-const filteredTodos = computed(() => {
-  const tagFilteredTodos = filterOutTags(props.todos)
-  const activeTodos = filterForActiveTodos(tagFilteredTodos)
-
-  if (showDeletedTodos.value) {
-    console.log("showDeleted ", showDeletedTodos.value)
-    const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
-    return [...activeTodos, ...deletedTodos];
-  } else {
-    return activeTodos
-  }
-}, {
-  deep: true
-});
-
 const displayedTodos = computed(() => {
-  return filteredTodos.value.slice(0, maxDisplayedTasks.value)
+  return props.filteredTodos.slice(0, maxDisplayedTasks.value)
 })
-
-const toggleShowDeletedTodos = () => {
-  showDeletedTodos.value = !showDeletedTodos.value;
-}
 
 const {isLoading} = useInfiniteScroll(
     containerRef,
     () => {
-      if (maxDisplayedTasks.value < filteredTodos.value.length) {
-        maxDisplayedTasks.value += 10
+      console.log("containerRef")
+      if (maxDisplayedTasks.value < props.filteredTodos.length) {
+        maxDisplayedTasks.value += 12
+        console.log("maxDisplayedTasks", maxDisplayedTasks.value)
       }
       displayedTodos.value
     },
@@ -79,14 +40,13 @@ const {isLoading} = useInfiniteScroll(
             :key="todo.id"
             :todo="todo"
             :currentTags="props.currentTags"
-            :time-to-wait="props.timeToWait"
             @toggle-todo="emit('toggle-todo', $event)"
             @delete-todo="emit('delete-todo', $event)"
         />
       </ul>
     </div>
     <button
-        @click="toggleShowDeletedTodos"
+        @click="emit('toggle-show-deleted-todos')"
         class="mt-2 text-center text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 dark:hover:text-gray-100 rounded-full p-1">
       {{ showDeletedTodos ? 'Hide completed tasks' : 'Show completed tasks' }}
     </button>
