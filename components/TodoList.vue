@@ -24,7 +24,7 @@ const filterOutTags = (todos: Todo[]) => {
 }
 
 const filterForActiveTodos = (todos: Todo[]) => {
-  return todos.filter(todo => !todo.deletedAt && !todo.completed)
+  return todos.filter(todo => !todo.deleted_at && !todo.completed)
 }
 
 // filter and reverse sort

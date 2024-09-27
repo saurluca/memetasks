@@ -56,7 +56,7 @@ onMounted(async () => {
     await syncSupabaseTodos(mergedTodos);
 
     supabaseTodos.forEach((todo) => {
-      if (!localTodos.some((t) => t.id === todo.id) && !todo.deletedAt && !todo.completed) {
+      if (!localTodos.some((t) => t.id === todo.id) && !todo.deleted_at && !todo.completed) {
         console.log("supabase todo", todo)
         generateTodoImage(todo);
       }
@@ -84,11 +84,11 @@ const mergeTodos = (localTodos: Todo[], supabaseTodos: Todo[]) => {
       if (localTodo.completed || todo.completed) {
         localTodo.completed = true;
         localTodo.image = null;
-        localTodo.completedAt = todo.completedAt;
-        localTodo.updatedAt = todo.updatedAt;
+        localTodo.completed_at = todo.completed_at;
+        localTodo.updated_at = todo.updated_at;
       }
-      if (localTodo.deletedAt || todo.deletedAt) {
-        localTodo.deletedAt = localTodo.deletedAt || todo.deletedAt;
+      if (localTodo.deleted_at || todo.deleted_at) {
+        localTodo.deleted_at = localTodo.deleted_at || todo.deleted_at;
         localTodo.image = null;
       }
 
@@ -110,9 +110,9 @@ const syncSupabaseTodos = async (mergedTodos: Todo[]) => {
     user_id: user.value.id,
     text: todo.text,
     completed: todo.completed,
-    completed_at: todo.completedAt,
-    updated_at: todo.updatedAt,
-    deleted_at: todo.deletedAt,
+    completed_at: todo.completed_at,
+    updated_at: todo.updated_at,
+    deleted_at: todo.deleted_at,
     position: todo.position,
     tags: todo.tags,
   }));
@@ -153,11 +153,11 @@ const addTodo = async (text: string) => {
   const newTodo: Todo = {
     id: nanoid(),
     text: text,
-    createdAt: new Date(),
+    created_at: new Date(),
     completed: false,
-    completedAt: null,
-    updatedAt: new Date(),
-    deletedAt: null,
+    completed_at: null,
+    updated_at: new Date(),
+    deleted_at: null,
     position: todos.value.length,
     image: null,
     tags: currentTags.value.length > 0 ? [...currentTags.value] : [],
@@ -185,7 +185,7 @@ const deleteTodo = async (id: string) => {
   const index = todos.value.findIndex(t => t.id === id)
   if (index !== -1) {
     // Soft delete by setting deletedAt to the current date
-    todos.value[index].deletedAt = new Date()
+    todos.value[index].deleted_at = new Date()
     await updateLocalTodos(todos.value)
 
     // delete task from supabase
@@ -199,8 +199,8 @@ const deleteTodo = async (id: string) => {
 const toggleTodo = async (todo: Todo) => {
   if (!todo.completed) {
     todo.completed = true
-    todo.completedAt = new Date()
-    todo.updatedAt = new Date()
+    todo.completed_at = new Date()
+    todo.updated_at = new Date()
 
     imagePopup.value?.resetImageBlob()
     if (todo.image) {
@@ -219,8 +219,8 @@ const toggleTodo = async (todo: Todo) => {
     if (user.value) {
       await client.from('todos').update({
         completed: todo.completed,
-        completed_at: todo.completed ? todo.completedAt : null,
-        updated_at: todo.updatedAt,
+        completed_at: todo.completed ? todo.completed_at : null,
+        updated_at: todo.updated_at,
       }).match({ id: todo.id })
       console.log("updated task in supabase")
     }
@@ -249,8 +249,8 @@ const addTag = async (text: string) => {
   const newTag: Tag = {
     id: nanoid(),
     text: text,
-    createdAt: new Date(),
-    deletedAt: null,
+    created_at: new Date(),
+    deleted_at: null,
   }
 
   tags.value.push(newTag)

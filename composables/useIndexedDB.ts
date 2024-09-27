@@ -6,18 +6,18 @@ import {nanoid} from 'nanoid'
 export interface Tag {
     id: string
     text: string
-    createdAt: Date
-    deletedAt: Date | null
+    created_at: Date
+    deleted_at: Date | null
 }
 
 export interface Todo {
     id: string
     text: string
-    createdAt: Date
+    created_at: Date
     completed: boolean
-    completedAt: Date | null
-    updatedAt: Date
-    deletedAt: Date | null
+    completed_at: Date | null
+    updated_at: Date
+    deleted_at: Date | null
     position: number
     image: Blob | null
     tags: string[]
@@ -50,14 +50,14 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 3, {
                 tagStore.add({
                     id: nanoid(),
                     text: 'general',
-                    createdAt: now,
-                    deletedAt: null
+                    created_at: now,
+                    deleted_at: null
                 })
                 tagStore.add({
                     id: nanoid(),
                     text: 'work',
-                    createdAt: now,
-                    deletedAt: null
+                    created_at: now,
+                    deleted_at: null
                 })
             }
         }
@@ -69,11 +69,11 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 3, {
             todoStore.add({
                 id: nanoid(),
                 text: "Create your first todo and check out your first meme!",
-                createdAt: now,
+                created_at: now,
                 completed: false,
-                completedAt: null,
-                updatedAt: now,
-                deletedAt: null,
+                completed_at: null,
+                updated_at: now,
+                deleted_at: null,
                 position: 0,
                 image: null,
                 tags: [],
@@ -82,11 +82,11 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 3, {
             todoStore.add({
                 id: nanoid(),
                 text: "Create your first tag by clicking on the +, select it and create another task!",
-                createdAt: now,
+                created_at: now,
                 completed: false,
-                completedAt: null,
-                updatedAt: now,
-                deletedAt: null,
+                completed_at: null,
+                updated_at: now,
+                deleted_at: null,
                 position: 1,
                 image: null,
                 tags: [],
@@ -95,11 +95,11 @@ const dbPromise = openDB<TodoDB>('todo-app-db', 3, {
             todoStore.add({
                 id: nanoid(),
                 text: "Click to expand: Psychology shows that only sometimes getting a reward feels more rewarding. So there won't be a meme every time!",
-                createdAt: now,
+                created_at: now,
                 completed: false,
-                completedAt: null,
-                updatedAt: now,
-                deletedAt: null,
+                completed_at: null,
+                updated_at: now,
+                deleted_at: null,
                 position: 2,
                 image: null,
                 tags: [],
@@ -119,11 +119,11 @@ export async function loadDataFromIndexedDB(): Promise<{ todos: Todo[], tags: Ta
             .map((todo, index) => ({
                 ...todo,
                 position: index,
-                completedAt: todo.completedAt ? new Date(todo.completedAt) : null,
-                updatedAt: new Date(todo.updatedAt),
-                deletedAt: todo.deletedAt ? new Date(todo.deletedAt) : null
+                completed_at: todo.completed_at ? new Date(todo.completed_at) : null,
+                updated_at: new Date(todo.updated_at),
+                deleted_at: todo.deleted_at ? new Date(todo.deleted_at) : null
             })),
-        tags: allTags.filter(tag => !tag.deletedAt),
+        tags: allTags.filter(tag => !tag.deleted_at),
     }
 }
 
@@ -142,15 +142,14 @@ export async function updateLocalTodos(todos: Todo[]): Promise<void> {
             id: todo.id,
             text: todo.text,
             completed: todo.completed,
-            completedAt: todo.completedAt ? new Date(todo.completedAt) : null,
-            updatedAt: new Date(todo.updatedAt),
-            deletedAt: todo.deletedAt ? new Date(todo.deletedAt) : null,
+            completed_at: todo.completed_at ? new Date(todo.completed_at) : null,
+            updated_at: new Date(todo.updated_at),
+            deleted_at: todo.deleted_at ? new Date(todo.deleted_at) : null,
             position: todo.position,
             image: todo.image ? todo.image : null,
-            createdAt: new Date(todo.createdAt),
+            created_at: new Date(todo.created_at),
             tags: Array.isArray(todo.tags) ? toRaw(todo.tags) : [],
         }
-        console.log('Storing todo in IndexedDB:', cloneableTodo);
         await store.put(cloneableTodo)
     }
 
@@ -169,8 +168,8 @@ export async function updateLocalTags(tags: Tag[]): Promise<void> {
     for (const tag of tags) {
         const cloneableTag = {
             ...tag,
-            createdAt: new Date(tag.createdAt),
-            deletedAt: tag.deletedAt ? new Date(tag.deletedAt) : null
+            created_at: new Date(tag.created_at),
+            deleted_at: tag.deleted_at ? new Date(tag.deleted_at) : null
         }
         await store.put(cloneableTag)
     }

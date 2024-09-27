@@ -13,11 +13,12 @@ const props = defineProps<{
 const emit = defineEmits(['toggle-todo', 'delete-todo']);
 
 const timeElapsed = (todo: Todo) => {
-  return new Date().getTime() - new Date(todo.createdAt).getTime();
+  return new Date().getTime() - new Date(todo.created_at).getTime();
 };
 
 const handleCheckboxClick = (event, todo) => {
-  if (!todo.completed && (timeElapsed(todo) > props.timeToWait || todo.image)) {
+  console.log("check")
+  if (!todo.completed ) {
     emit('toggle-todo', todo);
   } else {
     event.preventDefault();

@@ -72,11 +72,11 @@ const addTodo = async () => {
   const newTodo: Todo = {
     id: nanoid(),
     text: newTodoText.value.trim(),
-    createdAt: new Date(),
+    created_at: new Date(),
     completed: false,
-    completedAt: null,
-    updatedAt: new Date(),
-    deletedAt: null,
+    completed_at: null,
+    updated_at: new Date(),
+    deleted_at: null,
     position: todos.value.length,
     image: null,
     tags: currentTags.value.length > 0 ? [...currentTags.value] : [],
@@ -110,13 +110,13 @@ const deleteTodo = async (id: string) => {
 
 const toggleTodo = async (todo: Todo) => {
   const currentTime = new Date().getTime()
-  if (currentTime - new Date(todo.createdAt).getTime() < timeToWait) {
+  if (currentTime - new Date(todo.created_at).getTime() < timeToWait) {
     return;
   }
 
   todo.completed = !todo.completed;
-  todo.completedAt = todo.completed ? new Date() : null;
-  todo.updatedAt = new Date();
+  todo.completed_at = todo.completed ? new Date() : null;
+  todo.updated_at = new Date();
   await updateLocalTodos(todos.value);
 
   if (todo.completed && todo.image instanceof Blob) {
@@ -128,7 +128,7 @@ const toggleTodo = async (todo: Todo) => {
 const updateTodoPositions = useDebounceFn(async () => {
   todos.value.forEach((todo, index) => {
     todo.position = index
-    todo.updatedAt = new Date()
+    todo.updated_at = new Date()
   })
   await updateLocalTodos(todos.value)
 }, 300)
@@ -162,8 +162,8 @@ const addTag = () => {
   const newTag: Tag = {
     id: nanoid(),
     text: newTagText.value.trim(),
-    createdAt: new Date(),
-    deletedAt: null,
+    created_at: new Date(),
+    deleted_at: null,
   }
 
   tags.value.push(newTag)
@@ -209,14 +209,14 @@ const removeSelectedTags = async () => {
     // Mark the tag as deleted in the tags array
     const index = tags.value.findIndex(tag => tag.text === tagName)
     if (index !== -1) {
-      tags.value[index].deletedAt = new Date()
+      tags.value[index].deleted_at = new Date()
     } else {
       console.warn(`Tag with name ${tagName} not found`)
     }
   }
   
   // Filter out the deleted tags
-  tags.value = tags.value.filter(tag => !tag.deletedAt)
+  tags.value = tags.value.filter(tag => !tag.deleted_at)
 
   // Clear the currentTags array
   currentTags.value = []
@@ -380,7 +380,7 @@ watch(isDarkMode, () => {
                       type="checkbox"
                       :checked="todo.completed"
                       @click="(event) => {
-                        if (new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait) {
+                        if (new Date().getTime() - new Date(todo.created_at).getTime() < timeToWait) {
                           event.preventDefault();
                         } else {
                           toggleTodo(todo);
@@ -389,8 +389,8 @@ watch(isDarkMode, () => {
                       :class="[
                           'form-checkbox h-5 w-5 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-blue-600 transition-colors duration-300',
                           {
-                              'text-blue-600 cursor-pointer': new Date().getTime() - new Date(todo.createdAt).getTime() >= timeToWait,
-                              'text-gray-400 cursor-not-allowed': new Date().getTime() - new Date(todo.createdAt).getTime() < timeToWait
+                              'text-blue-600 cursor-pointer': new Date().getTime() - new Date(todo.created_at).getTime() >= timeToWait,
+                              'text-gray-400 cursor-not-allowed': new Date().getTime() - new Date(todo.created_at).getTime() < timeToWait
                           }
                       ]"
                   />
