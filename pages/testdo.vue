@@ -33,6 +33,10 @@ async function addTodo() {
   loading.value = false
 }
 
+const filteredTodos = computed(() => {
+  return todos.value.filter(todo => !todo.completed)
+})
+
 
 const completeTodo = async (todo: Todo) => {
   await client.from('todos').update({ completed: todo.completed }).match({ id: todo.id })
@@ -58,7 +62,7 @@ const removeTodo = async (todo: Todo) => {
         <button @click="addTodo" class="bg-blue-500 text-white rounded-lg p-2 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700">Add</button>
       </div>
       <div class="flex flex-col space-y-4">
-        <div v-for="todo in todos" :key="todo.id" class="flex items-center space-x-4">
+        <div v-for="todo in filteredTodos" :key="todo.id" class="flex items-center space-x-4">
           <input type="checkbox" :checked="todo.completed" @change="completeTodo(todo)" class="w-4 h-4 text-blue-600 bg-gray-100 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600">
           <div class="flex-grow">
             <label class="block text-sm font-medium text-gray-900 dark:text-white">{{ todo.text }}</label>

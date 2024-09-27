@@ -37,15 +37,18 @@ onMounted(async () => {
   applyDarkMode()
 
   if (user.value) {
+    console.log("user", user.value)
     const { data: supabaseTodos } = await client
         .from('todos')
         .select('*')
         .eq('user_id', user.value.id);
 
+    console.log("supabase todos", supabaseTodos)
     // Merge todos (local first, then Supabase)
     const mergedTodos = mergeTodos(todos.value, supabaseTodos);
     todos.value = mergedTodos;
 
+    console.log("merged todos", todos.value)
     // Save updated todos to IndexedDB
     await updateLocalTodos(todos.value);
 
@@ -54,6 +57,7 @@ onMounted(async () => {
 
     supabaseTodos.forEach((todo) => {
       if (!localTodos.some((t) => t.id === todo.id) && !todo.deletedAt && !todo.completed) {
+        console.log("supabase todo", todo)
         generateTodoImage(todo);
       }
     });
@@ -100,22 +104,28 @@ const mergeTodos = (localTodos: Todo[], supabaseTodos: Todo[]) => {
 
 // Sync merged todos to Supabase
 const syncSupabaseTodos = async (mergedTodos: Todo[]) => {
-  for (const todo of mergedTodos) {
-    // Update or insert each task in Supabase
-    await client
-        .from('todos')
-        .upsert({
-          id: todo.id,
-          user_id: user.value.id,
-          text: todo.text,
-          completed: todo.completed,
-          completed_at: todo.completedAt,
-          updated_at: todo.updatedAt,
-          deleted_at: todo.deletedAt,
-          position: todo.position,
-          tags: todo.tags,
-        })
-        .eq('id', todo.id);
+  // Create an array of todos to upsert
+  const todosToUpsert = mergedTodos.map(todo => ({
+    id: todo.id,
+    user_id: user.value.id,
+    text: todo.text,
+    completed: todo.completed,
+    completed_at: todo.completedAt,
+    updated_at: todo.updatedAt,
+    deleted_at: todo.deletedAt,
+    position: todo.position,
+    tags: todo.tags,
+  }));
+
+  // Perform bulk upsert
+  const { data, error } = await client
+      .from('todos')
+      .upsert(todosToUpsert, { onConflict: ['id'] }); // 'id' is used to avoid duplicates
+
+  if (error) {
+    console.error('Error upserting todos:', error);
+  } else {
+    console.log('Todos synced successfully:', data);
   }
 };
 

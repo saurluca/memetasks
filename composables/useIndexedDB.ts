@@ -150,6 +150,7 @@ export async function updateLocalTodos(todos: Todo[]): Promise<void> {
             createdAt: new Date(todo.createdAt),
             tags: Array.isArray(todo.tags) ? toRaw(todo.tags) : [],
         }
+        console.log('Storing todo in IndexedDB:', cloneableTodo);
         await store.put(cloneableTodo)
     }
 
