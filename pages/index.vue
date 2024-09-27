@@ -51,6 +51,12 @@ onMounted(async () => {
 
     // After merging, update Supabase with merged todos
     await syncSupabaseTodos(mergedTodos);
+
+    supabaseTodos.forEach((todo) => {
+      if (!localTodos.some((t) => t.id === todo.id) && !todo.deletedAt && !todo.completed) {
+        generateTodoImage(todo);
+      }
+    });
   }
 
   document.addEventListener('keydown', handleKeyDown)
@@ -73,14 +79,18 @@ const mergeTodos = (localTodos: Todo[], supabaseTodos: Todo[]) => {
       // If either is completed or deleted, prefer the completed/deleted state
       if (localTodo.completed || todo.completed) {
         localTodo.completed = true;
+        localTodo.image = null;
+        localTodo.completedAt = todo.completedAt;
+        localTodo.updatedAt = todo.updatedAt;
       }
       if (localTodo.deletedAt || todo.deletedAt) {
         localTodo.deletedAt = localTodo.deletedAt || todo.deletedAt;
+        localTodo.image = null;
       }
 
       todoMap.set(todo.id, localTodo);
     } else {
-      // Add missing Supabase todo to local
+      // Add missing Supabase task to local
       todoMap.set(todo.id, todo);
     }
   });
