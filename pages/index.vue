@@ -10,7 +10,12 @@ import TodoList from '~/components/TodoList.vue'
 import {Settings} from 'lucide-vue-next';
 import SettingsPopup from "~/components/SettingsPopup.vue";
 import DPage from "~/components/d-page.vue";
+
+
 // State variables
+const client = useSupabaseClient()
+const user = useSupabaseUser()
+
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const isDarkMode = ref(false)
@@ -25,14 +30,84 @@ const numberOfCompletedTodos = computed(() => {
 
 // Lifecycle hooks
 onMounted(async () => {
-  const {todos: loadedTodos, tags: loadedTags} = await loadDataFromIndexedDB()
-  todos.value = loadedTodos
-  tags.value = loadedTags
+  const {todos: localTodos, tags: localTags} = await loadDataFromIndexedDB()
+  todos.value = localTodos
+  tags.value = localTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
 
+  if (user.value) {
+    const { data: supabaseTodos } = await client
+        .from('todos')
+        .select('*')
+        .eq('user_id', user.value.id);
+
+    // Merge todos (local first, then Supabase)
+    const mergedTodos = mergeTodos(todos.value, supabaseTodos);
+    todos.value = mergedTodos;
+
+    // Save updated todos to IndexedDB
+    await updateLocalTodos(todos.value);
+
+    // After merging, update Supabase with merged todos
+    await syncSupabaseTodos(mergedTodos);
+  }
+
   document.addEventListener('keydown', handleKeyDown)
 })
+
+// Merge local todos with Supabase todos
+const mergeTodos = (localTodos: Todo[], supabaseTodos: Todo[]) => {
+  const todoMap = new Map<string, Todo>();
+
+  // Add local todos to map
+  localTodos.forEach((todo) => {
+    todoMap.set(todo.id, todo);
+  });
+
+  // Merge Supabase todos
+  supabaseTodos.forEach((todo) => {
+    if (todoMap.has(todo.id)) {
+      const localTodo = todoMap.get(todo.id);
+
+      // If either is completed or deleted, prefer the completed/deleted state
+      if (localTodo.completed || todo.completed) {
+        localTodo.completed = true;
+      }
+      if (localTodo.deletedAt || todo.deletedAt) {
+        localTodo.deletedAt = localTodo.deletedAt || todo.deletedAt;
+      }
+
+      todoMap.set(todo.id, localTodo);
+    } else {
+      // Add missing Supabase todo to local
+      todoMap.set(todo.id, todo);
+    }
+  });
+
+  return Array.from(todoMap.values());
+};
+
+// Sync merged todos to Supabase
+const syncSupabaseTodos = async (mergedTodos: Todo[]) => {
+  for (const todo of mergedTodos) {
+    // Update or insert each task in Supabase
+    await client
+        .from('todos')
+        .upsert({
+          id: todo.id,
+          user_id: user.value.id,
+          text: todo.text,
+          completed: todo.completed,
+          completed_at: todo.completedAt,
+          updated_at: todo.updatedAt,
+          deleted_at: todo.deletedAt,
+          position: todo.position,
+          tags: todo.tags,
+        })
+        .eq('id', todo.id);
+  }
+};
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeyDown)
@@ -71,6 +146,18 @@ const addTodo = async (text: string) => {
   todos.value.push(newTodo)
   await updateLocalTodos(todos.value)
 
+  // add task to supabase
+  if (user.value) {
+    await client.from('todos').insert({
+      id: newTodo.id,
+      user_id: user.value.id,
+      text: newTodo.text,
+      completed: false,
+      tags: currentTags.value.length == 0 ? currentTags.value : "",
+    })
+    console.log("added task to supabase")
+  }
+
   await generateTodoImage(newTodo)
 }
 
@@ -80,6 +167,12 @@ const deleteTodo = async (id: string) => {
     // Soft delete by setting deletedAt to the current date
     todos.value[index].deletedAt = new Date()
     await updateLocalTodos(todos.value)
+
+    // delete task from supabase
+    if (user.value) {
+      await client.from('todos').delete().match({ id: id })
+      console.log("deleted task from supabase")
+    }
   }
 }
 
@@ -101,6 +194,16 @@ const toggleTodo = async (todo: Todo) => {
     imagePopup.value?.open()
 
     await updateLocalTodos(todos.value);
+
+    // update task in supabase
+    if (user.value) {
+      await client.from('todos').update({
+        completed: todo.completed,
+        completed_at: todo.completed ? todo.completedAt : null,
+        updated_at: todo.updatedAt,
+      }).match({ id: todo.id })
+      console.log("updated task in supabase")
+    }
   }
 }
 
@@ -132,6 +235,14 @@ const addTag = async (text: string) => {
 
   tags.value.push(newTag)
   await updateLocalTags(tags.value)
+
+  if (user.value) {
+    await client.from('tags').insert({
+      id: newTag.id,
+      user_id: user.value.id,
+      text: newTag.text,
+    })
+  }
 }
 
 const toggleTag = (tagText: string) => {
@@ -149,6 +260,10 @@ const removeSelectedTags = async () => {
   tags.value = tags.value.filter(tag => !currentTags.value.includes(tag.text))
   currentTags.value = []
   await updateLocalTags(tags.value)
+
+  if (user.value) {
+    await client.from('tags').delete().match({ id: currentTags.value })
+  }
 }
 
 // Dark mode functionality
@@ -186,9 +301,6 @@ const openProfile = () => {
 const closeProfile = () => {
   profileIsOpen.value = false;
 }
-
-const config = useRuntimeConfig()
-
 
 useSeoMeta({
   title: 'Memetasks',
