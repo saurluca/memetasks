@@ -35,33 +35,33 @@ onMounted(async () => {
   tags.value = localTags
   isDarkMode.value = localStorage.getItem('darkMode') === 'true'
   applyDarkMode()
-
-  if (user.value) {
-    console.log("user", user.value)
-    const { data: supabaseTodos } = await client
-        .from('todos')
-        .select('*')
-        .eq('user_id', user.value.id);
-
-    console.log("supabase todos", supabaseTodos)
-    // Merge todos (local first, then Supabase)
-    const mergedTodos = mergeTodos(todos.value, supabaseTodos);
-    todos.value = mergedTodos;
-
-    console.log("merged todos", todos.value)
-    // Save updated todos to IndexedDB
-    await updateLocalTodos(todos.value);
-
-    // After merging, update Supabase with merged todos
-    await syncSupabaseTodos(mergedTodos);
-
-    supabaseTodos.forEach((todo) => {
-      if (!localTodos.some((t) => t.id === todo.id) && !todo.deleted_at && !todo.completed) {
-        console.log("supabase todo", todo)
-        generateTodoImage(todo);
-      }
-    });
-  }
+  //
+  // if (user.value) {
+  //   console.log("user", user.value)
+  //   const { data: supabaseTodos } = await client
+  //       .from('todos')
+  //       .select('*')
+  //       .eq('user_id', user.value.id);
+  //
+  //   // console.log("supabase todos", supabaseTodos)
+  //   // Merge todos (local first, then Supabase)
+  //   const mergedTodos = mergeTodos(todos.value, supabaseTodos);
+  //   todos.value = mergedTodos;
+  //
+  //   // console.log("merged todos", todos.value)
+  //   // Save updated todos to IndexedDB
+  //   await updateLocalTodos(todos.value);
+  //
+  //   // After merging, update Supabase with merged todos
+  //   await syncSupabaseTodos(mergedTodos);
+  //
+  //   supabaseTodos.forEach((todo) => {
+  //     if (!localTodos.some((t) => t.id === todo.id) && !todo.deleted_at && !todo.completed) {
+  //       console.log("supabase todo", todo)
+  //       generateTodoImage(todo);
+  //     }
+  //   });
+  // }
 
   document.addEventListener('keydown', handleKeyDown)
 })

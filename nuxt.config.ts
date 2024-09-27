@@ -4,6 +4,7 @@ export default defineNuxtConfig({
     modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase'],
     ssr: false,
     target: 'static',
+    plugins: ['~/plugins/db.ts'],
     hub: {
         database: true,
         kv: true,
