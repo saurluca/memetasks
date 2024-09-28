@@ -30,7 +30,7 @@ async function addTodo() {
     deleted_at: null,
     position: todos.value.length,
     image: null,
-    tags: [],
+    tags: "",
   }
   console.log("new todo", newTodo)
   await $db.put('todos', newTodo)

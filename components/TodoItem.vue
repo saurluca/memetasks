@@ -39,7 +39,7 @@ const handleCheckboxClick = (event, todo) => {
       </div>
       <div class="flex flex-wrap gap-1 px-2 py-1 rounded-full text-sm transition-colors duration-300 mr-1"
            :class="todo.tags && currentTag == todo.tags ? getTagColorActive(todo.tags) : getTagColorInactive(todo.tags)">
-        {{ todo.tags }}
+        {{ todo.tags ? todo.tags.replace(/[\[\]" ]/g, '') : "" }}
       </div>
     </div>
     <div v-if="todo.isExpanded" class="mt-2" @click="todo.isExpanded = !todo.isExpanded">

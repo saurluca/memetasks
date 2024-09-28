@@ -51,10 +51,10 @@ async function pull() {
 
   for (const todo of todos) {
     // temporary fix for fucked up data structure for tags
-    if (todo.tags == "[]" || todo.tags == "" || todo.tags == null) {
+    if (todo.tags == null) {
       todo.tags = ""
-    } else if (todo.tags.startsWith("[") && todo.tags.endsWith("]")) {
-      todo.tags = todo.tags.slice(1, -1)
+    } else {
+      todo.tags = todo.tags.replace(/[\[\]" ]/g, '');
     }
     if (!todo.completed) {
       const localTodo = await $db.get('todos', todo.id)
@@ -198,6 +198,7 @@ const filterForDeletedTodos = (todos: Todo[]) => {
 const filteredTodos = computed(() => {
   const tagFilteredTodos = filterOutTags(todos.value)
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
+  console.log("active", activeTodos)
   if (showDeletedTodos.value) {
     const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
     return [...activeTodos, ...deletedTodos];
