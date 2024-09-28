@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   filteredTodos: Todo[]
-  currentTags: string[]
+  currentTag: string
   showDeletedTodos: boolean
 }>()
 
@@ -17,7 +17,6 @@ const displayedTodos = computed(() => {
 const {isLoading} = useInfiniteScroll(
     containerRef,
     () => {
-      console.log("containerRef")
       if (maxDisplayedTasks.value < props.filteredTodos.length) {
         maxDisplayedTasks.value += 12
         console.log("maxDisplayedTasks", maxDisplayedTasks.value)
@@ -39,7 +38,7 @@ const {isLoading} = useInfiniteScroll(
             v-for="todo in displayedTodos"
             :key="todo.id"
             :todo="todo"
-            :currentTags="props.currentTags"
+            :currentTag="props.currentTag"
             @toggle-todo="emit('toggle-todo', $event)"
             @delete-todo="emit('delete-todo', $event)"
         />

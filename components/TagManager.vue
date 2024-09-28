@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Plus, Minus } from 'lucide-vue-next'
-import type { Tag } from '~/composables/useIndexedDB'
-import { getTagColor } from '~/composables/getTagColor'
 
 const props = defineProps<{
   tags: Tag[]
-  currentTags: string[]
+  currentTag: string
 }>()
 
 const emit = defineEmits(['toggle-tag', 'add-tag', 'remove-selected-tags'])
@@ -39,6 +37,7 @@ const addTag = () => {
     closeTagPopup()
   }
 }
+
 </script>
 
 <template>
@@ -49,12 +48,7 @@ const addTag = () => {
           :key="tag.text"
           @click="toggleTag(tag.text)" 
           class="px-2 py-1 rounded-full text-sm cursor-pointer transition-colors duration-300"
-          :class="[
-            {
-              [`bg-${getTagColor(tag.text)}-500 text-white dark:bg-${getTagColor(tag.text)}-600 dark:text-white`]: props.currentTags.includes(tag.text),
-              [`bg-${getTagColor(tag.text)}-100 text-${getTagColor(tag.text)}-900 dark:bg-${getTagColor(tag.text)}-300 dark:text-${getTagColor(tag.text)}-900`]: !props.currentTags.includes(tag.text),
-            }
-          ]"
+          :class="currentTag == tag.text ? getTagColorActive(tag.text) : getTagColorInactive(tag.text)"
         >
           {{ tag.text }}
         </span>
@@ -86,8 +80,8 @@ const addTag = () => {
           <button
             @click="emit('remove-selected-tags')"
             class="p-1 rounded-full bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors duration-300"
-            :disabled="props.currentTags.length === 0"
-            :class="{ 'opacity-50 cursor-not-allowed': props.currentTags.length === 0 }"
+            :disabled="props.currentTag.length === 0"
+            :class="{ 'opacity-50 cursor-not-allowed': props.currentTag.length === 0 }"
           >
             <Minus class="w-4 h-4"/>
           </button>

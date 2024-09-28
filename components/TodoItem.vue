@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import {Check, Trash2} from 'lucide-vue-next';
-import {getTagColor} from '~/composables/getTagColor';
 
 const props = defineProps<{
   todo: Todo,
-  currentTags: string[]
+  currentTag: string
 }>();
 
 const emit = defineEmits(['toggle-todo', 'delete-todo']);
 
 const handleCheckboxClick = (event, todo) => {
-  if (!todo.completed ) {
+  if (!todo.completed) {
     emit('toggle-todo', todo.id);
   } else {
     event.preventDefault();
@@ -38,15 +37,9 @@ const handleCheckboxClick = (event, todo) => {
           {{ todo.text.length > 75 ? todo.text.slice(0, todo.text.lastIndexOf(' ', 75)) + '...' : todo.text }}
         </span>
       </div>
-      <div class="flex flex-wrap gap-1">
-        <span v-for="tag in todo.tags" :key="tag" class="px-2 py-1 rounded-full text-sm transition-colors duration-300 mr-1" :class="[
-          {
-            [`bg-${getTagColor(tag)}-500 text-white dark:bg-${getTagColor(tag)}-600 dark:text-white`]: props.currentTags.includes(tag),
-            [`bg-${getTagColor(tag)}-100 text-${getTagColor(tag)}-900 dark:bg-${getTagColor(tag)}-300 dark:text-${getTagColor(tag)}-900`]: !props.currentTags.includes(tag),
-          }
-        ]">
-          {{ tag }}
-        </span>
+      <div class="flex flex-wrap gap-1 px-2 py-1 rounded-full text-sm transition-colors duration-300 mr-1"
+           :class="currentTag && todo.tag && currentTag == todo.tag ? getTagColorActive(todo.tag) : getTagColorInactive(todo.tag)">
+        {{ todo.tag }}
       </div>
     </div>
     <div v-if="todo.isExpanded" class="mt-2" @click="todo.isExpanded = !todo.isExpanded">

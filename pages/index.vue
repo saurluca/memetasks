@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {nanoid} from 'nanoid'
 import {Settings} from 'lucide-vue-next';
-import { useStorage, useDark, useToggle } from '@vueuse/core'
+import {useDark, useStorage, useToggle} from '@vueuse/core'
 import SettingsPopup from "~/components/SettingsPopup.vue";
 
 // State variables
@@ -16,13 +16,14 @@ const tags = ref<Tag[]>([])
 // const isDarkMode = ref(false)
 const showDeletedTodos = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
-const currentTags = ref<string[]>([])
+const currentTag = ref("")
 const profileIsOpen = ref(false)
 const isDarkMode = useDark()
 const toggleDarkMode = useToggle(isDarkMode)
 
 
 async function load() {
+  if (!$db) return console.error("No DB")
   todos.value = await $db.getAll('todos')
   tags.value = await $db.getAll('tags')
 }
@@ -34,7 +35,7 @@ async function pull() {
     return
   }
   for (const todo of todos) {
-    // temport fix for fucked up data strucutre for tags
+    // temporary fix for fucked up data structure for tags
     if (todo.tags == "[]" || todo.tags == "" || todo.tags == null) {
       todo.tags = ""
     }
@@ -45,17 +46,17 @@ async function pull() {
 }
 
 async function push() {
-  const todos = $db.getAll('todos')
-  if (!todos) return
-  const newTodos = todos.filter(todo => new Date(todo.updated_at) > lastPush.value)
+  const dbTodos = await $db.getAll('todos')
+  if (!dbTodos) return
+  const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > lastPush.value)
   if (newTodos.length === 0) return
   // add user id and remove images
-  const todosWithUserId = todos.map(todo => ({
+  const todosWithUserId = newTodos.map(todo => ({
     ...todo,
     tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags, // temport fix for fucked up data strucutre for tags
     user_id: user.value.id,
   }))
-  await client.from('todos').upsert(todosWithUserId.value, {onConflict: ['id']})
+  await client.from('todos').upsert(todosWithUserId, {onConflict: ['id']})
   lastPush.value = new Date()
 }
 
@@ -87,9 +88,9 @@ const addTodo = async (text: string) => {
     deleted_at: null,
     position: todos.value.length,
     image: null,
-    tags: currentTags.value.length > 0 ? currentTags.value.join(",") : null,
-    // tags: currentTags.value.length > 0 ? [...currentTags.value] : [],
+    tags: currentTag.value ? currentTag.value : null,
   }
+  console.log("new todo", newTodo)
   await $db.put('todos', newTodo)
   await load()
   await push()
@@ -153,10 +154,10 @@ const numberOfCompletedTodos = computed(() => {
 })
 
 const filterOutTags = (todos: Todo[]) => {
-  if (currentTags.value.length === 0) {
+  if (!currentTag.value) {
     return todos
   } else {
-    return todos.filter(todo => todo.tags && currentTags.value.includes(todo.tags))
+    return todos.filter(todo => todo.tags && currentTag.value == todo.tags)
   }
 }
 
@@ -172,7 +173,6 @@ const filterForDeletedTodos = (todos: Todo[]) => {
 const filteredTodos = computed(() => {
   const tagFilteredTodos = filterOutTags(todos.value)
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
-  console.log(activeTodos)
   if (showDeletedTodos.value) {
     const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
     return [...activeTodos, ...deletedTodos];
@@ -199,16 +199,16 @@ const addTag = async (text: string) => {
 }
 
 const toggleTag = (tagText: string) => {
-  if (currentTags.value.includes(tagText)) {
-    currentTags.value = []
+  if (currentTag.value == tagText) {
+    currentTag.value = ""
   } else {
-    currentTags.value = [tagText]
+    currentTag.value = tagText
   }
 }
 
 const removeSelectedTags = async () => {
-  tags.value = tags.value.filter(tag => !currentTags.value.includes(tag.text))
-  currentTags.value = []
+  tags.value = tags.value.filter(tag => !currentTag.value == tag.text)
+  currentTag.value = ""
   await $db.put('tags', tags.value)
   await load()
 }
@@ -262,14 +262,14 @@ useSeoMeta({
     <TodoInput @add-todo="addTodo"/>
     <TagManager
         :tags="tags"
-        :current-tags="currentTags"
+        :currentTag="currentTag"
         @toggle-tag="toggleTag"
         @add-tag="addTag"
         @remove-selected-tags="removeSelectedTags"
     />
     <TodoList
         :filteredTodos="filteredTodos"
-        :current-tags="currentTags"
+        :currentTag="currentTag"
         :showDeletedTodos="showDeletedTodos"
         @toggle-show-deleted-todos="toggleShowDeletedTodos"
         @toggle-todo="completeTodo"

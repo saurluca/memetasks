@@ -32,6 +32,7 @@ async function addTodo() {
     image: null,
     tags: [],
   }
+  console.log("new todo", newTodo)
   await $db.put('todos', newTodo)
   await loadTodos()
 
