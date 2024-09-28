@@ -53,8 +53,6 @@ async function pull() {
     // temporary fix for fucked up data structure for tags
     if (todo.tags == null) {
       todo.tags = ""
-    } else {
-      todo.tags = todo.tags.replace(/[\[\]" ]/g, '');
     }
     if (!todo.completed) {
       const localTodo = await $db.get('todos', todo.id)
