@@ -21,7 +21,7 @@ export interface Todo {
     deleted_at: Date | null
     position: number
     image: Blob | ArrayBuffer | null
-    tags: string[]
+    tags: string | null
 }
 
 interface TodoDB extends DBSchema {
@@ -82,7 +82,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                     deleted_at: null,
                     position: 0,
                     image: null,
-                    tags: [],
+                    tags: "",
                 })
 
                 todoStore.add({
@@ -95,7 +95,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                     deleted_at: null,
                     position: 1,
                     image: null,
-                    tags: [],
+                    tags: "",
                 })
 
                 todoStore.add({
@@ -108,7 +108,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                     deleted_at: null,
                     position: 2,
                     image: null,
-                    tags: [],
+                    tags: ""
                 })
             }
         },

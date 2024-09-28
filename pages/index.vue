@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {nanoid} from 'nanoid'
-import {updateLocalTags} from '~/composables/useIndexedDB'
 import {Settings} from 'lucide-vue-next';
+import { useStorage, useDark, useToggle } from '@vueuse/core'
 import SettingsPopup from "~/components/SettingsPopup.vue";
 
 // State variables
@@ -9,24 +9,61 @@ const {$db} = useNuxtApp()
 const client = useSupabaseClient()
 const user = useSupabaseUser()
 
+const lastPull = useStorage('last-pull', null)
+const lastPush = useStorage('last-push', null)
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
-const isDarkMode = ref(false)
+// const isDarkMode = ref(false)
 const showDeletedTodos = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const currentTags = ref<string[]>([])
 const profileIsOpen = ref(false)
+const isDarkMode = useDark()
+const toggleDarkMode = useToggle(isDarkMode)
+
 
 async function load() {
   todos.value = await $db.getAll('todos')
   tags.value = await $db.getAll('tags')
 }
 
+async function pull() {
+  const { data: todos, error } = await client.from('todos').select('*').eq('user_id', user.value.id).order('position')
+  if (error) {
+    console.error('Error pulling todos:', error)
+    return
+  }
+  for (const todo of todos) {
+    // temport fix for fucked up data strucutre for tags
+    if (todo.tags == "[]" || todo.tags == "" || todo.tags == null) {
+      todo.tags = ""
+    }
+    await $db.put('todos', todo)
+}
+  await load()
+  lastPull.value = new Date()
+}
+
+async function push() {
+  const todos = $db.getAll('todos')
+  if (!todos) return
+  const newTodos = todos.filter(todo => new Date(todo.updated_at) > lastPush.value)
+  if (newTodos.length === 0) return
+  // add user id and remove images
+  const todosWithUserId = todos.map(todo => ({
+    ...todo,
+    tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags, // temport fix for fucked up data strucutre for tags
+    user_id: user.value.id,
+  }))
+  await client.from('todos').upsert(todosWithUserId.value, {onConflict: ['id']})
+  lastPush.value = new Date()
+}
+
 // Lifecycle hooks
 onMounted(async () => {
+  // applyDarkMode()
   await load()
-  isDarkMode.value = localStorage.getItem('darkMode') === 'true'
-  applyDarkMode()
+  await pull()
   document.addEventListener('keydown', handleKeyDown)
 })
 
@@ -37,7 +74,6 @@ onUnmounted(() => {
 function arrayBufferToBlob(buffer, type) {
   return new Blob([buffer], {type: type});
 }
-
 
 // Methods
 const addTodo = async (text: string) => {
@@ -51,10 +87,12 @@ const addTodo = async (text: string) => {
     deleted_at: null,
     position: todos.value.length,
     image: null,
-    tags: currentTags.value.length > 0 ? [...currentTags.value] : [],
+    tags: currentTags.value.length > 0 ? currentTags.value.join(",") : null,
+    // tags: currentTags.value.length > 0 ? [...currentTags.value] : [],
   }
   await $db.put('todos', newTodo)
   await load()
+  await push()
 
   await generateTodoImage(newTodo)
 }
@@ -63,8 +101,10 @@ const deleteTodo = async (id: string) => {
   let todo = await $db.get('todos', id)
   if (!todo) return
   todo.deleted_at = new Date()
+  todo.updated_at = new Date()
   await $db.put('todos', todo)
   await load()
+  await push()
 }
 
 const completeTodo = async (id: string) => {
@@ -79,6 +119,7 @@ const completeTodo = async (id: string) => {
 
   await $db.put('todos', todo)
   await load()
+  await push()
 
   imagePopup.value?.resetImageBlob()
   if (image) {
@@ -89,6 +130,7 @@ const completeTodo = async (id: string) => {
     imagePopup.value?.setError("There was no image")
   }
   imagePopup.value?.open()
+
 }
 
 const generateTodoImage = async (todo: Todo) => {
@@ -114,7 +156,7 @@ const filterOutTags = (todos: Todo[]) => {
   if (currentTags.value.length === 0) {
     return todos
   } else {
-    return todos.filter(todo => todo.tags && todo.tags.some(tag => currentTags.value.includes(tag)))
+    return todos.filter(todo => todo.tags && currentTags.value.includes(todo.tags))
   }
 }
 
@@ -130,7 +172,7 @@ const filterForDeletedTodos = (todos: Todo[]) => {
 const filteredTodos = computed(() => {
   const tagFilteredTodos = filterOutTags(todos.value)
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
-
+  console.log(activeTodos)
   if (showDeletedTodos.value) {
     const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
     return [...activeTodos, ...deletedTodos];
@@ -146,53 +188,29 @@ const addTag = async (text: string) => {
     id: nanoid(),
     text: text,
     created_at: new Date(),
+    updated_at: new Date(),
     deleted_at: null,
   }
 
   tags.value.push(newTag)
-  await updateLocalTags(tags.value)
 
-  if (user.value) {
-    await client.from('tags').insert({
-      id: newTag.id,
-      user_id: user.value.id,
-      text: newTag.text,
-    })
-  }
+  await $db.put('tags', newTag)
+  await load()
 }
 
 const toggleTag = (tagText: string) => {
   if (currentTags.value.includes(tagText)) {
     currentTags.value = []
   } else {
-    // Deselect all tags first
-    currentTags.value = []
-    // Select the new tag
-    currentTags.value.push(tagText)
+    currentTags.value = [tagText]
   }
 }
 
 const removeSelectedTags = async () => {
   tags.value = tags.value.filter(tag => !currentTags.value.includes(tag.text))
   currentTags.value = []
-  await updateLocalTags(tags.value)
-
-  if (user.value) {
-    await client.from('tags').delete().match({id: currentTags.value})
-  }
-}
-
-// Dark mode functionality
-const toggleDarkMode = () => {
-  isDarkMode.value = !isDarkMode.value
-}
-
-const applyDarkMode = () => {
-  if (isDarkMode.value) {
-    document.documentElement.classList.add('dark')
-  } else {
-    document.documentElement.classList.remove('dark')
-  }
+  await $db.put('tags', tags.value)
+  await load()
 }
 
 // Event handlers
@@ -202,12 +220,6 @@ const handleKeyDown = (event: KeyboardEvent) => {
     closeProfile();
   }
 }
-
-// Watchers
-watch(isDarkMode, () => {
-  localStorage.setItem('darkMode', isDarkMode.value.toString())
-  applyDarkMode()
-})
 
 // Methods
 const openProfile = () => {
