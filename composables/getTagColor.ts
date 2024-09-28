@@ -1,3 +1,5 @@
+// noinspection SuspiciousTypeOfGuard
+
 export const getTagColorInactive = (tagId: string) => {
     if (!tagId || typeof tagId !== 'string') return ""
     const colorIndex = tagId.charCodeAt(0) % 5

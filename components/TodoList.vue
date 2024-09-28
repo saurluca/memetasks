@@ -19,7 +19,6 @@ const {isLoading} = useInfiniteScroll(
     () => {
       if (maxDisplayedTasks.value < props.filteredTodos.length) {
         maxDisplayedTasks.value += 12
-        console.log("maxDisplayedTasks", maxDisplayedTasks.value)
       }
       displayedTodos.value
     },

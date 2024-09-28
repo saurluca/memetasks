@@ -24,11 +24,24 @@ const toggleDarkMode = useToggle(isDarkMode)
 async function load() {
   if (!$db) return console.error("No DB")
   todos.value = await $db.getAll('todos')
-  tags.value = await $db.getAll('tags')
+  const fetchedTags = await $db.getAll('tags')
+  tags.value = fetchedTags.filter(tag => !tag.deleted_at)
 }
 
 async function pull() {
-  const {data: todos, error} = await client.from('todos').select('*').eq('user_id', user.value.id).order('position')
+  if (!user.value) return
+  let query = client
+      .from('todos')
+      .select('*')
+      .eq('user_id', user.value.id)
+      .order('created_at')
+
+  if (lastPull.value) {
+    query = query.gte('updated_at', new Date(lastPull.value).toISOString())
+  }
+
+  const {data: todos, error} = await query
+
   if (error) {
     console.error('Error pulling todos:', error)
     return
@@ -40,6 +53,8 @@ async function pull() {
     // temporary fix for fucked up data structure for tags
     if (todo.tags == "[]" || todo.tags == "" || todo.tags == null) {
       todo.tags = ""
+    } else if (todo.tags.startsWith("[") && todo.tags.endsWith("]")) {
+      todo.tags = todo.tags.slice(1, -1)
     }
     if (!todo.completed) {
       const localTodo = await $db.get('todos', todo.id)
@@ -53,7 +68,8 @@ async function pull() {
   }
   await load()
   await Promise.all(queue)
-  lastPull.value = new Date()
+
+  lastPull.value = new Date().toISOString()
 }
 
 async function push() {
@@ -73,7 +89,6 @@ async function push() {
 
 // Lifecycle hooks
 onMounted(async () => {
-  // applyDarkMode()
   await load()
   await pull()
   document.addEventListener('keydown', handleKeyDown)
@@ -217,9 +232,16 @@ const toggleTag = (tagText: string) => {
 }
 
 const removeSelectedTags = async () => {
-  tags.value = tags.value.filter(tag => !currentTag.value == tag.text)
+  // remove currentTag from tags
+  const selectedTag = tags.value.find(tag => tag.text == currentTag.value)
+  if (!selectedTag) return
+
+  selectedTag.deleted_at = new Date().toISOString()
+  console.log("selectedTag", selectedTag)
+  await $db.put('tags', {...selectedTag})
+
+  // remove currentTag from currentTag
   currentTag.value = ""
-  await $db.put('tags', tags.value)
   await load()
 }
 
@@ -249,6 +271,7 @@ useSeoMeta({
   ogTitle: 'Memetasks',
   description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
+  //Todo add image
 })
 
 </script>
