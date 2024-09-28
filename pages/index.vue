@@ -13,7 +13,6 @@ const lastPull = useStorage('last-pull', null)
 const lastPush = useStorage('last-push', null)
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
-// const isDarkMode = ref(false)
 const showDeletedTodos = ref(false)
 const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const currentTag = ref("")
@@ -29,19 +28,31 @@ async function load() {
 }
 
 async function pull() {
-  const { data: todos, error } = await client.from('todos').select('*').eq('user_id', user.value.id).order('position')
+  const {data: todos, error} = await client.from('todos').select('*').eq('user_id', user.value.id).order('position')
   if (error) {
     console.error('Error pulling todos:', error)
     return
   }
+
+  let queue = []
+
   for (const todo of todos) {
     // temporary fix for fucked up data structure for tags
     if (todo.tags == "[]" || todo.tags == "" || todo.tags == null) {
       todo.tags = ""
     }
+    if (!todo.completed) {
+      const localTodo = await $db.get('todos', todo.id)
+      if (localTodo) {
+        todo.image = localTodo.image
+      } else {
+        queue.push(generateTodoImage(todo))
+      }
+    }
     await $db.put('todos', todo)
-}
+  }
   await load()
+  await Promise.all(queue)
   lastPull.value = new Date()
 }
 
@@ -90,7 +101,6 @@ const addTodo = async (text: string) => {
     image: null,
     tags: currentTag.value ? currentTag.value : null,
   }
-  console.log("new todo", newTodo)
   await $db.put('todos', newTodo)
   await load()
   await push()
