@@ -84,6 +84,10 @@ export function useMemeGenerator() {
             canvas.width = img.width;
             canvas.height = img.height + 120; // Extra space for the header
 
+            // Set canvas background color
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             // Draw the image on the canvas
             ctx.drawImage(img, 0, 120); // Draw image below the header
 
