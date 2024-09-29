@@ -15,6 +15,7 @@ const filteredTodos = computed(() => {
 
 async function loadTodos() {
   todos.value = await $db.getAll('todos')
+  todos.value = todos.value.filter(todo => !todo.deleted_at && !todo.completed)
 }
 
 await loadTodos()
@@ -30,12 +31,13 @@ async function addTodo() {
     deleted_at: null,
     position: todos.value.length,
     image: null,
-    tags: "",
+    tags: "general",
   }
   console.log("new todo", newTodo)
-  await $db.put('todos', newTodo)
-  await loadTodos()
-
+  // await $db.put('todos', newTodo)
+  // await loadTodos()
+  todos.value.push(newTodo)
+  await push()
   // sync supabase TODO why should i use push?
   // if (user.value) {
   //   await client.from('todos').insert({
@@ -61,8 +63,7 @@ async function completeTodo(id: string) {
 
   await $db.put('todos', todo)
   await loadTodos()
-  // TODO push or specifc push?
-  // await push()
+  await push()
 }
 
 async function removeTodo(id: string) {
@@ -71,7 +72,7 @@ async function removeTodo(id: string) {
   todo.deleted_at = new Date()
   await $db.put('todos', todo)
   await loadTodos()
-
+  await push()
   // sync supabase
   // if (user.value) {
   //   await client.from('todos').delete().match({ id: todo.id })
@@ -80,24 +81,27 @@ async function removeTodo(id: string) {
 
 // Todo does it run in the background fine?
 async function push() {
-  const todos = $load('todos')
-  const todosWithUserId = todos.map(todo => ({
+  // const todos = $db.getAll('todos')
+  const todosWithUserId = todos.value.map(todo => ({
     ...todo,
     user_id: user.value.id,
+    image: null,
   }))
-  await client.from('todos').upsert(todosWithUserId.value, {onConflict: ['id']})
+  await client.from('todos').upsert(todosWithUserId, {onConflict: ['id']})
 }
 
 async function pull() {
-  const {data: todos, error} = await client.from('todos').select('*').where('user_id', 'eq', user.value.id)
+  const {data: todos, error} = await client.from('todos').select('*').eq('user_id', user.value.id)
   if (error) return
   for (const todo of todos) {
-    await $put('todos', todo)
+    await $db.put('todos', todo)
   }
   await loadTodos()
 }
 
-
+onMounted(async () => {
+  await pull()
+})
 </script>
 
 <template>

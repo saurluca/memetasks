@@ -40,49 +40,65 @@ async function pull() {
     query = query.gte('updated_at', new Date(lastPull.value).toISOString())
   }
 
-  const {data: todos, error} = await query
-
-  if (error) {
-    console.error('Error pulling todos:', error)
-    return
-  }
-
-  let queue = []
-
-  for (const todo of todos) {
-    // temporary fix for fucked up data structure for tags
-    if (todo.tags == null) {
-      todo.tags = ""
+  try {
+    const { data: todos, error } = await query
+    if (error) {
+      console.error('Error pulling todos:', error)
+      return
     }
-    if (!todo.completed) {
-      const localTodo = await $db.get('todos', todo.id)
-      if (localTodo) {
-        todo.image = localTodo.image
-      } else {
-        queue.push(generateTodoImage(todo))
+
+    let queue = []
+
+    for (const todo of todos) {
+      if (!todo.completed) {
+        const localTodo = await $db.get('todos', todo.id)
+        if (localTodo) {
+          todo.image = localTodo.image
+        } else {
+          queue.push(generateTodoImage(todo))
+        }
       }
+      await $db.put('todos', todo)
     }
-    await $db.put('todos', todo)
-  }
-  await load()
-  await Promise.all(queue)
+    await load()
+    await Promise.all(queue)
 
-  lastPull.value = new Date().toISOString()
+    lastPull.value = new Date().toISOString()
+  } catch (err) {
+    console.error('Unexpected error:', err.message);
+  }
 }
 
 async function push() {
+  console.log("push")
   const dbTodos = await $db.getAll('todos')
   if (!dbTodos) return
-  const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > lastPush.value)
+  console.log("dbTodos", dbTodos)
+  const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
+  console.log("newTodos", newTodos)
   if (newTodos.length === 0) return
   // add user id and remove images
-  const todosWithUserId = newTodos.map(todo => ({
+  // also deleting image column
+  const todosWithUserId = newTodos.map(({ image, ...todo }) => ({
     ...todo,
-    tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags, // temport fix for fucked up data strucutre for tags
+    tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
     user_id: user.value.id,
-  }))
-  await client.from('todos').upsert(todosWithUserId, {onConflict: ['id']})
-  lastPush.value = new Date()
+  }));
+  console.log("todosWithUserId", todosWithUserId)
+  const todoWithTags = todosWithUserId.filter(todo => todo.tags)
+  console.log("todoWithTags", todoWithTags)
+
+  try {
+    const { data, error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
+    if (error) {
+      console.error('Error upserting todos:', error.message);
+    } else {
+      console.log('Upsert successful');
+      lastPush.value = new Date()
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err.message);
+  }
 }
 
 // Lifecycle hooks
@@ -110,10 +126,11 @@ const addTodo = async (text: string) => {
     completed_at: null,
     updated_at: new Date(),
     deleted_at: null,
-    position: todos.value.length,
+    position: todos.value.length + 1,
     image: null,
     tags: currentTag.value ? currentTag.value : null,
   }
+  console.log("newTodo", newTodo)
   await $db.put('todos', newTodo)
   await load()
   await push()
@@ -196,7 +213,7 @@ const filterForDeletedTodos = (todos: Todo[]) => {
 const filteredTodos = computed(() => {
   const tagFilteredTodos = filterOutTags(todos.value)
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
-  console.log("active", activeTodos)
+  // console.log("active", activeTodos)
   if (showDeletedTodos.value) {
     const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
     return [...activeTodos, ...deletedTodos];
