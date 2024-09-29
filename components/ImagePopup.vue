@@ -44,6 +44,15 @@ const resetImageBlob = () => {
   imageUrl.value = ''
 }
 
+const downloadImage = () => {
+  if (imageBlob.value) {
+    const link = document.createElement('a')
+    link.href = imageUrl.value
+    link.download = 'meme.png'
+    link.click()
+  }
+}
+
 defineExpose({ open, close, setImageBlob, resetImageBlob, setError })
 </script>
 
@@ -59,7 +68,7 @@ defineExpose({ open, close, setImageBlob, resetImageBlob, setError })
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
-      <div class="p-4">
+      <div class="p-3">
         <img v-if="imageUrl" :src="imageUrl" alt="Todo image" class="w-full h-auto rounded-lg" />
         <p v-else-if="!imageBlob" class="max-w-xl h-auto rounded-lg text-gray-500">
           No image provided. <br/>Either you don't give the memes enough time to fully grow, you don't have internet or there was an error .
@@ -68,6 +77,11 @@ defineExpose({ open, close, setImageBlob, resetImageBlob, setError })
           {{errorMessage}}
         </p>
         <p v-else class="text-gray-500">Loading image...</p>
+      </div>
+      <div v-if="imageBlob" class="flex w-full p-2">
+        <button @click="downloadImage" class="bg-green-500 text-white flex w-full justify-center text-xl rounded-lg p-2 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700">
+          Download
+        </button>
       </div>
     </div>
   </div>

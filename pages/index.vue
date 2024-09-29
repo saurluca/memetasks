@@ -201,13 +201,14 @@ const filterOutTags = (todos: Todo[]) => {
   }
 }
 
+// filter and reverse sort active todos based on created_at
 const filterForActiveTodos = (todos: Todo[]) => {
-  return todos.filter(todo => !todo.deleted_at && !todo.completed)
+  return todos.filter(todo => !todo.deleted_at && !todo.completed).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 }
 
-// filter and reverse sort
+// filter and reverse sort deleted todos based on completed_at
 const filterForDeletedTodos = (todos: Todo[]) => {
-  return todos.filter(todo => todo.completed).sort((a, b) => b.position - a.position);
+  return todos.filter(todo => todo.completed).sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
 }
 
 const filteredTodos = computed(() => {
