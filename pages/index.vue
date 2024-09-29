@@ -73,20 +73,15 @@ async function push() {
   console.log("push")
   const dbTodos = await $db.getAll('todos')
   if (!dbTodos) return
-  console.log("dbTodos", dbTodos)
   const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
-  console.log("newTodos", newTodos)
   if (newTodos.length === 0) return
-  // add user id and remove images
-  // also deleting image column
+  // add user id and remove image column
   const todosWithUserId = newTodos.map(({ image, ...todo }) => ({
     ...todo,
     tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
     user_id: user.value.id,
   }));
-  console.log("todosWithUserId", todosWithUserId)
   const todoWithTags = todosWithUserId.filter(todo => todo.tags)
-  console.log("todoWithTags", todoWithTags)
 
   try {
     const { data, error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
@@ -115,6 +110,45 @@ onUnmounted(() => {
 function arrayBufferToBlob(buffer, type) {
   return new Blob([buffer], {type: type});
 }
+
+async function blobToArrayBuffer(blob) {
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener('loadend', () => {
+      resolve(reader.result);
+    });
+    reader.addEventListener('error', reject);
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+// Uploads image via cloudflare worker
+// async function uploadImage(image: Blob) {
+//   try {
+//     console.log('Uploading image...');
+//     // Create FormData and append the file
+//     const formData = new FormData();
+//     formData.append('image', image);
+//
+//     // Post the image to the Cloudflare Worker
+//     const response = await fetch('https://imageupload.spuckteller.workers.dev/', {
+//       method: 'POST',
+//       body: formData,
+//     });
+//     console.log('Response:', response);
+//     if (!response.ok) {
+//       throw new Error('Failed to upload image');
+//     }
+//
+//     // Get the image URL from the response
+//     const imageUrl = await response.text();
+//     console.log('Image URL:', imageUrl);
+//     return imageUrl;
+//
+//   } catch (error) {
+//     console.error('Error uploading image:', error);
+//   }
+// }
 
 // Methods
 const addTodo = async (text: string) => {
@@ -181,9 +215,10 @@ const generateTodoImage = async (todo: Todo) => {
     const result = await generateImage(todo.text)
     if (!result) return
     console.log("image received for", todo.text)
-    todo.image = result
+    todo.image = await blobToArrayBuffer(result)
     await $db.put('todos', todo)
     await load()
+    // await uploadImage(result)
   } catch (error) {
     console.error('Error generating image:', error)
   }

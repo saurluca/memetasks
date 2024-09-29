@@ -1,17 +1,5 @@
 import {ref} from 'vue'
 
-
-function blobToArrayBuffer(blob) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.addEventListener('loadend', () => {
-            resolve(reader.result);
-        });
-        reader.addEventListener('error', reject);
-        reader.readAsArrayBuffer(blob);
-    });
-}
-
 export function useMemeGenerator() {
     const imageBlob = ref<Blob | null>(null)
     const isLoading = ref(false)
@@ -119,12 +107,11 @@ export function useMemeGenerator() {
             drawWrappedText(memeHeader, canvas.width / 2, 30, canvas.width - 20); // Draw wrapped header
 
             // Convert canvas to blob
-            const finalBlob= await new Promise((resolve) => {
+            return await new Promise((resolve) => {
                 canvas.toBlob((newBlob) => {
                     resolve(newBlob);
                 });
-            });
-            return blobToArrayBuffer(finalBlob)
+            })
         } catch (error) {
             console.error('Error generating image:', error)
             return
