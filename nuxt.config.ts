@@ -6,8 +6,7 @@ export default defineNuxtConfig({
     target: 'static',
     plugins: ['~/plugins/db.ts'],
     hub: {
-        // database: true,
-        // kv: true,
+       blob: true,
     },
     supabase: {
         redirect: false,
