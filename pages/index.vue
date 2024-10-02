@@ -81,10 +81,10 @@ async function push() {
     tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
     user_id: user.value.id,
   }));
-  const todoWithTags = todosWithUserId.filter(todo => todo.tags)
+  // const todoWithTags = todosWithUserId.filter(todo => todo.tags)
 
   try {
-    const { data, error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
+    const {error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
     if (error) {
       console.error('Error upserting todos:', error.message);
     } else {
@@ -238,7 +238,7 @@ const filterOutTags = (todos: Todo[]) => {
 
 // filter and reverse sort active todos based on created_at
 const filterForActiveTodos = (todos: Todo[]) => {
-  return todos.filter(todo => !todo.deleted_at && !todo.completed).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  return todos.filter(todo => !todo.deleted_at && !todo.completed).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
 }
 
 // filter and reverse sort deleted todos based on completed_at
