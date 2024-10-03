@@ -32,7 +32,7 @@ const {isLoading} = useInfiniteScroll(
         ref="containerRef"
         class="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 dark:hover:scrollbar-thumb-gray-500"
     >
-      <ul class="space-y-3">
+      <ul class="space-y-2">
         <TodoItem
             v-for="todo in displayedTodos"
             :key="todo.id"

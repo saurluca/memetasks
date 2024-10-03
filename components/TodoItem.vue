@@ -6,10 +6,10 @@ const props = defineProps<{
   currentTag: string
 }>();
 
-const expanded = ref(false)
+const expandedText = ref(false)
 
 const handleExpandClick = () => {
-  expanded.value = !expanded.value
+  expandedText.value = !expandedText.value
 }
 
 const emit = defineEmits(['toggle-todo', 'delete-todo']);
@@ -26,21 +26,21 @@ const handleCheckboxClick = (event, todo) => {
 </script>
 
 <template>
-  <li :key="todo.id" class="bg-gray-50 p-2 rounded-lg shadow-sm cursor-default hover:bg-gray-100" @click="handleExpandClick">
+  <li :key="todo.id" class="bg-slate-50 p-2 rounded-lg shadow-sm cursor-default hover:bg-gray-100" @click="handleExpandClick">
     <div class="flex flex-row gap-2 justify-between">
       <div class="flex gap-2 ml-1" >
-        <div class="pt-2.5">
+        <div class="mt-2.5 mr-1">
           <input type="checkbox" class="size-5 bg-green-500" :checked="todo.completed"/>
         </div>
-        <div class="text-slate-800 pt-2" :class="{ 'line-through': todo.completed, 'opacity-50': todo.completed, 'line-clamp-1': !expanded }">
+        <div class="text-slate-800 pt-2" :class="{ 'line-through': todo.completed, 'opacity-50': todo.completed, 'line-clamp-1': !expandedText }">
           {{ todo.text }}
         </div>
       </div>
       <div class="flex flex-col items-center gap-2 text-sm justify-between pt-1.5 pr-0.5">
-        <div v-if="todo.tags" class="px-2 py-1 rounded-full whitespace-nowrap" :class="todo.tags && currentTag == todo.tags ? getTagColorActive(todo.tags) : getTagColorInactive(todo.tags)">
+        <div v-if="todo.tags" class="px-2 py-1 rounded-full whitespace-nowrap shadow" :class="todo.tags && currentTag == todo.tags ? getTagColorActive(todo.tags) : getTagColorInactive(todo.tags)">
           {{ todo.tags }}
         </div>
-        <button class="text-red-700 bg-red-300 rounded-full p-1.5 ml-auto mt-auto" v-if="expanded" @click="emit('delete-todo', todo.id)">
+        <button class="text-red-700 bg-red-300 rounded-full shadow-sm mb-0.5 p-1.5 ml-auto mt-auto hover:bg-red-500 hover:text-white" v-if="expandedText" @click="emit('delete-todo', todo.id)">
           delete
         </button>
       </div>
