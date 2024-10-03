@@ -28,72 +28,80 @@ async function load() {
   tags.value = fetchedTags.filter(tag => !tag.deleted_at)
 }
 
-async function pull() {
-  if (!user.value) return
-  let query = client
-      .from('todos')
-      .select('*')
-      .eq('user_id', user.value.id)
-      .order('created_at')
+// async function pull() {
+//   if (!user.value) return
+//   let query = client
+//       .from('todos')
+//       .select('*')
+//       .eq('user_id', user.value.id)
+//       .order('created_at')
+//
+//   if (lastPull.value) {
+//     query = query.gte('updated_at', new Date(lastPull.value).toISOString())
+//   }
+//
+//   try {
+//     const { data: todos, error } = await query
+//     if (error) {
+//       console.error('Error pulling todos:', error)
+//       return
+//     }
+//
+//     let queue = []
+//
+//     for (const todo of todos) {
+//       if (!todo.completed) {
+//         const localTodo = await $db.get('todos', todo.id)
+//         if (localTodo) {
+//           todo.image = localTodo.image
+//         } else {
+//           queue.push(generateTodoImage(todo))
+//         }
+//       }
+//       await $db.put('todos', todo)
+//     }
+//     await load()
+//     await Promise.all(queue)
+//
+//     lastPull.value = new Date().toISOString()
+//   } catch (err) {
+//     console.error('Unexpected error:', err.message);
+//   }
+// }
 
-  if (lastPull.value) {
-    query = query.gte('updated_at', new Date(lastPull.value).toISOString())
-  }
+// async function push() {
+//   console.log("push")
+//   const dbTodos = await $db.getAll('todos')
+//   if (!dbTodos) return
+//   const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
+//   if (newTodos.length === 0) return
+//   // add user id and remove image column
+//   const todosWithUserId = newTodos.map(({ image, ...todo }) => ({
+//     ...todo,
+//     tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
+//     user_id: user.value.id,
+//   }));
+//   // const todoWithTags = todosWithUserId.filter(todo => todo.tags)
+//
+//   try {
+//     const {error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
+//     if (error) {
+//       console.error('Error upserting todos:', error.message);
+//     } else {
+//       console.log('Upsert successful');
+//       lastPush.value = new Date()
+//     }
+//   } catch (err) {
+//     console.error('Unexpected error:', err.message);
+//   }
+// }
 
-  try {
-    const { data: todos, error } = await query
-    if (error) {
-      console.error('Error pulling todos:', error)
-      return
-    }
-
-    let queue = []
-
-    for (const todo of todos) {
-      if (!todo.completed) {
-        const localTodo = await $db.get('todos', todo.id)
-        if (localTodo) {
-          todo.image = localTodo.image
-        } else {
-          queue.push(generateTodoImage(todo))
-        }
-      }
-      await $db.put('todos', todo)
-    }
-    await load()
-    await Promise.all(queue)
-
-    lastPull.value = new Date().toISOString()
-  } catch (err) {
-    console.error('Unexpected error:', err.message);
-  }
+async function pull(){
+  return
 }
 
-async function push() {
-  console.log("push")
-  const dbTodos = await $db.getAll('todos')
-  if (!dbTodos) return
-  const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
-  if (newTodos.length === 0) return
-  // add user id and remove image column
-  const todosWithUserId = newTodos.map(({ image, ...todo }) => ({
-    ...todo,
-    tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
-    user_id: user.value.id,
-  }));
-  // const todoWithTags = todosWithUserId.filter(todo => todo.tags)
-
-  try {
-    const {error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
-    if (error) {
-      console.error('Error upserting todos:', error.message);
-    } else {
-      console.log('Upsert successful');
-      lastPush.value = new Date()
-    }
-  } catch (err) {
-    console.error('Unexpected error:', err.message);
-  }
+async function push(){
+  return
 }
 
 // Lifecycle hooks

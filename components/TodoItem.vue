@@ -26,22 +26,22 @@ const handleCheckboxClick = (event, todo) => {
 </script>
 
 <template>
-  <li :key="todo.id" class="bg-gray-50 p-1.5 rounded-lg shadow-sm cursor-default hover:bg-gray-100" @click="handleExpandClick">
-    <div class="flex flex-row gap-2">
-      <div class="flex gap-2 pl-1" >
-        <div class="pt-2">
-          <input type="checkbox" class="h-4 w-4" :checked="todo.completed"/>
+  <li :key="todo.id" class="bg-gray-50 p-2 rounded-lg shadow-sm cursor-default hover:bg-gray-100" @click="handleExpandClick">
+    <div class="flex flex-row gap-2 justify-between">
+      <div class="flex gap-2 ml-1" >
+        <div class="pt-2.5">
+          <input type="checkbox" class="size-5 bg-green-500" :checked="todo.completed"/>
         </div>
-        <div class="text-slate-800 pt-2" :class="{ 'line-through': todo.completed, 'opacity-50': todo.completed, 'line-clamp-1': expanded }">
+        <div class="text-slate-800 pt-2" :class="{ 'line-through': todo.completed, 'opacity-50': todo.completed, 'line-clamp-1': !expanded }">
           {{ todo.text }}
         </div>
       </div>
-      <div class="flex flex-col items-center text-sm justify-between pt-1">
-        <div class="px-2 py-1 rounded-full" :class="todo.tags && currentTag == todo.tags ? getTagColorActive(todo.tags) : getTagColorInactive(todo.tags)">
+      <div class="flex flex-col items-center gap-2 text-sm justify-between pt-1.5 pr-0.5">
+        <div v-if="todo.tags" class="px-2 py-1 rounded-full whitespace-nowrap" :class="todo.tags && currentTag == todo.tags ? getTagColorActive(todo.tags) : getTagColorInactive(todo.tags)">
           {{ todo.tags }}
         </div>
-        <button class="text-red-600 bg-red-100 rounded-full p-1.5" v-if="!expanded" @click="emit('delete-todo', todo.id)">
-          Delete
+        <button class="text-red-700 bg-red-300 rounded-full p-1.5 ml-auto mt-auto" v-if="expanded" @click="emit('delete-todo', todo.id)">
+          delete
         </button>
       </div>
     </div>
