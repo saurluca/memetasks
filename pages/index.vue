@@ -55,7 +55,7 @@ async function load() {
 }
 
 async function pull() {
-  if (!user.value) return
+  if (!user.value) return  // if user is not logged in, don't pull
   let query = client
       .from('todos')
       .select('*')
@@ -97,6 +97,7 @@ async function pull() {
 
 async function push() {
   console.log("push")
+  if (!user.value) return  // if user is not logged in, don't push
   const dbTodos = await $db.getAll('todos')
   if (!dbTodos) return
   const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
