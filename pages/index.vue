@@ -21,89 +21,6 @@ const isDarkMode = useDark()
 const toggleDarkMode = useToggle(isDarkMode)
 
 
-async function load() {
-  if (!$db) return console.error("No DB")
-  todos.value = await $db.getAll('todos')
-  const fetchedTags = await $db.getAll('tags')
-  tags.value = fetchedTags.filter(tag => !tag.deleted_at)
-}
-
-// async function pull() {
-//   if (!user.value) return
-//   let query = client
-//       .from('todos')
-//       .select('*')
-//       .eq('user_id', user.value.id)
-//       .order('created_at')
-//
-//   if (lastPull.value) {
-//     query = query.gte('updated_at', new Date(lastPull.value).toISOString())
-//   }
-//
-//   try {
-//     const { data: todos, error } = await query
-//     if (error) {
-//       console.error('Error pulling todos:', error)
-//       return
-//     }
-//
-//     let queue = []
-//
-//     for (const todo of todos) {
-//       if (!todo.completed) {
-//         const localTodo = await $db.get('todos', todo.id)
-//         if (localTodo) {
-//           todo.image = localTodo.image
-//         } else {
-//           queue.push(generateTodoImage(todo))
-//         }
-//       }
-//       await $db.put('todos', todo)
-//     }
-//     await load()
-//     await Promise.all(queue)
-//
-//     lastPull.value = new Date().toISOString()
-//   } catch (err) {
-//     console.error('Unexpected error:', err.message);
-//   }
-// }
-
-// async function push() {
-//   console.log("push")
-//   const dbTodos = await $db.getAll('todos')
-//   if (!dbTodos) return
-//   const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
-//   if (newTodos.length === 0) return
-//   // add user id and remove image column
-//   const todosWithUserId = newTodos.map(({ image, ...todo }) => ({
-//     ...todo,
-//     tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
-//     user_id: user.value.id,
-//   }));
-//   // const todoWithTags = todosWithUserId.filter(todo => todo.tags)
-//
-//   try {
-//     const {error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
-//     if (error) {
-//       console.error('Error upserting todos:', error.message);
-//     } else {
-//       console.log('Upsert successful');
-//       lastPush.value = new Date()
-//     }
-//   } catch (err) {
-//     console.error('Unexpected error:', err.message);
-//   }
-// }
-
-async function pull(){
-  return
-}
-
-async function push(){
-  return
-}
-
 // Lifecycle hooks
 onMounted(async () => {
   await load()
@@ -130,33 +47,80 @@ async function blobToArrayBuffer(blob) {
   });
 }
 
-// Uploads image via cloudflare worker
-// async function uploadImage(image: Blob) {
-//   try {
-//     console.log('Uploading image...');
-//     // Create FormData and append the file
-//     const formData = new FormData();
-//     formData.append('image', image);
-//
-//     // Post the image to the Cloudflare Worker
-//     const response = await fetch('https://imageupload.spuckteller.workers.dev/', {
-//       method: 'POST',
-//       body: formData,
-//     });
-//     console.log('Response:', response);
-//     if (!response.ok) {
-//       throw new Error('Failed to upload image');
-//     }
-//
-//     // Get the image URL from the response
-//     const imageUrl = await response.text();
-//     console.log('Image URL:', imageUrl);
-//     return imageUrl;
-//
-//   } catch (error) {
-//     console.error('Error uploading image:', error);
-//   }
-// }
+async function load() {
+  if (!$db) return console.error("No DB")
+  todos.value = await $db.getAll('todos')
+  const fetchedTags = await $db.getAll('tags')
+  tags.value = fetchedTags.filter(tag => !tag.deleted_at)
+}
+
+async function pull() {
+  if (!user.value) return
+  let query = client
+      .from('todos')
+      .select('*')
+      .eq('user_id', user.value.id)
+      .order('created_at')
+
+  if (lastPull.value) {
+    query = query.gte('updated_at', new Date(lastPull.value).toISOString())
+  }
+
+  try {
+    const { data: todos, error } = await query
+    if (error) {
+      console.error('Error pulling todos:', error)
+      return
+    }
+
+    let queue = []
+
+    for (const todo of todos) {
+      if (!todo.completed) {
+        const localTodo = await $db.get('todos', todo.id)
+        if (localTodo) {
+          todo.image = localTodo.image
+        } else {
+          queue.push(generateTodoImage(todo))
+        }
+      }
+      await $db.put('todos', todo)
+    }
+    await load()
+    await Promise.all(queue)
+
+    lastPull.value = new Date().toISOString()
+  } catch (err) {
+    console.error('Unexpected error:', err.message);
+  }
+}
+
+async function push() {
+  console.log("push")
+  const dbTodos = await $db.getAll('todos')
+  if (!dbTodos) return
+  const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
+  if (newTodos.length === 0) return
+  // add user id and remove image column
+  const todosWithUserId = newTodos.map(({ image, ...todo }) => ({
+    ...todo,
+    tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
+    user_id: user.value.id,
+  }));
+  // const todoWithTags = todosWithUserId.filter(todo => todo.tags)
+
+  try {
+    const {error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
+    if (error) {
+      console.error('Error upserting todos:', error.message);
+    } else {
+      console.log('Upsert successful');
+      lastPush.value = new Date()
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err.message);
+  }
+}
 
 // Methods
 const addTodo = async (text: string) => {
@@ -250,16 +214,20 @@ const filterForActiveTodos = (todos: Todo[]) => {
 }
 
 // filter and reverse sort deleted todos based on completed_at
-const filterForDeletedTodos = (todos: Todo[]) => {
-  return todos.filter(todo => todo.completed).sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+const filterForCompletedTodos = (todos: Todo[]) => {
+  return todos.filter(todo => !todo.deleted_at && todo.completed).sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+}
+
+const filterOutDeletedTodos = (todos: Todo[]) => {
+  return todos.filter(todo => !todo.deleted_at)
 }
 
 const filteredTodos = computed(() => {
-  const tagFilteredTodos = filterOutTags(todos.value)
+  const realTodos = filterOutDeletedTodos(todos.value)
+  const tagFilteredTodos = filterOutTags(realTodos)
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
-  // console.log("active", activeTodos)
   if (showDeletedTodos.value) {
-    const deletedTodos = filterForDeletedTodos(tagFilteredTodos)
+    const deletedTodos = filterForCompletedTodos(tagFilteredTodos)
     return [...activeTodos, ...deletedTodos];
   } else {
     return activeTodos
@@ -276,9 +244,7 @@ const addTag = async (text: string) => {
     updated_at: new Date(),
     deleted_at: null,
   }
-
   tags.value.push(newTag)
-
   await $db.put('tags', newTag)
   await load()
 }
@@ -313,18 +279,12 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 }
 
-// Methods
-const openProfile = () => {
-  profileIsOpen.value = true;
-}
+//helper methods
+const openProfile = () => {  profileIsOpen.value = true }
 
-const closeProfile = () => {
-  profileIsOpen.value = false;
-}
+const closeProfile = () => { profileIsOpen.value = false }
 
-const toggleShowDeletedTodos = () => {
-  showDeletedTodos.value = !showDeletedTodos.value;
-}
+const toggleShowDeletedTodos = () => { showDeletedTodos.value = !showDeletedTodos.value }
 
 useSeoMeta({
   title: 'Memetasks',
