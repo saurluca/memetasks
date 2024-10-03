@@ -42,6 +42,18 @@ export default defineNuxtConfig({
             start_url: '/',
             display: 'standalone',
         },
+        workbox: {
+            cacheId: 'memetasks',
+            runtimeCaching: [
+                {
+                    urlPattern: '/',
+                    handler: 'NetworkFirst',
+                    options: {
+                        cacheName: 'html-cache',
+                    },
+                },
+            ],
+        },
     },
     app: {
         head: {
