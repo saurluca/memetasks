@@ -14,11 +14,16 @@ const lastPush = useStorage('last-push', null)
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const showDeletedTodos = ref(false)
-const imagePopup = ref<InstanceType<typeof ImagePopup> | null>(null)
 const currentTag = ref("")
 const profileIsOpen = ref(false)
 const isDarkMode = useDark()
 const toggleDarkMode = useToggle(isDarkMode)
+
+const imagePopupTodoText = ref("")
+const imagePopupIsOpen = ref(false)
+const imagePopupErrorMessage = ref("")
+const imagePopupBlob = ref<Blob | null>(null)
+const imagePopupUrl = ref('')
 
 
 // Lifecycle hooks
@@ -163,22 +168,24 @@ const completeTodo = async (id: string) => {
   todo.completed = true
   todo.completed_at = new Date()
   todo.updated_at = new Date()
-  todo.image = null // delete image, no longer needed
+  todo.image = null // delete image, because no longer needed
 
   await $db.put('todos', todo)
   await load()
   await push()
 
-  imagePopup.value?.resetImageBlob()
   if (image) {
     const imageBlob = arrayBufferToBlob(image, 'image/png')
-    imagePopup.value?.setError("There is an image")
-    imagePopup.value?.setImageBlob(imageBlob)
+    imagePopupBlob.value = imageBlob
+    imagePopupUrl.value = URL.createObjectURL(imageBlob)
+    imagePopupErrorMessage.value = ""
   } else {
-    imagePopup.value?.setError("There was no image")
+    imagePopupBlob.value = null
+    imagePopupUrl.value = ''
+    imagePopupErrorMessage.value = "No image provided"
   }
-  imagePopup.value?.open()
-
+  imagePopupTodoText.value = todo.text
+  imagePopupIsOpen.value = true
 }
 
 const generateTodoImage = async (todo: Todo) => {
@@ -275,7 +282,7 @@ const removeSelectedTags = async () => {
 // Event handlers
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
-    imagePopup.value?.close()
+    imagePopupIsOpen.value = false
     closeProfile();
   }
 }
@@ -335,6 +342,13 @@ useSeoMeta({
         @toggle-dark-mode="toggleDarkMode"
         :is-dark-mode="isDarkMode"
     />
+    <ImagePopup
+        :todo-text="imagePopupTodoText"
+        :is-open="imagePopupIsOpen"
+        :error-message="imagePopupErrorMessage"
+        :image-blob="imagePopupBlob"
+        :image-url="imagePopupUrl"
+        @close-image-popup="imagePopupIsOpen = false"
+    />
   </d-page>
-  <ImagePopup ref="imagePopup"/>
 </template>
