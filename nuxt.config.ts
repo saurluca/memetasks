@@ -3,7 +3,6 @@ export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
     modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase'],
     ssr: false,
-    target: 'static',
     plugins: ['~/plugins/db.ts'],
     hub: {
        blob: true,
@@ -27,7 +26,6 @@ export default defineNuxtConfig({
         ],
     },
     devtools: {enabled: true},
-    ssr: false,
     css: ['~/assets/css/main.css'],
     postcss: {
         plugins: {
