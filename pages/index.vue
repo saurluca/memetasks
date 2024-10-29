@@ -1,8 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import {nanoid} from 'nanoid'
 import {Settings} from 'lucide-vue-next';
 import {useDark, useStorage, useToggle} from '@vueuse/core'
 import SettingsPopup from "~/components/SettingsPopup.vue";
+import {DatePicker} from 'v-calendar'
+import 'v-calendar/style.css'
 
 // State variables
 const {$db} = useNuxtApp()
@@ -16,6 +18,8 @@ const tags = ref<Tag[]>([])
 const showDeletedTodos = ref(false)
 const currentTag = ref("")
 const profileIsOpen = ref(false)
+const showDatePicker = ref(false)
+const selectedDate = ref<Date | null>(null)
 const isDarkMode = useDark()
 const toggleDarkMode = useToggle(isDarkMode)
 
@@ -72,7 +76,7 @@ async function pull() {
   }
 
   try {
-    const { data: todos, error } = await query
+    const {data: todos, error} = await query
     if (error) {
       console.error('Error pulling todos:', error)
       return
@@ -108,7 +112,7 @@ async function push() {
   const newTodos = dbTodos.filter(todo => new Date(todo.updated_at) > new Date(lastPush.value))
   if (newTodos.length === 0) return
   // add user id and remove image column
-  const todosWithUserId = newTodos.map(({ image, ...todo }) => ({
+  const todosWithUserId = newTodos.map(({image, ...todo}) => ({
     ...todo,
     tags: (!todo.tags || todo.tags === "[]") ? "" : todo.tags,
     user_id: user.value.id,
@@ -116,7 +120,7 @@ async function push() {
   // const todoWithTags = todosWithUserId.filter(todo => todo.tags)
 
   try {
-    const {error } = await client.from('todos').upsert(todosWithUserId, { onConflict: ['id'] });
+    const {error} = await client.from('todos').upsert(todosWithUserId, {onConflict: ['id']});
     if (error) {
       console.error('Error upserting todos:', error.message);
     } else {
@@ -138,10 +142,12 @@ const addTodo = async (text: string) => {
     completed_at: null,
     updated_at: new Date(),
     deleted_at: null,
+    due_at: selectedDate.value ? new Date(selectedDate.value) : null,
     position: todos.value.length + 1,
     image: null,
     tags: currentTag.value ? currentTag.value : null,
   }
+  selectedDate.value = null
   console.log("newTodo", newTodo)
   await $db.put('todos', newTodo)
   await load()
@@ -283,16 +289,29 @@ const removeSelectedTags = async () => {
 const handleKeyDown = (event: KeyboardEvent) => {
   if (event.key === 'Escape') {
     imagePopupIsOpen.value = false
+    showDatePicker.value = false
     closeProfile();
   }
 }
 
 //helper methods
-const openProfile = () => {  profileIsOpen.value = true }
+const openProfile = () => {
+  profileIsOpen.value = true
+}
 
-const closeProfile = () => { profileIsOpen.value = false }
+const closeProfile = () => {
+  profileIsOpen.value = false
+}
 
-const toggleShowDeletedTodos = () => { showDeletedTodos.value = !showDeletedTodos.value }
+const toggleShowDeletedTodos = () => {
+  showDeletedTodos.value = !showDeletedTodos.value
+}
+
+function onDateSelect(date: Date | null) {
+  console.log('Selected date:', date)
+  selectedDate.value = date
+  showDatePicker.value = false  // Close the date picker after selection
+}
 
 useSeoMeta({
   title: 'Memetasks',
@@ -320,35 +339,47 @@ useSeoMeta({
       </button>
     </div>
 
-    <TodoInput @add-todo="addTodo"/>
+    <div class="relative">
+      <TodoInput @add-todo="addTodo" @toggle-date-picker="showDatePicker = !showDatePicker" :selectedDate="selectedDate"/>
+      <DatePicker
+          v-if="showDatePicker"
+          v-model="selectedDate"
+          @update:model-value="onDateSelect"
+          :model-config="{ type: 'date', mask: 'YYYY-MM-DD' }"
+          class="absolute right-0 top-full mt-0 z-50 shadow-lg bg-white dark:bg-gray-800 rounded-lg"
+          style="position: absolute;"
+      />
+    </div>
+
     <TagManager
-        :tags="tags"
         :currentTag="currentTag"
+        :tags="tags"
         @toggle-tag="toggleTag"
         @add-tag="addTag"
         @remove-selected-tags="removeSelectedTags"
     />
     <TodoList
-        :filteredTodos="filteredTodos"
         :currentTag="currentTag"
+        :filteredTodos="filteredTodos"
         :showDeletedTodos="showDeletedTodos"
         @toggle-show-deleted-todos="toggleShowDeletedTodos"
         @toggle-todo="completeTodo"
         @delete-todo="deleteTodo"
     />
     <SettingsPopup
+        :is-dark-mode="isDarkMode"
         :profile-is-open="profileIsOpen"
         @close-profile="closeProfile"
         @toggle-dark-mode="toggleDarkMode"
-        :is-dark-mode="isDarkMode"
     />
     <ImagePopup
-        :todo-text="imagePopupTodoText"
-        :is-open="imagePopupIsOpen"
         :error-message="imagePopupErrorMessage"
         :image-blob="imagePopupBlob"
         :image-url="imagePopupUrl"
+        :is-open="imagePopupIsOpen"
+        :todo-text="imagePopupTodoText"
         @close-image-popup="imagePopupIsOpen = false"
     />
   </d-page>
+
 </template>

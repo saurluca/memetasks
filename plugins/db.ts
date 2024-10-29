@@ -19,6 +19,7 @@ export interface Todo {
     completed_at: Date | null
     updated_at: Date
     deleted_at: Date | null
+    due_at: Date | null
     position: number
     image: Blob | ArrayBuffer | null
     tags: string | null
@@ -80,6 +81,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                     completed_at: null,
                     updated_at: now,
                     deleted_at: null,
+                    due_at: null,
                     position: 0,
                     image: null,
                     tags: "",
@@ -93,6 +95,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                     completed_at: null,
                     updated_at: now,
                     deleted_at: null,
+                    due_at: null,
                     position: 1,
                     image: null,
                     tags: "",
@@ -106,6 +109,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                     completed_at: null,
                     updated_at: now,
                     deleted_at: null,
+                    due_at: null,
                     position: 2,
                     image: null,
                     tags: ""
