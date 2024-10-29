@@ -10,9 +10,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxthub/core": "^0.7.20",
-    "@nuxtjs/sitemap": "^6.1.0",
-    "@nuxtjs/supabase": "^1.4.0",
+    "@nuxthub/core": "^0.7.37",
+    "@nuxtjs/sitemap": "^6.1.2",
+    "@nuxtjs/supabase": "^1.4.1",
     "@vite-pwa/nuxt": "^0.10.5",
     "@vueuse/core": "^11.1.0",
     "idb": "^8.0.0",
@@ -21,6 +21,7 @@
     "nuxt": "^3.13.2",
     "tailwind-scrollbar": "^3.1.0",
     "unenv": "^1.10.0",
+    "v-calendar": "^3.1.2",
     "vue": "latest",
     "vuedraggable": "^4.1.0"
   },
@@ -28,7 +29,7 @@
     "@vueuse/nuxt": "^11.1.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
-    "tailwindcss": "^3.4.12",
-    "wrangler": "^3.78.7"
+    "tailwindcss": "^3.4.14",
+    "wrangler": "^3.83.0"
   }
 }
