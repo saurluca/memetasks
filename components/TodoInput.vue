@@ -35,9 +35,12 @@ const addTodo = () => {
         <input
           v-model="newTodoText"
           placeholder="Add new task..."
-          class="w-full px-3.5 py-2 border bg-slate-50 text-black rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+          :class="[
+            'w-full px-3.5 py-2 border bg-slate-50 text-black rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300',
+            formattedDate ? 'pr-[120px]' : 'pr-[40px]'
+          ]"
         />
-        <div class="absolute right-8 top-1/2 -translate-y-1/2 mr-1 mt-0.5 text-gray-500 dark:text-gray-400">
+        <div v-if="formattedDate" class="absolute right-8 top-1/2 -translate-y-1/2 mr-1 mt-0.5 text-gray-500 dark:text-gray-400 whitespace-nowrap">
           {{ formattedDate }}
         </div>
         <button
