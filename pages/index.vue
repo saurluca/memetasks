@@ -346,7 +346,7 @@ useSeoMeta({
           v-model="selectedDate"
           @update:model-value="onDateSelect"
           :model-config="{ type: 'date', mask: 'YYYY-MM-DD' }"
-          class="absolute right-0 top-full mt-0 z-50 shadow-lg bg-white dark:bg-gray-800 rounded-lg"
+          class="absolute right-0 top-full mt-0 z-50 shadow-lg bg-white dark:bg-gray-800 rounded-lg dark:text-white [&_.vc-title]:dark:text-white"
           style="position: absolute;"
       />
     </div>
