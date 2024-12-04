@@ -4,12 +4,14 @@ import {Settings} from 'lucide-vue-next';
 import {useDark, useStorage, useToggle} from '@vueuse/core'
 import SettingsPopup from "~/components/SettingsPopup.vue";
 import {DatePicker} from 'v-calendar'
+import { useOnline } from '@vueuse/core'
 import 'v-calendar/style.css'
 
 // State variables
 const {$db} = useNuxtApp()
 const client = useSupabaseClient()
 const user = useSupabaseUser()
+const online = useOnline()
 
 const lastPull = useStorage('last-pull', null)
 const lastPush = useStorage('last-push', null)
@@ -64,6 +66,7 @@ async function load() {
 }
 
 async function pull() {
+  if (!online) return
   if (!user.value) return  // if user is not logged in, don't pull
   let query = client
       .from('todos')
@@ -105,6 +108,7 @@ async function pull() {
 }
 
 async function push() {
+  if (!online) return
   console.log("push")
   if (!user.value) return  // if user is not logged in, don't push
   const dbTodos = await $db.getAll('todos')
