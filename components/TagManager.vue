@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {ref} from 'vue'
 import {Plus, Minus} from 'lucide-vue-next'
-import {CalendarClock} from 'lucide-vue-next';
+import {CalendarSearch} from 'lucide-vue-next';
 import type {Tag} from "~/plugins/db";
 
 const props = defineProps<{
@@ -54,7 +54,7 @@ function buttonClick() {
       <button @click=buttonClick
               class="px-2 border-black rounded-full"
               :class="todayFilter ? 'bg-gray-400' : 'bg-gray-200'">
-        <CalendarClock class="w-5 h-5 text-gray-800 dark:text-gray-400"/>
+        <CalendarSearch class="w-5 h-5 text-gray-800 dark:text-gray-400"/>
       </button>
       <span
           v-for="tag in tags"

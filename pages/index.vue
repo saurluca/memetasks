@@ -148,7 +148,7 @@ const addTodo = async (text: string) => {
     completed_at: null,
     updated_at: new Date(),
     deleted_at: null,
-    due_at: selectedDate.value ? new Date(selectedDate.value) : null,
+    due_at: selectedDate.value ? new Date(selectedDate.value) : new Date(),
     position: todos.value.length + 1,
     image: null,
     tags: currentTag.value ? currentTag.value : null,
@@ -249,9 +249,9 @@ const filterForToday = (todos: Todo[]) => {
     const dueDate = new Date(todo.due_at);
 
     return (
-        today.getFullYear() === dueDate.getFullYear() &&
-        today.getMonth() === dueDate.getMonth() &&
-        today.getDate() === dueDate.getDate()
+        today.getFullYear() >= dueDate.getFullYear() &&
+        today.getMonth() >= dueDate.getMonth() &&
+        today.getDate() >= dueDate.getDate()
     );
   })
 }
