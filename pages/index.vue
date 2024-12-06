@@ -4,8 +4,9 @@ import {Settings} from 'lucide-vue-next';
 import {useDark, useStorage, useToggle} from '@vueuse/core'
 import SettingsPopup from "~/components/SettingsPopup.vue";
 import {DatePicker} from 'v-calendar'
-import { useOnline } from '@vueuse/core'
+import {useOnline} from '@vueuse/core'
 import 'v-calendar/style.css'
+import type {Tag, Todo} from "~/plugins/db";
 
 // State variables
 const {$db} = useNuxtApp()
@@ -18,6 +19,7 @@ const lastPush = useStorage('last-push', null)
 const todos = ref<Todo[]>([])
 const tags = ref<Tag[]>([])
 const showDeletedTodos = ref(false)
+const currentDayFilter = ref(false)
 const currentTag = ref("")
 const profileIsOpen = ref(false)
 const showDatePicker = ref(false)
@@ -240,15 +242,38 @@ const filterOutDeletedTodos = (todos: Todo[]) => {
   return todos.filter(todo => !todo.deleted_at)
 }
 
+const filterForToday = (todos: Todo[]) => {
+  return todos.filter(todo => {
+    if (!todo.due_at) return false
+    const today = new Date();
+    const dueDate = new Date(todo.due_at);
+
+    return (
+        today.getFullYear() === dueDate.getFullYear() &&
+        today.getMonth() === dueDate.getMonth() &&
+        today.getDate() === dueDate.getDate()
+    );
+  })
+}
+
 const filteredTodos = computed(() => {
   const realTodos = filterOutDeletedTodos(todos.value)
   const tagFilteredTodos = filterOutTags(realTodos)
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
+  let dayFilteredTodos = activeTodos
+  console.log("filter")
+  console.log("activeTodos", activeTodos)
+  if (currentDayFilter.value) {
+    console.log("filter for today")
+    dayFilteredTodos = filterForToday(dayFilteredTodos)
+    console.log("dayFilteredTodos FINAL", dayFilteredTodos)
+  }
+
   if (showDeletedTodos.value) {
-    const deletedTodos = filterForCompletedTodos(tagFilteredTodos)
-    return [...activeTodos, ...deletedTodos];
+    const deletedTodos = filterForCompletedTodos(dayFilteredTodos)
+    return [...dayFilteredTodos, ...deletedTodos];
   } else {
-    return activeTodos
+    return dayFilteredTodos
   }
 }, {
   deep: true
@@ -317,6 +342,10 @@ function onDateSelect(date: Date | null) {
   showDatePicker.value = false  // Close the date picker after selection
 }
 
+const toggleTodayFilter = () => {
+  currentDayFilter.value = !currentDayFilter.value
+}
+
 useSeoMeta({
   title: 'Memetasks',
   ogTitle: 'Memetasks',
@@ -358,9 +387,11 @@ useSeoMeta({
     <TagManager
         :currentTag="currentTag"
         :tags="tags"
+        :todayFilter="currentDayFilter"
         @toggle-tag="toggleTag"
         @add-tag="addTag"
         @remove-selected-tags="removeSelectedTags"
+        @toggle-today-filter="toggleTodayFilter"
     />
     <TodoList
         :currentTag="currentTag"
