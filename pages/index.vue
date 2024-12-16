@@ -261,12 +261,8 @@ const filteredTodos = computed(() => {
   const tagFilteredTodos = filterOutTags(realTodos)
   const activeTodos = filterForActiveTodos(tagFilteredTodos)
   let dayFilteredTodos = activeTodos
-  console.log("filter")
-  console.log("activeTodos", activeTodos)
   if (currentDayFilter.value) {
-    console.log("filter for today")
     dayFilteredTodos = filterForToday(dayFilteredTodos)
-    console.log("dayFilteredTodos FINAL", dayFilteredTodos)
   }
 
   if (showDeletedTodos.value) {
