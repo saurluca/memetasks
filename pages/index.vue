@@ -374,7 +374,11 @@ useSeoMeta({
           v-if="showDatePicker"
           v-model="selectedDate"
           @update:model-value="onDateSelect"
-          :model-config="{ type: 'date', mask: 'YYYY-MM-DD' }"
+          :first-day-of-week="2"
+          :model-config="{ type: 'date', mask: 'YYYY-MM-DD', isoWeek: true }"
+          :attributes="[
+              { key: 'today', highlight: true, dates: new Date() }
+          ]"
           class="absolute right-0 top-full mt-0 z-50 shadow-lg bg-white dark:bg-gray-800 rounded-lg dark:text-white [&_.vc-title]:dark:text-white"
           style="position: absolute;"
       />
