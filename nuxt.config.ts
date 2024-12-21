@@ -55,7 +55,8 @@ export default defineNuxtConfig({
     },
     nitro: {
         preset: 'cloudflare-pages',
-        compatibilityDate: '2024-04-03'
+        compatibilityDate: '2024-04-03',
+        nodeCompat: true,
     },
     app: {
         head: {
