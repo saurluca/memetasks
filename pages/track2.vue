@@ -1,40 +1,44 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import {reactive, ref} from 'vue';
+import {nanoid} from 'nanoid';
 import WellbeingChart from '~/components/WellbeingChart.vue';
 
-// Reactive state
+// Initialize Supabase
+const client = useSupabaseClient();
+const user = useSupabaseUser();
+
+// Reactive Form State
 const form = reactive({
+  id: nanoid(),
   wellbeing: 0,
   meditated: 'no',
-  sleep: '',
-  didSport: 'no',
+  sleep_time: '',
+  did_sport: 'no',
   gratitude: '',
   steps: '',
 });
 
-// Validation state
+// Validation State
 const errors = reactive({
-  sleep: '',
+  sleep_time: '',
   gratitude: '',
   steps: ''
 });
 
-// Submission state
+// Submission State
 const submitted = ref(false);
 
-// Validate form fields
+// Validate Form Fields
 function validateForm() {
   let isValid = true;
 
-  // Validate Sleep
-  if (form.sleep === '' || isNaN(form.sleep)) {
-    errors.sleep = 'Sleep time is required.';
+  if (form.sleep_time === '' || isNaN(form.sleep_time)) {
+    errors.sleep_time = 'Sleep time is required.';
     isValid = false;
   } else {
-    errors.sleep = '';
+    errors.sleep_time = '';
   }
 
-  // Validate Gratitude
   if (form.gratitude.trim() === '') {
     errors.gratitude = 'Gratitude note is required.';
     isValid = false;
@@ -42,7 +46,6 @@ function validateForm() {
     errors.gratitude = '';
   }
 
-  // Validate Steps
   if (form.steps === '' || isNaN(form.steps)) {
     errors.steps = 'Number of steps is required.';
     isValid = false;
@@ -53,20 +56,47 @@ function validateForm() {
   return isValid;
 }
 
-// Handle form submission
-function submitForm() {
-  if (validateForm()) {
-    submitted.value = true;
-    console.log(form);
+// Prepare Data for Submission
+function prepareFormData() {
+  return {
+    id: form.id,
+    wellbeing: Number(form.wellbeing),
+    meditated: form.meditated === 'yes',
+    sleep_time: Number(form.sleep_time),
+    did_sport: form.did_sport === 'yes',
+    gratitude: form.gratitude.trim(),
+    steps: Number(form.steps),
+    user_id: user.value?.id || null,
+    date: new Date().toISOString().split('T')[0],
+  };
+}
+
+// Handle Form Submission
+async function submitForm() {
+  if (!validateForm()) return;
+
+  const dataToUpload = prepareFormData();
+  submitted.value = true;
+
+  try {
+    const {error} = await client
+        .from('tracker')
+        .upsert([dataToUpload], {onConflict: ['id']});
+    if (error) {
+      console.error('Error upserting tracker data:', error.message);
+    } else {
+      console.log('Upsert successful:', dataToUpload);
+    }
+  } catch (err) {
+    console.error('Unexpected error during upsert:', err.message);
   }
 }
 
-// Update wellbeing value from chart
+// Update Wellbeing Value from Chart
 function updateWellbeing(value) {
   form.wellbeing = Number(value);
 }
 </script>
-
 
 <template>
   <d-page>
@@ -75,7 +105,7 @@ function updateWellbeing(value) {
       <form @submit.prevent="submitForm" class="space-y-4">
         <div>
           <label class="block mb-1">Feeling of Wellbeing (0-10)</label>
-          <WellbeingChart @pointSelected="updateWellbeing" />
+          <WellbeingChart @pointSelected="updateWellbeing"/>
         </div>
         <div>
           <label class="block mb-1">Gratitude Note</label>
@@ -96,18 +126,18 @@ function updateWellbeing(value) {
         <div>
           <label class="block mb-1">Sleep Time (hours)</label>
           <input
-              v-model="form.sleep"
+              v-model="form.sleep_time"
               type="number"
               min="0"
               step="0.1"
               class="w-full border p-2 rounded"
-              :class="{'border-red-500': errors.sleep}"
-          >
-          <p v-if="errors.sleep" class="text-red-500 text-sm">{{ errors.sleep }}</p>
+              :class="{'border-red-500': errors.sleep_time}"
+          />
+          <p v-if="errors.sleep_time" class="text-red-500 text-sm">{{ errors.sleep_time }}</p>
         </div>
         <div>
           <label class="block mb-1">Did Sport Today?</label>
-          <select v-model="form.didSport" class="w-full border p-2 rounded">
+          <select v-model="form.did_sport" class="w-full border p-2 rounded">
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </select>
@@ -120,7 +150,7 @@ function updateWellbeing(value) {
               min="0"
               class="w-full border p-2 rounded"
               :class="{'border-red-500': errors.steps}"
-          >
+          />
           <p v-if="errors.steps" class="text-red-500 text-sm">{{ errors.steps }}</p>
         </div>
         <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Submit</button>
@@ -130,11 +160,10 @@ function updateWellbeing(value) {
         <p><strong>Wellbeing:</strong> {{ form.wellbeing }}/10</p>
         <p><strong>Gratitude:</strong> {{ form.gratitude }}</p>
         <p><strong>Meditated:</strong> {{ form.meditated }}</p>
-        <p><strong>Sleep:</strong> {{ form.sleep }} hours</p>
-        <p><strong>Did Sport:</strong> {{ form.didSport }}</p>
+        <p><strong>Sleep:</strong> {{ form.sleep_time }} hours</p>
+        <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
         <p><strong>Steps:</strong> {{ form.steps }}</p>
       </div>
     </div>
   </d-page>
 </template>
-
