@@ -5,7 +5,7 @@ export default defineNuxtConfig({
     ssr: false,
     plugins: ['~/plugins/db.ts'],
     hub: {
-       blob: true,
+       blob: false,
     },
     supabase: {
         redirect: false,
@@ -56,7 +56,6 @@ export default defineNuxtConfig({
     nitro: {
         preset: 'cloudflare-pages',
         compatibilityDate: '2024-04-03',
-        nodeCompat: true,
     },
     app: {
         head: {

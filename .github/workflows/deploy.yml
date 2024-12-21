@@ -2,41 +2,28 @@ name: Deploy with NuxtHub CLI
 
 on:
   push:
-    branches:
-      - main # Ensure deployment only triggers on main branch pushes
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the Repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # Step 2: Install Bun
       - name: Install Bun
         uses: oven-sh/setup-bun@v1
         with:
-          bun-version: 1.1.42 # Use the latest Bun version
+          bun-version: 1.0.1
 
-      # Step 3: Install Dependencies
       - name: Install Dependencies
-        run: bun install --frozen-lockfile
-        env:
-          NUXT_HUB_USER_TOKEN: ${{ secrets.NUXT_HUB_USER_TOKEN }}
+        run: bun install
 
-      # Step 4: Build Project
-      - name: Build Project
-        run: bun run build
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-
-      # Step 5: Deploy to NuxtHub
       - name: Deploy to NuxtHub
-        run: bun x nuxthub deploy
+        run: npx nuxthub deploy
         env:
           NUXT_HUB_PROJECT_KEY: ${{ secrets.NUXT_HUB_PROJECT_KEY }}
           NUXT_HUB_USER_TOKEN: ${{ secrets.NUXT_HUB_USER_TOKEN }}
           NUXT_HUB_PROJECT_SECRET_KEY: ${{ secrets.NUXT_HUB_PROJECT_SECRET_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
