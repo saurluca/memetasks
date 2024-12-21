@@ -1,82 +1,169 @@
-<script setup lang="ts">
-interface FormField {
-  id: number
-  name: string
-  type: 'text' | 'number' | 'boolean'
-  value: string | number | boolean
+<script setup>
+import {reactive, ref} from 'vue';
+import {nanoid} from 'nanoid';
+import WellbeingChart from '~/components/WellbeingChart.vue';
+
+// Initialize Supabase
+const client = useSupabaseClient();
+const user = useSupabaseUser();
+
+// Reactive Form State
+const form = reactive({
+  id: nanoid(),
+  wellbeing: 0,
+  meditated: 'no',
+  sleep_time: '',
+  did_sport: 'no',
+  gratitude: '',
+  steps: '',
+});
+
+// Validation State
+const errors = reactive({
+  sleep_time: '',
+  gratitude: '',
+  steps: ''
+});
+
+// Submission State
+const submitted = ref(false);
+
+// Validate Form Fields
+function validateForm() {
+  let isValid = true;
+
+  if (form.sleep_time === '' || isNaN(form.sleep_time)) {
+    errors.sleep_time = 'Sleep time is required.';
+    isValid = false;
+  } else {
+    errors.sleep_time = '';
+  }
+
+  if (form.gratitude.trim() === '') {
+    errors.gratitude = 'Gratitude note is required.';
+    isValid = false;
+  } else {
+    errors.gratitude = '';
+  }
+
+  if (form.steps === '' || isNaN(form.steps)) {
+    errors.steps = 'Number of steps is required.';
+    isValid = false;
+  } else {
+    errors.steps = '';
+  }
+
+  return isValid;
 }
 
-const formFields = ref<FormField[]>([])
-const newFieldName = ref('')
-const newFieldType = ref<'text' | 'number' | 'boolean'>('text')
+// Prepare Data for Submission
+function prepareFormData() {
+  return {
+    id: form.id,
+    wellbeing: Number(form.wellbeing),
+    meditated: form.meditated === 'yes',
+    sleep_time: Number(form.sleep_time),
+    did_sport: form.did_sport === 'yes',
+    gratitude: form.gratitude.trim(),
+    steps: Number(form.steps),
+    user_id: user.value?.id || null,
+    date: new Date().toISOString().split('T')[0],
+  };
+}
 
-const addField = () => {
-  if (formFields.value.length >= 8) return
-  if (!newFieldName.value.trim()) return
-  
-  formFields.value.push({
-    id: Date.now(),
-    name: newFieldName.value,
-    type: newFieldType.value,
-    value: newFieldType.value === 'number' ? 0 : 
-           newFieldType.value === 'boolean' ? false : ''
-  })
-  
-  newFieldName.value = ''
+// Handle Form Submission
+async function submitForm() {
+  if (!validateForm()) return;
+
+  const dataToUpload = prepareFormData();
+  submitted.value = true;
+
+  try {
+    const {error} = await client
+        .from('tracker')
+        .upsert([dataToUpload], {onConflict: ['id']});
+    if (error) {
+      console.error('Error upserting tracker data:', error.message);
+    } else {
+      console.log('Upsert successful:', dataToUpload);
+    }
+  } catch (err) {
+    console.error('Unexpected error during upsert:', err.message);
+  }
+}
+
+// Update Wellbeing Value from Chart
+function updateWellbeing(value) {
+  form.wellbeing = Number(value);
 }
 </script>
 
 <template>
   <d-page>
-    <div class="w-full p-4">
-      <h1 class="text-2xl font-bold mb-6">Dynamic Form Builder</h1>
-      
-      <!-- Add new field controls -->
-      <div class="flex gap-2 mb-6 w-full" v-if="formFields.length < 5">
-        <input
-          v-model="newFieldName"
-          placeholder="Field name..."
-          class="flex-1 px-3.5 py-2 border rounded-lg"
-        />
-        <select v-model="newFieldType" class="px-3.5 py-2 border rounded-lg">
-          <option value="text">Text</option>
-          <option value="number">Number</option>
-          <option value="boolean">Checkbox</option>
-        </select>
-        <button
-          @click="addField"
-          class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          Add Field
-        </button>
-      </div>
-
-      <!-- Form fields -->
-      <form @submit.prevent class="w-full">
-        <template v-for="field in formFields" :key="field.id">
-          <d-tracker-input
-            v-if="field.type !== 'boolean'"
-            v-model="field.value"
-            :name="field.name"
-            :type="field.type"
-            :placeholder="`Enter ${field.name}...`"
+    <div class="p-6">
+      <h1 class="text-2xl font-bold mb-4">Daily Habit Tracker</h1>
+      <form @submit.prevent="submitForm" class="space-y-4">
+        <div>
+          <label class="block mb-1">Feeling of Wellbeing (0-10)</label>
+          <WellbeingChart @pointSelected="updateWellbeing"/>
+        </div>
+        <div>
+          <label class="block mb-1">Gratitude Note</label>
+          <textarea
+              v-model="form.gratitude"
+              class="w-full border p-2 rounded"
+              :class="{'border-red-500': errors.gratitude}"
+          ></textarea>
+          <p v-if="errors.gratitude" class="text-red-500 text-sm">{{ errors.gratitude }}</p>
+        </div>
+        <div>
+          <label class="block mb-1">Meditated</label>
+          <select v-model="form.meditated" class="w-full border p-2 rounded">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-1">Sleep Time (hours)</label>
+          <input
+              v-model="form.sleep_time"
+              type="number"
+              min="0"
+              step="0.1"
+              class="w-full border p-2 rounded"
+              :class="{'border-red-500': errors.sleep_time}"
           />
-          <div v-else class="mb-4 w-full px-3.5 py-2 border rounded-lg bg-slate-50 dark:bg-gray-700 dark:border-gray-600">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                v-model="field.value"
-                class="w-4 h-4 text-blue-500 rounded focus:ring-blue-500"
-              />
-              <span class="text-sm font-medium">{{ field.name }}</span>
-            </label>
-          </div>
-        </template>
+          <p v-if="errors.sleep_time" class="text-red-500 text-sm">{{ errors.sleep_time }}</p>
+        </div>
+        <div>
+          <label class="block mb-1">Did Sport Today?</label>
+          <select v-model="form.did_sport" class="w-full border p-2 rounded">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-1">Number of Steps</label>
+          <input
+              v-model="form.steps"
+              type="number"
+              min="0"
+              class="w-full border p-2 rounded"
+              :class="{'border-red-500': errors.steps}"
+          />
+          <p v-if="errors.steps" class="text-red-500 text-sm">{{ errors.steps }}</p>
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Submit</button>
       </form>
+      <div v-if="submitted" class="mt-6 p-4 border rounded bg-green-50">
+        <h2 class="font-semibold">Today's Entry:</h2>
+        <p><strong>Wellbeing:</strong> {{ form.wellbeing }}/10</p>
+        <p><strong>Gratitude:</strong> {{ form.gratitude }}</p>
+        <p><strong>Meditated:</strong> {{ form.meditated }}</p>
+        <p><strong>Sleep:</strong> {{ form.sleep_time }} hours</p>
+        <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
+        <p><strong>Steps:</strong> {{ form.steps }}</p>
+      </div>
     </div>
   </d-page>
 </template>
-
-<style scoped>
-
-</style>
