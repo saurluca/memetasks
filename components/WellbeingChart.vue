@@ -1,10 +1,12 @@
 <template>
   <div class="w-full mt-4">
-    <canvas ref="wellbeingChart" class="w-full h-40"></canvas>
+    <div class="h-32 overflow-hidden">
+      <canvas ref="wellbeingChart" class="w-full h-full"></canvas>
+    </div>
     <input
         type="range"
         v-model="selectedPoint"
-        :min="1"
+        :min="0"
         :max="10"
         @input="onSliderChange"
         class="w-full mt-4"
@@ -23,7 +25,7 @@ export default {
   data() {
     return {
       chart: null,
-      selectedPoint: 5,
+      selectedPoint: 0,
     };
   },
   mounted() {
@@ -32,46 +34,41 @@ export default {
   methods: {
     renderChart() {
       const ctx = this.$refs.wellbeingChart.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+      gradient.addColorStop(0, 'blue');
+      gradient.addColorStop(1, 'green');
+
       this.chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: Array.from({length: 10}, (_, i) => i + 1),
+          labels: Array.from({ length: 100 }, (_, i) => i + 1),
           datasets: [{
             label: 'Wellbeing Levels',
-            data: this.generateBellCurve(10, 5, 1.5),
-            borderColor: 'blue',
+            data: this.generateBellCurve(100, 50, 18),
+            borderColor: gradient,
             fill: false,
-            tension: 0.4,
-            pointRadius: 5,
-            pointBackgroundColor: Array.from({length: 10}, (_, i) => i + 1 === this.selectedPoint ? 'red' : 'blue')
+            tension: 1,
+            pointRadius: 0,
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
-            legend: {display: false},
+            legend: { display: false },
           },
           scales: {
-            x: {display: false},
-            y: {display: false},
+            x: { display: false },
+            y: { display: false },
           },
         }
       });
     },
     onSliderChange() {
-      this.updateChart();
       this.$emit('pointSelected', this.selectedPoint);
     },
-    updateChart() {
-      if (this.chart) {
-        this.chart.data.datasets[0].pointBackgroundColor = Array.from({length: 10}, (_, i) =>
-            i + 1 === Number(this.selectedPoint) ? 'red' : 'blue'
-        );
-        this.chart.update();
-      }
-    },
     generateBellCurve(points, mean, stdDev) {
-      return Array.from({length: points}, (_, i) => {
+      return Array.from({ length: points }, (_, i) => {
         const x = i + 1;
         return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
       });
