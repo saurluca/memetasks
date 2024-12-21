@@ -1,7 +1,80 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+
+// Define emits
+const emit = defineEmits(['pointSelected']);
+
+// Reactive State
+const selectedPoint = ref(0);
+let chart = null;
+
+// Render the Chart
+function renderChart() {
+  const ctx = document.querySelector('#wellbeingChart').getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
+  gradient.addColorStop(0, 'blue');
+  gradient.addColorStop(1, 'green');
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: Array.from({ length: 100 }, (_, i) => i + 1),
+      datasets: [{
+        label: 'Wellbeing Levels',
+        data: generateBellCurve(100, 50, 18),
+        borderColor: gradient,
+        fill: false,
+        tension: 1,
+        pointRadius: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+      },
+      scales: {
+        x: { display: false },
+        y: { display: false },
+      },
+    }
+  });
+}
+
+// Handle Slider Change
+function onSliderChange() {
+  if (chart) {
+    chart.data.datasets[0].pointBackgroundColor = Array.from(
+        { length: 100 },
+        (_, i) => (i + 1 === Number(selectedPoint.value) ? 'red' : 'blue')
+    );
+    chart.update();
+  }
+  emit('pointSelected', selectedPoint.value);
+}
+
+// Generate Bell Curve Data
+function generateBellCurve(points, mean, stdDev) {
+  return Array.from({ length: points }, (_, i) => {
+    const x = i + 1;
+    return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
+  });
+}
+
+// Lifecycle Hook
+onMounted(() => {
+  renderChart();
+});
+</script>
+
 <template>
   <div class="w-full mt-4">
     <div class="h-32 overflow-hidden">
-      <canvas ref="wellbeingChart" class="w-full h-full"></canvas>
+      <canvas id="wellbeingChart" class="w-full h-full"></canvas>
     </div>
     <input
         type="range"
@@ -14,68 +87,6 @@
     <p class="text-center mt-2">Selected Wellbeing: {{ selectedPoint }}</p>
   </div>
 </template>
-
-<script>
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
-
-export default {
-  name: 'WellbeingChart',
-  emits: ['pointSelected'],
-  data() {
-    return {
-      chart: null,
-      selectedPoint: 0,
-    };
-  },
-  mounted() {
-    this.renderChart();
-  },
-  methods: {
-    renderChart() {
-      const ctx = this.$refs.wellbeingChart.getContext('2d');
-      const gradient = ctx.createLinearGradient(0, 0, ctx.canvas.width, 0);
-      gradient.addColorStop(0, 'blue');
-      gradient.addColorStop(1, 'green');
-
-      this.chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: Array.from({ length: 100 }, (_, i) => i + 1),
-          datasets: [{
-            label: 'Wellbeing Levels',
-            data: this.generateBellCurve(100, 50, 18),
-            borderColor: gradient,
-            fill: false,
-            tension: 1,
-            pointRadius: 0,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-          },
-          scales: {
-            x: { display: false },
-            y: { display: false },
-          },
-        }
-      });
-    },
-    onSliderChange() {
-      this.$emit('pointSelected', this.selectedPoint);
-    },
-    generateBellCurve(points, mean, stdDev) {
-      return Array.from({ length: points }, (_, i) => {
-        const x = i + 1;
-        return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mean) / stdDev, 2));
-      });
-    }
-  }
-};
-</script>
 
 <style>
 input[type="range"] {

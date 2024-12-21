@@ -1,11 +1,36 @@
+<script setup>
+import { reactive, ref } from 'vue';
+import WellbeingChart from '~/components/WellbeingChart.vue';
+
+const form = reactive({
+  wellbeing: 0,
+  meditated: 'no',
+  sleep: '',
+  didSport: 'no',
+  gratitude: '',
+  steps: '',
+});
+
+const submitted = ref(false);
+
+function submitForm() {
+  submitted.value = true;
+  console.log(form);
+}
+
+function updateWellbeing(value) {
+  form.wellbeing = Number(value);
+}
+</script>
+
 <template>
   <d-page>
-    <div class="p-6 ">
+    <div class="p-6">
       <h1 class="text-2xl font-bold mb-4">Daily Habit Tracker</h1>
       <form @submit.prevent="submitForm" class="space-y-4">
         <div>
           <label class="block mb-1">Feeling of Wellbeing (0-10)</label>
-          <WellbeingChart @pointSelected="updateWellbeing"/>
+          <WellbeingChart @pointSelected="updateWellbeing" />
         </div>
         <div>
           <label class="block mb-1">Gratitude Note</label>
@@ -20,7 +45,7 @@
         </div>
         <div>
           <label class="block mb-1">Sleep Time (hours)</label>
-          <input v-model="form.sleep" type="number" min="0" step="0.1"  class="w-full border p-2 rounded">
+          <input v-model="form.sleep" type="number" min="0" step="0.1" class="w-full border p-2 rounded">
         </div>
         <div>
           <label class="block mb-1">Did Sport Today?</label>
@@ -48,32 +73,4 @@
   </d-page>
 </template>
 
-<script>
 
-import WellbeingChart from "~/components/WellbeingChart.vue";
-
-export default {
-  components: {WellbeingChart},
-  data() {
-    return {
-      form: {
-        wellbeing: 0,
-        meditated: 'no',
-        sleep: '',
-        didSport: 'no',
-        gratitude: '',
-        steps: '',
-      },
-      submitted: false
-    };
-  },
-  methods: {
-    submitForm() {
-      this.submitted = true;
-    },
-    updateWellbeing(value) {
-      this.form.wellbeing = value;
-    }
-  }
-};
-</script>
