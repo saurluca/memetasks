@@ -27,6 +27,7 @@ const errors = reactive({
 
 // Submission State
 const submitted = ref(false);
+const showSuccessDialog = ref(false);
 
 // Validate Form Fields
 function validateForm() {
@@ -85,6 +86,8 @@ async function submitForm() {
     if (error) {
       console.error('Error upserting tracker data:', error.message);
     } else {
+      submitted.value = true;
+      showSuccessDialog.value = true; // Show the success dialog
       console.log('Upsert successful:', dataToUpload);
     }
   } catch (err) {
@@ -95,6 +98,10 @@ async function submitForm() {
 // Update Wellbeing Value from Chart
 function updateWellbeing(value) {
   form.wellbeing = Number(value);
+}
+
+function closeDialog() {
+  showSuccessDialog.value = false;
 }
 </script>
 
@@ -155,14 +162,24 @@ function updateWellbeing(value) {
         </div>
         <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Submit</button>
       </form>
-      <div v-if="submitted" class="mt-6 p-4 border rounded bg-green-50">
-        <h2 class="font-semibold">Today's Entry:</h2>
-        <p><strong>Wellbeing:</strong> {{ form.wellbeing }}/10</p>
-        <p><strong>Gratitude:</strong> {{ form.gratitude }}</p>
-        <p><strong>Meditated:</strong> {{ form.meditated }}</p>
-        <p><strong>Sleep:</strong> {{ form.sleep_time }} hours</p>
-        <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
-        <p><strong>Steps:</strong> {{ form.steps }}</p>
+      <div v-if="showSuccessDialog" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
+          <h2 class="text-2xl font-bold mb-4">Good Job!</h2>
+          <p>Your entry has been successfully saved.</p>
+          <div class="mt-4 text-left p-4 border rounded bg-green-50">
+            <p><strong>Wellbeing:</strong> {{ form.wellbeing }}/10</p>
+            <p><strong>Gratitude:</strong> {{ form.gratitude }}</p>
+            <p><strong>Meditated:</strong> {{ form.meditated }}</p>
+            <p><strong>Sleep:</strong> {{ form.sleep_time }} hours</p>
+            <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
+            <p><strong>Steps:</strong> {{ form.steps }}</p>
+          </div>
+          <router-link to="/">
+            <button class="bg-blue-500 text-white p-2 mt-4 rounded w-full">
+              Home
+            </button>
+          </router-link>
+        </div>
       </div>
     </div>
   </d-page>

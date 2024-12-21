@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import {LogIn} from "lucide-vue-next";
+import { House } from 'lucide-vue-next';
+
 const router = useRouter();
 const client = useSupabaseClient();
 
@@ -25,9 +28,16 @@ async function login() {
 <template>
   <d-auth-page>
     <div class="flex justify-between items-center mb-4">
-      <div class="flex items-center">
+      <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Login</h1>
+
+        <router-link to="/">
+          <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">
+            <House class="text-black dark:text-slate-200 h-6 w-6"/>
+          </button>
+        </router-link>
       </div>
+
 
     </div>
     <form @submit.prevent="login">

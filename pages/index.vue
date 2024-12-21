@@ -7,6 +7,7 @@ import {DatePicker} from 'v-calendar'
 import {useOnline} from '@vueuse/core'
 import 'v-calendar/style.css'
 import type {Tag, Todo} from "~/plugins/db";
+import {LogIn, Notebook} from 'lucide-vue-next';
 
 // State variables
 const {$db} = useNuxtApp()
@@ -362,10 +363,21 @@ useSeoMeta({
         </div>
         <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Meme your tasks!</h1>
       </div>
-
-      <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1" @click="openProfile">
-        <Settings class="text-black dark:text-slate-200 h-7 w-7"/>
-      </button>
+      <div class="flex flex-row ">
+        <router-link to="/login" class="mr-1">
+          <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">
+            <LogIn class="text-black dark:text-slate-200 h-6 w-6"/>
+          </button>
+        </router-link>
+        <router-link to="/tracker" class="mr-1">
+          <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">
+            <Notebook class="text-black dark:text-slate-200 h-6 w-6"/>
+          </button>
+        </router-link>
+        <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5" @click="openProfile">
+          <Settings class="text-black dark:text-slate-200 h-6 w-6"/>
+        </button>
+      </div>
     </div>
 
     <div class="relative">
@@ -383,7 +395,6 @@ useSeoMeta({
           style="position: absolute;"
       />
     </div>
-
     <TagManager
         :currentTag="currentTag"
         :tags="tags"

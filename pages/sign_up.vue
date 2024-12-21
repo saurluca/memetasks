@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import {House} from "lucide-vue-next";
+
 const client = useSupabaseClient();
 const email = ref("");
 const password = ref("");
@@ -32,15 +34,23 @@ async function sign_up() {
         <h1 class="text-2xl font-bold text-slate-800 dark:text-slate-200">Sign up</h1>
       </div>
 
+      <router-link to="/">
+        <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">
+          <House class="text-black dark:text-slate-200 h-6 w-6"/>
+        </button>
+      </router-link>
+
     </div>
     <form class="flex flex-col " @submit.prevent="sign_up">
       <div class="mb-4">
-        <input id="email" v-model="email" autocomplete="username" class="bg-gray-50 border text-slate-900  rounded-lg text-sm  block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white  "
+        <input id="email" v-model="email" autocomplete="username"
+               class="bg-gray-50 border text-slate-900  rounded-lg text-sm  block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white  "
                placeholder="Enter your email"
                type="email">
       </div>
       <div class="mb-6">
-        <input id="password" v-model="password" autocomplete="new-password" class="bg-gray-50 border text-gray-900  rounded-lg text-sm block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        <input id="password" v-model="password" autocomplete="new-password"
+               class="bg-gray-50 border text-gray-900  rounded-lg text-sm block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                placeholder="Enter your password"
                type="password">
       </div>
@@ -53,8 +63,9 @@ async function sign_up() {
           {{ successMsg }}
         </div>
       </div>
-      <button class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              type="submit">
+      <button
+          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          type="submit">
         Sign up
       </button>
     </form>
