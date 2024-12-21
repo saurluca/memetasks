@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import {LogIn} from "lucide-vue-next";
 import { House } from 'lucide-vue-next';
 
 const router = useRouter();

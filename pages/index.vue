@@ -379,7 +379,6 @@ useSeoMeta({
         </button>
       </div>
     </div>
-
     <div class="relative">
       <TodoInput @add-todo="addTodo" @toggle-date-picker="showDatePicker = !showDatePicker" :selectedDate="selectedDate"/>
       <DatePicker
