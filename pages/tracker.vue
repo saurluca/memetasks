@@ -69,7 +69,8 @@ function prepareFormData() {
     gratitude: form.gratitude.trim(),
     steps: Number(form.steps),
     user_id: user.value?.id || null,
-    date: new Date().toISOString().split('T')[0],
+    // Date -4 hours to adjust for doing entry at night
+    date: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString().split('T')[0],
   };
 }
 
