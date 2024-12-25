@@ -144,7 +144,7 @@ function updateWellbeing(value) {
 }
 
 //Update table fields
-const toggleStates = ['yes', 'no', '-']
+const toggleStates = ['yes', 'no', ' ']
 
 function handleClick(item){
   let currentValue = form[item.slug]
@@ -233,13 +233,14 @@ function handleClick(item){
           <p><strong>Wellbeing:</strong> {{ form.wellbeing }}/10</p>
           <p><strong>Gratitude:</strong> {{ form.gratitude }}</p>
           <p><strong>Insight:</strong> {{ form.insight }}</p>
-          <p><strong>Meditated:</strong> {{ form.meditated }}</p>
           <p><strong>Sleep:</strong> {{ form.sleep_time }} hours</p>
           <p><strong>Steps:</strong> {{ form.steps }}</p>
+          <p><strong>Breadstuff:</strong> {{ form.breadstuff }}</p>
+          <p><strong>Meditated:</strong> {{ form.meditated }}</p>
           <p><strong>Walk:</strong> {{ form.walk }}</p>
           <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
           <p><strong>Sweets:</strong> {{ form.sweets }}</p>
-          <p><strong>Breadstuff:</strong> {{ form.breadstuff }}</p>
+
           <p><strong>Period:</strong> {{ form.period }}</p>
         </div>
         <router-link to="/">
