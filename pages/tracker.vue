@@ -193,11 +193,11 @@ function updateWellbeing(value) {
           <p><strong>Meditated:</strong> {{ form.meditated }}</p>
           <p><strong>Sleep:</strong> {{ form.sleep_time }} hours</p>
           <p><strong>Steps:</strong> {{ form.steps }}</p>
-          <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
           <p><strong>Walk:</strong> {{ form.walk }}</p>
-          <p><strong>Period:</strong> {{ form.period }}</p>
+          <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
           <p><strong>Sweets:</strong> {{ form.sweets }}</p>
           <p><strong>Breadstuff:</strong> {{ form.breadstuff }}</p>
+          <p><strong>Period:</strong> {{ form.period }}</p>
         </div>
         <router-link to="/">
           <button class="bg-blue-500 text-white p-2 mt-4 rounded w-full">
