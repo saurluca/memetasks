@@ -1,9 +1,10 @@
 <script setup>
-import {reactive, ref} from 'vue';
-import {nanoid} from 'nanoid';
-import WellbeingChart from '~/components/WellbeingChart.vue';
-import {House} from 'lucide-vue-next';
+import {reactive, ref} from 'vue'
+import {nanoid} from 'nanoid'
+import WellbeingChart from '~/components/WellbeingChart.vue'
+import {House} from 'lucide-vue-next'
 
+// Initialize Supabase
 const client = useSupabaseClient()
 const user = useSupabaseUser()
 
@@ -23,13 +24,15 @@ const form = reactive({
   breadstuff: null,
 })
 
-// Submission & Dialog States
+// Dialog and Submission States
 const submitted = ref(false)
 const showSuccessDialog = ref(false)
 const showUpdateDialog = ref(false)
+const showErrorDialog = ref(false)
+const errorMessage = ref('')
 const existingEntryId = ref(null)
 
-// Dynamic Field Config
+// Field Config
 const fields = [
   {title: 'Gratitude Note', slug: 'gratitude', type: 'text'},
   {title: 'Learned or Observed', slug: 'insight', type: 'text'},
@@ -50,7 +53,7 @@ function parseBoolean(val) {
   return null
 }
 
-// Prepare Data for Submission
+// Prepare Data
 function prepareFormData() {
   return {
     id: form.id,
@@ -66,20 +69,26 @@ function prepareFormData() {
     period: parseBoolean(form.period),
     sweets: parseBoolean(form.sweets),
     breadstuff: (form.breadstuff ?? '').trim() || null,
-    date: new Date(Date.now() - 6 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0],
-  };
+    test: "21",
+    date: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString().split('T')[0],
+  }
 }
 
 // Submit Handler
 async function submitForm() {
+  // Example check: if user is not logged in, show error
+  if (!user.value) {
+    showErrorDialog.value = true
+    errorMessage.value = 'You must be logged in to submit.'
+    return
+  }
+
   const dataToUpload = prepareFormData()
   submitted.value = true
 
   try {
-    // Check if an entry already exists for this user & date
-    const {data: existingEntry, error: fetchError} = await client
+    // Check existing entry
+    const { data: existingEntry, error: fetchError } = await client
         .from('tracker')
         .select('id')
         .eq('user_id', user.value?.id)
@@ -87,21 +96,20 @@ async function submitForm() {
         .single()
 
     if (fetchError && fetchError.code !== 'PGRST116') {
-      console.error('Error checking existing entry:', fetchError.message)
-      return
+      throw new Error('Error checking existing entry: ' + fetchError.message)
     }
 
-    // If entry found, confirm update
     if (existingEntry) {
       existingEntryId.value = existingEntry.id
       showUpdateDialog.value = true
       return
     }
 
-    // Otherwise upsert directly
     await upsertEntry(dataToUpload)
   } catch (err) {
-    console.error('Unexpected error during entry check:', err.message)
+    console.error('Unexpected error:', err.message)
+    errorMessage.value = err.message
+    showErrorDialog.value = true
   } finally {
     submitted.value = false
   }
@@ -109,49 +117,46 @@ async function submitForm() {
 
 // Upsert Entry
 async function upsertEntry(dataToUpload) {
-  if (existingEntryId.value) {
-    dataToUpload.id = existingEntryId.value
-  }
+  if (existingEntryId.value) dataToUpload.id = existingEntryId.value
 
   try {
-    const {error} = await client
+    const { error } = await client
         .from('tracker')
-        .upsert([dataToUpload], {onConflict: ['user_id', 'date']})
+        .upsert([dataToUpload], { onConflict: ['user_id', 'date'] })
 
-    if (error) {
-      console.error('Error upserting tracker data:', error.message)
-    } else {
-      showSuccessDialog.value = true
-      console.log('Entry successfully saved:', dataToUpload)
-    }
+    if (error) throw new Error('Error upserting tracker data: ' + error.message)
+
+    showSuccessDialog.value = true
+    console.log('Entry successfully saved:', dataToUpload)
   } catch (err) {
     console.error('Unexpected error during upsert:', err.message)
+    errorMessage.value = err.message
+    showErrorDialog.value = true
   } finally {
     showUpdateDialog.value = false
     existingEntryId.value = null
   }
 }
 
-// Update Wellbeing from Chart
+// Update Wellbeing
 function updateWellbeing(value) {
   form.wellbeing = Number(value)
 }
 </script>
 
-
 <template>
   <d-page>
+    <!-- Header -->
     <div class="flex flex-row justify-between">
-      <h1 class="text-2xl font-bold mb-4">Daily Habit Tracker</h1>
+      <h1 class="text-2xl font-bold mb-4">Daily Wellbeing Tracker</h1>
       <router-link to="/">
-        <button
-            class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5"
-        >
+        <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">
           <House class="text-black dark:text-slate-200 h-6 w-6"/>
         </button>
       </router-link>
     </div>
 
+    <!-- Form -->
     <form
         @submit.prevent="submitForm"
         class="space-y-4 h-full overflow-y-auto pr-2
@@ -159,11 +164,13 @@ function updateWellbeing(value) {
              hover:scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600
              dark:hover:scrollbar-thumb-gray-500"
     >
+      <!-- Wellbeing -->
       <div>
         <label class="block mb-1">Feeling of Wellbeing (0-10)</label>
         <WellbeingChart @pointSelected="updateWellbeing"/>
       </div>
 
+      <!-- Dynamic Fields -->
       <d-tracker-input
           v-for="item in fields"
           :key="item.slug"
@@ -179,6 +186,7 @@ function updateWellbeing(value) {
       </button>
     </form>
 
+    <!-- Success Dialog -->
     <div
         v-if="showSuccessDialog"
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
@@ -207,6 +215,7 @@ function updateWellbeing(value) {
       </div>
     </div>
 
+    <!-- Update Confirmation Dialog -->
     <div
         v-if="showUpdateDialog"
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
@@ -228,6 +237,26 @@ function updateWellbeing(value) {
             Cancel
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Error Dialog -->
+    <div
+        v-if="showErrorDialog"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
+        <h2 class="text-xl font-bold mb-4">Something Went Wrong</h2>
+        <p class="mb-4">{{ errorMessage }}</p>
+        <p>Please try again later.</p>
+        <br/>
+        <p>If the problem persists, please contact mail@memetasks.com</p>
+        <button
+            class="bg-red-500 text-white p-2 mt-4 rounded w-full"
+            @click="showErrorDialog = false"
+        >
+          Close
+        </button>
       </div>
     </div>
   </d-page>
