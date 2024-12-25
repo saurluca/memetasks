@@ -18,10 +18,13 @@ const props = defineProps<FormProps>()
   <div v-if="type === 'bool'">
     <label class="block mb-1">{{ title }}</label>
     <select v-model="form[slug]" class="w-full border p-2 rounded">
+      <option :value="null"> - </option>
       <option value="yes">Yes</option>
       <option value="no">No</option>
     </select>
-    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">{{ errors[slug] }}</p>
+    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
+      {{ errors[slug] }}
+    </p>
   </div>
 
   <!-- Number Field -->
@@ -33,7 +36,9 @@ const props = defineProps<FormProps>()
         min="0"
         class="w-full border p-2 rounded"
     />
-    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">{{ errors[slug] }}</p>
+    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
+      {{ errors[slug] }}
+    </p>
   </div>
 
   <!-- Text Field -->
@@ -44,6 +49,12 @@ const props = defineProps<FormProps>()
         class="w-full border p-2 rounded"
         :class="{ 'border-red-500': mandatory && errors[slug] }"
     ></textarea>
-    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">{{ errors[slug] }}</p>
+    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
+      {{ errors[slug] }}
+    </p>
   </div>
 </template>
+
+<style scoped>
+/* Add component-specific styles if needed */
+</style>
