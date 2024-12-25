@@ -43,7 +43,7 @@ const fields = [
   {title: 'Did Sport?', slug: 'did_sport', type: 'bool'},
   {title: 'Sweets', slug: 'sweets', type: 'bool'},
   {title: 'Period', slug: 'period', type: 'bool'},
-  {title: 'Breadstuff', slug: 'breadstuff', type: 'select', options: ['Bread', 'Buns', 'Both', 'None']},
+  {title: 'Bread eaten', slug: 'breadstuff', type: 'select', options: ['Bread', 'Buns', 'Both', 'None']},
 ]
 
 // Convert "yes"/"no" to boolean or null
