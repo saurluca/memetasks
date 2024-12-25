@@ -16,6 +16,7 @@ const form = reactive({
   sleep_time: '',
   did_sport: 'no',
   gratitude: '',
+  insight: '',
   steps: '',
 });
 
@@ -23,7 +24,8 @@ const form = reactive({
 const errors = reactive({
   sleep_time: '',
   gratitude: '',
-  steps: ''
+  steps: '',
+  insight: '',
 });
 
 // Submission State
@@ -48,6 +50,13 @@ function validateForm() {
     errors.gratitude = '';
   }
 
+  if (form.insight.trim() === '') {
+    errors.insight = 'Insight note is required.';
+    isValid = false;
+  } else {
+    errors.insight = '';
+  }
+
   if (form.steps === '' || isNaN(form.steps)) {
     errors.steps = 'Number of steps is required.';
     isValid = false;
@@ -63,6 +72,7 @@ function prepareFormData() {
   return {
     id: form.id,
     wellbeing: Number(form.wellbeing),
+    insight: form.insight.trim(),
     meditated: form.meditated === 'yes',
     sleep_time: Number(form.sleep_time),
     did_sport: form.did_sport === 'yes',
@@ -75,6 +85,9 @@ function prepareFormData() {
 }
 
 // Handle Form Submission
+const showUpdateDialog = ref(false);
+const existingEntryId = ref(null);
+
 async function submitForm() {
   if (!validateForm()) return;
 
@@ -82,20 +95,58 @@ async function submitForm() {
   submitted.value = true;
 
   try {
+    // Check if an entry already exists for today
+    const {data: existingEntry, error: fetchError} = await client
+        .from('tracker')
+        .select('id')
+        .eq('user_id', user.value?.id)
+        .eq('date', dataToUpload.date)
+        .single();
+
+    if (fetchError && fetchError.code !== 'PGRST116') {
+      console.error('Error checking existing entry:', fetchError.message);
+      return;
+    }
+
+    if (existingEntry) {
+      // Store existing entry ID and show confirmation dialog
+      existingEntryId.value = existingEntry.id;
+      showUpdateDialog.value = true;
+      return; // Stop execution and wait for user response
+    }
+
+    await upsertEntry(dataToUpload);
+  } catch (err) {
+    console.error('Unexpected error during entry check:', err.message);
+  } finally {
+    submitted.value = false;
+  }
+}
+
+async function upsertEntry(dataToUpload) {
+  if (existingEntryId.value) {
+    dataToUpload.id = existingEntryId.value; // Use existing entry ID for update
+  }
+
+  try {
     const {error} = await client
         .from('tracker')
-        .upsert([dataToUpload], {onConflict: ['id']});
+        .upsert([dataToUpload], {onConflict: ['user_id', 'date']});
+
     if (error) {
       console.error('Error upserting tracker data:', error.message);
     } else {
-      submitted.value = true;
-      showSuccessDialog.value = true; // Show the success dialog
-      console.log('Upsert successful:', dataToUpload);
+      showSuccessDialog.value = true;
+      console.log('Entry successfully saved:', dataToUpload);
     }
   } catch (err) {
     console.error('Unexpected error during upsert:', err.message);
+  } finally {
+    showUpdateDialog.value = false;
+    existingEntryId.value = null;
   }
 }
+
 
 // Update Wellbeing Value from Chart
 function updateWellbeing(value) {
@@ -132,6 +183,15 @@ function closeDialog() {
             :class="{'border-red-500': errors.gratitude}"
         ></textarea>
         <p v-if="errors.gratitude" class="text-red-500 text-sm">{{ errors.gratitude }}</p>
+      </div>
+      <div>
+        <label class="block mb-1">Learned or observed</label>
+        <textarea
+            v-model="form.insight"
+            class="w-full border p-2 rounded"
+            :class="{'border-red-500': errors.insight}"
+        ></textarea>
+        <p v-if="errors.insight" class="text-red-500 text-sm">{{ errors.insight }}</p>
       </div>
       <div>
         <label class="block mb-1">Meditated</label>
@@ -179,6 +239,7 @@ function closeDialog() {
         <div class="mt-4 text-left p-4 border rounded bg-green-50">
           <p><strong>Wellbeing:</strong> {{ form.wellbeing }}/10</p>
           <p><strong>Gratitude:</strong> {{ form.gratitude }}</p>
+          <p><strong>Insight:</strong> {{ form.insight }}</p>
           <p><strong>Meditated:</strong> {{ form.meditated }}</p>
           <p><strong>Sleep:</strong> {{ form.sleep_time }} hours</p>
           <p><strong>Did Sport:</strong> {{ form.did_sport }}</p>
@@ -189,6 +250,22 @@ function closeDialog() {
             Home
           </button>
         </router-link>
+      </div>
+    </div>
+    <div v-if="showUpdateDialog" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
+        <h2 class="text-xl font-bold mb-0">Entry Already Exists</h2>
+        <p>Do you want to update it?</p>
+        <div class="flex justify-around mt-4">
+          <button @click="upsertEntry(prepareFormData())"
+                  class="bg-blue-500 text-white px-2 py-1 mr-4 rounded">
+            Yes, Update
+          </button>
+          <button @click="showUpdateDialog = false"
+                  class="bg-gray-300 text-black px-2 py-1 rounded">
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   </d-page>
