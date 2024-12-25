@@ -36,14 +36,15 @@ const existingEntryId = ref(null)
 const fields = [
   {title: 'Gratitude Note', slug: 'gratitude', type: 'text'},
   {title: 'Learned or Observed', slug: 'insight', type: 'text'},
-  {title: 'Meditated', slug: 'meditated', type: 'bool'},
   {title: 'Sleep Time (hours)', slug: 'sleep_time', type: 'number'},
   {title: 'Steps taken', slug: 'steps', type: 'number'},
+  {title: 'Bread eaten', slug: 'breadstuff', type: 'select', options: ['Bread', 'Buns', 'Both', 'None']},
+  {title: 'Meditated', slug: 'meditated', type: 'bool'},
   {title: 'Went for a walk', slug: 'walk', type: 'bool'},
   {title: 'Did Sport', slug: 'did_sport', type: 'bool'},
   {title: 'Ate Sweets', slug: 'sweets', type: 'bool'},
   {title: 'Period', slug: 'period', type: 'bool'},
-  {title: 'Bread eaten', slug: 'breadstuff', type: 'select', options: ['Bread', 'Buns', 'Both', 'None']},
+
 ]
 
 // Convert "yes"/"no" to boolean or null
@@ -141,6 +142,20 @@ async function upsertEntry(dataToUpload) {
 function updateWellbeing(value) {
   form.wellbeing = Number(value)
 }
+
+//Update table fields
+const toggleStates = ['yes', 'no', '-']
+
+function handleClick(item){
+  let currentValue = form[item.slug]
+  let index = toggleStates.indexOf(currentValue)
+  let nextIndex = (index + 1) % toggleStates.length
+  let nextState = toggleStates[nextIndex]
+  form[item.slug] = nextState
+
+}
+
+
 </script>
 
 <template>
@@ -169,9 +184,9 @@ function updateWellbeing(value) {
         <WellbeingChart @pointSelected="updateWellbeing"/>
       </div>
 
-      <!-- Dynamic Fields -->
+      <!-- Initial Dynamic Fields (First portion of the form) -->
       <d-tracker-input
-          v-for="item in fields"
+          v-for="item in fields.slice(0, fields.length - 5)"
           :key="item.slug"
           :form="form"
           :title="item.title"
@@ -179,6 +194,27 @@ function updateWellbeing(value) {
           :type="item.type"
           :options="item.options"
       />
+
+      <!-- Table for the Last Five Items -->
+      <table class="min-w-full border-collapse border border-gray-200 mt-4">
+        <tbody>
+        <tr v-for="item in fields.slice(-5)"
+            :key="item.slug"
+            :form="form"
+            :title="item.title"
+            :slug="item.slug"
+            :type="item.type"
+            :options="item.options">
+          <td class="border border-gray-300 p-2 w-1/4">{{ item.title }}</td>
+          <td
+              class="border border-gray-300 p-2 cursor-pointer hover:bg-gray-100"
+              @click="handleClick(item)"
+          >
+            {{form[item.slug]}}
+          </td>
+        </tr>
+        </tbody>
+      </table>
 
       <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">
         Submit
