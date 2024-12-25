@@ -180,7 +180,7 @@ function handleClick(item){
     >
       <!-- Wellbeing -->
       <div>
-        <label class="block mb-1">Feeling of Wellbeing (0-10)</label>
+        <label class="tracker-title-input">Feeling of Wellbeing (0-10)</label>
         <WellbeingChart @pointSelected="updateWellbeing"/>
       </div>
 
@@ -205,7 +205,7 @@ function handleClick(item){
             :slug="item.slug"
             :type="item.type"
             :options="item.options">
-          <td class="border border-gray-300 p-2 w-1/4">{{ item.title }}</td>
+          <td class="font-bold border border-gray-300 p-2 w-1/4">{{ item.title }}</td>
           <td
               class="border border-gray-300 p-2 cursor-pointer hover:bg-gray-100"
               @click="handleClick(item)"

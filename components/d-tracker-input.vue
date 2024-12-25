@@ -15,7 +15,7 @@ const props = defineProps<FormProps>()
 <template>
   <!-- Boolean Field -->
   <div v-if="type === 'bool'">
-    <label class="block mb-1">{{ title }}</label>
+    <label class="tracker-title-input">{{ title }}</label>
     <select v-model="form[slug]" class="w-full border p-2 rounded">
       <option :value="null"> - </option>
       <option value="yes">Yes</option>
@@ -25,7 +25,7 @@ const props = defineProps<FormProps>()
 
   <!-- Number Field -->
   <div v-else-if="type === 'number'">
-    <label class="block mb-1">{{ title }}</label>
+    <label class="tracker-title-input">{{ title }}</label>
     <input
         v-model="form[slug]"
         type="number"
@@ -36,7 +36,7 @@ const props = defineProps<FormProps>()
 
   <!-- Text Field -->
   <div v-else-if="type === 'text'">
-    <label class="block mb-1">{{ title }}</label>
+    <label class="tracker-title-input">{{ title }}</label>
     <textarea
         v-model="form[slug]"
         class="w-full border p-2 rounded"
@@ -44,7 +44,7 @@ const props = defineProps<FormProps>()
   </div>
 
   <div v-else-if="type === 'select'">
-    <label class="block mb-1">{{ title }}</label>
+    <label class="tracker-title-input">{{ title }}</label>
     <select v-model="form[slug]" class="w-full border p-2 rounded">
       <option :value="null"> - </option>
       <option
