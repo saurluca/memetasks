@@ -5,3 +5,8 @@
 .tracker-title-input {
   @apply mb-1 font-bold block
 }
+
+.dark-mode {
+  @apply dark:bg-blue-700 dark:border-gray-600 dark:text-red-700
+
+}
