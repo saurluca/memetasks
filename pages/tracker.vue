@@ -18,10 +18,9 @@ const form = reactive({
   insight: null,
   steps: null,
   period: null,
-  bread: null,
-  buns: null,
   sweets: null,
   walk: null,
+  breadstuff: null,
 })
 
 // Validation Errors
@@ -46,10 +45,8 @@ const fields = [
   {title: 'Walk', slug: 'walk', type: 'bool', mandatory: false},
   {title: 'Did Sport?', slug: 'did_sport', type: 'bool', mandatory: false},
   {title: 'Sweets', slug: 'sweets', type: 'bool', mandatory: false},
-  {title: 'Bread', slug: 'bread', type: 'bool', mandatory: false},
-  {title: 'Buns', slug: 'buns', type: 'bool', mandatory: false},
   {title: 'Period', slug: 'period', type: 'bool', mandatory: false},
-
+  {title: 'Breadstuff', slug: 'breadstuff', type: 'select', mandatory: false, options: ['Bread', 'Buns', 'Both', 'None']},
 ]
 
 // Convert "yes"/"no" to boolean or null
@@ -81,22 +78,21 @@ function prepareFormData() {
   return {
     id: form.id,
     wellbeing: Number(form.wellbeing),
-    insight: form.insight.trim(),
+    insight: (form.insight ?? '').trim() || null,
     meditated: parseBoolean(form.meditated),
     sleep_time: Number(form.sleep_time),
     did_sport: parseBoolean(form.did_sport),
-    gratitude: form.gratitude.trim(),
+    gratitude: (form.gratitude ?? '').trim() || null,
     steps: Number(form.steps),
     user_id: user.value?.id || null,
     walk: parseBoolean(form.walk),
     period: parseBoolean(form.period),
     sweets: parseBoolean(form.sweets),
-    bread: parseBoolean(form.bread),
-    buns: parseBoolean(form.buns),
+    breadstuff: (form.breadstuff ?? '').trim() || null,
     date: new Date(Date.now() - 6 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0],
-  }
+  };
 }
 
 // Submit Handler
@@ -199,6 +195,7 @@ function updateWellbeing(value) {
           :title="item.title"
           :slug="item.slug"
           :type="item.type"
+          :options="item.options"
           :mandatory="item.mandatory"
           :errors="errors"
       />
@@ -226,8 +223,7 @@ function updateWellbeing(value) {
           <p><strong>Walk:</strong> {{ form.walk }}</p>
           <p><strong>Period:</strong> {{ form.period }}</p>
           <p><strong>Sweets:</strong> {{ form.sweets }}</p>
-          <p><strong>Bread:</strong> {{ form.bread }}</p>
-          <p><strong>Buns:</strong> {{ form.buns }}</p>
+          <p><strong>Breadstuff:</strong> {{ form.breadstuff }}</p>
         </div>
         <router-link to="/">
           <button class="bg-blue-500 text-white p-2 mt-4 rounded w-full">
