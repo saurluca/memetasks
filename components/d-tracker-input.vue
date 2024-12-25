@@ -6,8 +6,6 @@ interface FormProps {
   title: string
   slug: string
   type: 'bool' | 'number' | 'text' | 'select'
-  mandatory?: boolean
-  errors: Record<string, string>
   options?: string[]
 }
 
@@ -23,9 +21,6 @@ const props = defineProps<FormProps>()
       <option value="yes">Yes</option>
       <option value="no">No</option>
     </select>
-    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
-      {{ errors[slug] }}
-    </p>
   </div>
 
   <!-- Number Field -->
@@ -37,9 +32,6 @@ const props = defineProps<FormProps>()
         min="0"
         class="w-full border p-2 rounded"
     />
-    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
-      {{ errors[slug] }}
-    </p>
   </div>
 
   <!-- Text Field -->
@@ -48,11 +40,7 @@ const props = defineProps<FormProps>()
     <textarea
         v-model="form[slug]"
         class="w-full border p-2 rounded"
-        :class="{ 'border-red-500': mandatory && errors[slug] }"
     ></textarea>
-    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
-      {{ errors[slug] }}
-    </p>
   </div>
 
   <div v-else-if="type === 'select'">
@@ -67,8 +55,5 @@ const props = defineProps<FormProps>()
         {{ opt }}
       </option>
     </select>
-    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
-      {{ errors[slug] }}
-    </p>
   </div>
 </template>

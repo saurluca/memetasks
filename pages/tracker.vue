@@ -23,12 +23,6 @@ const form = reactive({
   breadstuff: null,
 })
 
-// Validation Errors
-const errors = reactive({
-  sleep_time: '',
-  gratitude: '',
-})
-
 // Submission & Dialog States
 const submitted = ref(false)
 const showSuccessDialog = ref(false)
@@ -37,16 +31,16 @@ const existingEntryId = ref(null)
 
 // Dynamic Field Config
 const fields = [
-  {title: 'Gratitude Note', slug: 'gratitude', type: 'text', mandatory: true},
-  {title: 'Learned or Observed', slug: 'insight', type: 'text', mandatory: false},
-  {title: 'Meditated', slug: 'meditated', type: 'bool', mandatory: false},
-  {title: 'Sleep Time (hours)', slug: 'sleep_time', type: 'number', mandatory: true},
-  {title: 'Steps', slug: 'steps', type: 'number', mandatory: true},
-  {title: 'Walk', slug: 'walk', type: 'bool', mandatory: false},
-  {title: 'Did Sport?', slug: 'did_sport', type: 'bool', mandatory: false},
-  {title: 'Sweets', slug: 'sweets', type: 'bool', mandatory: false},
-  {title: 'Period', slug: 'period', type: 'bool', mandatory: false},
-  {title: 'Breadstuff', slug: 'breadstuff', type: 'select', mandatory: false, options: ['Bread', 'Buns', 'Both', 'None']},
+  {title: 'Gratitude Note', slug: 'gratitude', type: 'text'},
+  {title: 'Learned or Observed', slug: 'insight', type: 'text'},
+  {title: 'Meditated', slug: 'meditated', type: 'bool'},
+  {title: 'Sleep Time (hours)', slug: 'sleep_time', type: 'number'},
+  {title: 'Steps', slug: 'steps', type: 'number'},
+  {title: 'Walk', slug: 'walk', type: 'bool'},
+  {title: 'Did Sport?', slug: 'did_sport', type: 'bool'},
+  {title: 'Sweets', slug: 'sweets', type: 'bool'},
+  {title: 'Period', slug: 'period', type: 'bool'},
+  {title: 'Breadstuff', slug: 'breadstuff', type: 'select', options: ['Bread', 'Buns', 'Both', 'None']},
 ]
 
 // Convert "yes"/"no" to boolean or null
@@ -54,23 +48,6 @@ function parseBoolean(val) {
   if (val === 'yes') return true
   if (val === 'no') return false
   return null
-}
-
-// Validate Form Fields
-function validateForm() {
-  let isValid = true
-  const mandatoryFields = ['sleep_time', 'gratitude']
-
-  mandatoryFields.forEach(field => {
-    if (!form[field] || form[field].toString().trim() === '') {
-      errors[field] = `${field} is required.`
-      isValid = false
-    } else {
-      errors[field] = ''
-    }
-  })
-
-  return isValid
 }
 
 // Prepare Data for Submission
@@ -97,7 +74,6 @@ function prepareFormData() {
 
 // Submit Handler
 async function submitForm() {
-  if (!validateForm()) return
   const dataToUpload = prepareFormData()
   submitted.value = true
 
@@ -196,8 +172,6 @@ function updateWellbeing(value) {
           :slug="item.slug"
           :type="item.type"
           :options="item.options"
-          :mandatory="item.mandatory"
-          :errors="errors"
       />
 
       <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">
