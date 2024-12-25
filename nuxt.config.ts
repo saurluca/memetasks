@@ -4,9 +4,6 @@ export default defineNuxtConfig({
     modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase'],
     ssr: false,
     plugins: ['~/plugins/db.ts'],
-    hub: {
-       blob: false,
-    },
     supabase: {
         redirect: false,
         exclude: ["/login", "/sign_up"],

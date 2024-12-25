@@ -1,37 +1,49 @@
 <script setup lang="ts">
-interface Props {
-  type?: 'text' | 'number'
-  name: string
-  placeholder?: string
-  modelValue: string | number
+import { defineProps } from 'vue'
+
+interface FormProps {
+  form: Record<string, any>
+  title: string
+  slug: string
+  type: 'bool' | 'number' | 'text'
+  mandatory?: boolean
+  errors: Record<string, string>
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  type: 'text',
-  placeholder: '',
-})
-
-const emit = defineEmits(['update:modelValue'])
-
-const updateValue = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  emit('update:modelValue', target.value)
-}
+const props = defineProps<FormProps>()
 </script>
 
 <template>
-  <div class="mb-4">
-    <label class="block text-sm font-medium mb-2">{{ name }}</label>
+  <!-- Boolean Field -->
+  <div v-if="type === 'bool'">
+    <label class="block mb-1">{{ title }}</label>
+    <select v-model="form[slug]" class="w-full border p-2 rounded">
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    </select>
+    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">{{ errors[slug] }}</p>
+  </div>
+
+  <!-- Number Field -->
+  <div v-else-if="type === 'number'">
+    <label class="block mb-1">{{ title }}</label>
     <input
-      :type="type"
-      :value="modelValue"
-      @input="updateValue"
-      :placeholder="placeholder"
-      class="w-full px-3.5 py-2 border bg-slate-50 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300"
+        v-model="form[slug]"
+        type="number"
+        min="0"
+        class="w-full border p-2 rounded"
     />
+    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">{{ errors[slug] }}</p>
+  </div>
+
+  <!-- Text Field -->
+  <div v-else-if="type === 'text'">
+    <label class="block mb-1">{{ title }}</label>
+    <textarea
+        v-model="form[slug]"
+        class="w-full border p-2 rounded"
+        :class="{ 'border-red-500': mandatory && errors[slug] }"
+    ></textarea>
+    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">{{ errors[slug] }}</p>
   </div>
 </template>
-
-<style scoped>
-
-</style>

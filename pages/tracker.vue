@@ -18,6 +18,11 @@ const form = reactive({
   gratitude: '',
   insight: '',
   steps: '',
+  period: '',
+  bread: '',
+  buns: '',
+  sweets: '',
+  walk: '',
 });
 
 // Validation State
@@ -48,13 +53,6 @@ function validateForm() {
     isValid = false;
   } else {
     errors.gratitude = '';
-  }
-
-  if (form.insight.trim() === '') {
-    errors.insight = 'Insight note is required.';
-    isValid = false;
-  } else {
-    errors.insight = '';
   }
 
   if (form.steps === '' || isNaN(form.steps)) {
@@ -189,9 +187,7 @@ function closeDialog() {
         <textarea
             v-model="form.insight"
             class="w-full border p-2 rounded"
-            :class="{'border-red-500': errors.insight}"
         ></textarea>
-        <p v-if="errors.insight" class="text-red-500 text-sm">{{ errors.insight }}</p>
       </div>
       <div>
         <label class="block mb-1">Meditated</label>
