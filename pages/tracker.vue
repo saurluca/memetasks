@@ -144,7 +144,7 @@ function updateWellbeing(value) {
 }
 
 //Update table fields
-const toggleStates = ['yes', 'no', ' ']
+const toggleStates = ['no', 'yes', ' ']
 
 function handleClick(item){
   let currentValue = form[item.slug]
