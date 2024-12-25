@@ -69,7 +69,6 @@ function prepareFormData() {
     period: parseBoolean(form.period),
     sweets: parseBoolean(form.sweets),
     breadstuff: (form.breadstuff ?? '').trim() || null,
-    test: "21",
     date: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString().split('T')[0],
   }
 }
