@@ -5,9 +5,10 @@ interface FormProps {
   form: Record<string, any>
   title: string
   slug: string
-  type: 'bool' | 'number' | 'text'
+  type: 'bool' | 'number' | 'text' | 'select'
   mandatory?: boolean
   errors: Record<string, string>
+  options?: string[]
 }
 
 const props = defineProps<FormProps>()
@@ -53,8 +54,21 @@ const props = defineProps<FormProps>()
       {{ errors[slug] }}
     </p>
   </div>
-</template>
 
-<style scoped>
-/* Add component-specific styles if needed */
-</style>
+  <div v-else-if="type === 'select'">
+    <label class="block mb-1">{{ title }}</label>
+    <select v-model="form[slug]" class="w-full border p-2 rounded">
+      <option :value="null"> - </option>
+      <option
+          v-for="opt in options"
+          :key="opt"
+          :value="opt"
+      >
+        {{ opt }}
+      </option>
+    </select>
+    <p v-if="errors[slug] && mandatory" class="text-red-500 text-sm">
+      {{ errors[slug] }}
+    </p>
+  </div>
+</template>
