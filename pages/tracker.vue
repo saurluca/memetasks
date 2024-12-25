@@ -162,7 +162,7 @@ function handleClick(item){
   <d-page>
     <!-- Header -->
     <div class="flex flex-row justify-between">
-      <h1 class="text-2xl font-bold mb-4">Daily Wellbeing Tracker</h1>
+      <h1 class="page-title">Daily Wellbeing Tracker</h1>
       <router-link to="/">
         <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">
           <House class="text-black dark:text-slate-200 h-6 w-6"/>
