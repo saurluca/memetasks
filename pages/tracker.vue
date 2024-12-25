@@ -173,61 +173,87 @@ function closeDialog() {
         <label class="block mb-1">Feeling of Wellbeing (0-10)</label>
         <WellbeingChart @pointSelected="updateWellbeing"/>
       </div>
-      <div>
-        <label class="block mb-1">Gratitude Note</label>
-        <textarea
-            v-model="form.gratitude"
-            class="w-full border p-2 rounded"
-            :class="{'border-red-500': errors.gratitude}"
-        ></textarea>
-        <p v-if="errors.gratitude" class="text-red-500 text-sm">{{ errors.gratitude }}</p>
-      </div>
-      <div>
-        <label class="block mb-1">Learned or observed</label>
-        <textarea
-            v-model="form.insight"
-            class="w-full border p-2 rounded"
-        ></textarea>
-      </div>
-      <div>
-        <label class="block mb-1">Meditated</label>
-        <select v-model="form.meditated" class="w-full border p-2 rounded">
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div>
-        <label class="block mb-1">Sleep Time (hours)</label>
-        <input
-            v-model="form.sleep_time"
-            type="number"
-            min="0"
-            step="0.1"
-            class="w-full border p-2 rounded"
-            :class="{'border-red-500': errors.sleep_time}"
-        />
-        <p v-if="errors.sleep_time" class="text-red-500 text-sm">{{ errors.sleep_time }}</p>
-      </div>
-      <div>
-        <label class="block mb-1">Did Sport Today?</label>
-        <select v-model="form.did_sport" class="w-full border p-2 rounded">
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </div>
-      <div>
-        <label class="block mb-1">Number of Steps</label>
-        <input
-            v-model="form.steps"
-            type="number"
-            min="0"
-            class="w-full border p-2 rounded"
-            :class="{'border-red-500': errors.steps}"
-        />
-        <p v-if="errors.steps" class="text-red-500 text-sm">{{ errors.steps }}</p>
-      </div>
+      <d-tracker-input
+          form="form"
+          title="Gratitude Note"
+          slug="gratitude"
+          type="text"
+          mandatory
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Learned or observed"
+          slug="insight"
+          type="text"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Meditated"
+          slug="meditated"
+          type="bool"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Sleep Time (hours)"
+          slug="sleep_time"
+          type="number"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Steps"
+          slug="steps"
+          type="number"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Did Sport Today?"
+          slug="did_sport"
+          type="bool"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Walk"
+          slug="walk"
+          type="bool"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Period"
+          slug="period"
+          type="bool"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Sweets"
+          slug="sweets"
+          type="bool"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Bread"
+          slug="bread"
+          type="bool"
+          :errors="errors"
+      />
+      <d-tracker-input
+          form="form"
+          title="Buns"
+          slug="buns"
+          type="bool"
+          :errors="errors"
+      />
       <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded">Submit</button>
     </form>
+
     <div v-if="showSuccessDialog" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
         <h2 class="text-2xl font-bold mb-4">Good Job!</h2>
