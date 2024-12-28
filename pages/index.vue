@@ -411,13 +411,13 @@ useSeoMeta({
         @toggle-todo="completeTodo"
         @delete-todo="deleteTodo"
     />
-    <SettingsPopup
+    <LazySettingsPopup
         :is-dark-mode="isDarkMode"
         :profile-is-open="profileIsOpen"
         @close-profile="closeProfile"
         @toggle-dark-mode="toggleDarkMode"
     />
-    <ImagePopup
+    <LazyImagePopup
         :error-message="imagePopupErrorMessage"
         :image-blob="imagePopupBlob"
         :image-url="imagePopupUrl"

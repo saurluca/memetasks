@@ -224,6 +224,7 @@ function handleClick(item){
     <!-- Success Dialog -->
     <div
         v-if="showSuccessDialog"
+        v-lazy
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
@@ -254,6 +255,7 @@ function handleClick(item){
     <!-- Update Confirmation Dialog -->
     <div
         v-if="showUpdateDialog"
+        v-lazy
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
@@ -279,6 +281,7 @@ function handleClick(item){
     <!-- Error Dialog -->
     <div
         v-if="showErrorDialog"
+        v-lazy
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
