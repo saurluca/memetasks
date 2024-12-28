@@ -54,6 +54,20 @@ function parseBoolean(val) {
   return null
 }
 
+// this is new. why not work?
+async function fetchData() {
+  if (!user.value) return
+  try {
+    const {data} = await client.from('tracker').select().eq('date', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString().split('T')[0])
+    console.log(data)
+    if (data && data[0]) {
+      Object.assign(form, data[0])
+    }
+  } catch {
+    console.log('error')
+  }
+}
+
 // Prepare Data
 function prepareFormData() {
   return {
@@ -152,9 +166,11 @@ function handleClick(item){
   let nextIndex = (index + 1) % toggleStates.length
   let nextState = toggleStates[nextIndex]
   form[item.slug] = nextState
-
 }
 
+onMounted(() => {
+  fetchData()
+})
 
 </script>
 
@@ -181,7 +197,7 @@ function handleClick(item){
       <!-- Wellbeing -->
       <div>
         <label class="tracker-title-input">Feeling of Wellbeing (0-10)</label>
-        <WellbeingChart @pointSelected="updateWellbeing"/>
+        <WellbeingChart @pointSelected="updateWellbeing" v-model:formValue="form.wellbeing"/>
       </div>
 
       <!-- Initial Dynamic Fields (First portion of the form) -->
@@ -224,7 +240,6 @@ function handleClick(item){
     <!-- Success Dialog -->
     <div
         v-if="showSuccessDialog"
-        v-lazy
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
@@ -255,7 +270,6 @@ function handleClick(item){
     <!-- Update Confirmation Dialog -->
     <div
         v-if="showUpdateDialog"
-        v-lazy
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
@@ -281,7 +295,6 @@ function handleClick(item){
     <!-- Error Dialog -->
     <div
         v-if="showErrorDialog"
-        v-lazy
         class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div class="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">

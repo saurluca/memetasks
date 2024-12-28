@@ -1,14 +1,20 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import {onMounted, defineProps, defineEmits, computed} from 'vue';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 
-// Define emits
-const emit = defineEmits(['pointSelected']);
+const props = defineProps({
+  formValue: { type: Number, default: 0 }
+})
+const emit = defineEmits(['pointSelected', 'update:formValue'])
+
+const currentValue = computed({
+  get: () => props.formValue,
+  set: (val) => emit('update:formValue', val)
+})
 
 // Reactive State
-const selectedPoint = ref(0);
 let chart = null;
 
 // Render the Chart
@@ -50,11 +56,11 @@ function onSliderChange() {
   if (chart) {
     chart.data.datasets[0].pointBackgroundColor = Array.from(
         { length: 100 },
-        (_, i) => (i + 1 === Number(selectedPoint.value) ? 'red' : 'blue')
+        (_, i) => (i + 1 === Number(currentValue.value) ? 'red' : 'blue')
     );
     chart.update();
   }
-  emit('pointSelected', selectedPoint.value);
+  emit('pointSelected', currentValue.value);
 }
 
 // Generate Bell Curve Data
@@ -78,13 +84,13 @@ onMounted(() => {
     </div>
     <input
         type="range"
-        v-model="selectedPoint"
+        v-model.number="currentValue"
         :min="0"
         :max="10"
         @input="onSliderChange"
         class="w-full mt-4"
     />
-    <p class="text-center mt-2">Selected Wellbeing: {{ selectedPoint }}</p>
+    <p class="text-center mt-2">Selected Wellbeing: {{ currentValue }}</p>
   </div>
 </template>
 
