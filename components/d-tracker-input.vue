@@ -29,6 +29,7 @@ const props = defineProps<FormProps>()
     <input
         v-model="form[slug]"
         type="number"
+        step="0.1"
         min="0"
         class="w-full border p-2 rounded"
     />
