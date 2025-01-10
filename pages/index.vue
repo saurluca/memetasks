@@ -386,7 +386,7 @@ useSeoMeta({
         <!--          <Settings class="text-black dark:text-slate-200 h-6 w-6"/>-->
         <!--        </button>-->
         <button
-            :class="['p-1.5 rounded-full bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-gray-500 transition-colors duration-300 text-xl']"
+            :class="['px-2.5 py-0 rounded-full  bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-gray-500 transition-colors duration-300 text-xl']"
             @click="toggleDarkMode"
         >
           <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
@@ -426,12 +426,12 @@ useSeoMeta({
         @toggle-todo="completeTodo"
         @delete-todo="deleteTodo"
     />
-    <LazySettingsPopup
-        :is-dark-mode="isDarkMode"
-        :profile-is-open="profileIsOpen"
-        @close-profile="closeProfile"
-        @toggle-dark-mode="toggleDarkMode"
-    />
+<!--    <LazySettingsPopup-->
+<!--        :is-dark-mode="isDarkMode"-->
+<!--        :profile-is-open="profileIsOpen"-->
+<!--        @close-profile="closeProfile"-->
+<!--        @toggle-dark-mode="toggleDarkMode"-->
+<!--    />-->
     <LazyImagePopup
         :error-message="imagePopupErrorMessage"
         :image-blob="imagePopupBlob"
