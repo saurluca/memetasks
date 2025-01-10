@@ -75,7 +75,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
                 const now = new Date()
                 todoStore.add({
                     id: nanoid(),
-                    text: "Create your first todo and check out your first meme!",
+                    text: "Memetasks is a todo app that sometimes rewards you with memes for completed tasks. Just create a task and see what happens!",
                     created_at: now,
                     completed: false,
                     completed_at: null,
@@ -89,7 +89,7 @@ export default defineNuxtPlugin(async (nuxtApp) => {
 
                 todoStore.add({
                     id: nanoid(),
-                    text: "Create your first tag by clicking on the +, select it and create another task!",
+                    text: "Create your first tag by clicking the + icon, then click on the tag to select it. Tasks will be assigned the currently selected tag, which can also be used for filtering.",
                     created_at: now,
                     completed: false,
                     completed_at: null,
