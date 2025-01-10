@@ -33,6 +33,7 @@ const imagePopupIsOpen = ref(false)
 const imagePopupErrorMessage = ref("")
 const imagePopupBlob = ref<Blob | null>(null)
 const imagePopupUrl = ref('')
+const imageProbability = 0.5
 
 
 // Lifecycle hooks
@@ -186,6 +187,9 @@ const completeTodo = async (id: string) => {
   await $db.put('todos', todo)
   await load()
   await push()
+
+  // chance to not show image
+  if (Math.random() > imageProbability) return
 
   if (image) {
     const imageBlob = arrayBufferToBlob(image, 'image/png')
@@ -348,7 +352,6 @@ useSeoMeta({
   ogTitle: 'Memetasks',
   description: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
   ogDescription: 'Memetasks is a simple, fun and rewarding todo app with personal memes for you!',
-  //Todo add image
 })
 
 </script>
@@ -369,11 +372,11 @@ useSeoMeta({
             <LogIn class="text-black dark:text-slate-200 h-6 w-6"/>
           </button>
         </router-link>
-        <router-link to="/tracker" class="mr-1">
-          <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">
-            <Notebook class="text-black dark:text-slate-200 h-6 w-6"/>
-          </button>
-        </router-link>
+<!--        <router-link to="/tracker" class="mr-1">-->
+<!--          <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">-->
+<!--            <Notebook class="text-black dark:text-slate-200 h-6 w-6"/>-->
+<!--          </button>-->
+<!--        </router-link>-->
         <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5" @click="openProfile">
           <Settings class="text-black dark:text-slate-200 h-6 w-6"/>
         </button>
