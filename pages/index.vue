@@ -26,7 +26,12 @@ const profileIsOpen = ref(false)
 const showDatePicker = ref(false)
 const selectedDate = ref<Date | null>(null)
 const isDarkMode = useDark()
-const toggleDarkMode = useToggle(isDarkMode)
+
+// const toggleDarkMode = useToggle(isDarkMode)
+
+function toggleDarkMode() {
+  isDarkMode.value = !isDarkMode.value
+}
 
 const imagePopupTodoText = ref("")
 const imagePopupIsOpen = ref(false)
@@ -372,13 +377,20 @@ useSeoMeta({
             <LogIn class="text-black dark:text-slate-200 h-6 w-6"/>
           </button>
         </router-link>
-<!--        <router-link to="/tracker" class="mr-1">-->
-<!--          <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">-->
-<!--            <Notebook class="text-black dark:text-slate-200 h-6 w-6"/>-->
-<!--          </button>-->
-<!--        </router-link>-->
-        <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5" @click="openProfile">
-          <Settings class="text-black dark:text-slate-200 h-6 w-6"/>
+        <!--        <router-link to="/tracker" class="mr-1">-->
+        <!--          <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5">-->
+        <!--            <Notebook class="text-black dark:text-slate-200 h-6 w-6"/>-->
+        <!--          </button>-->
+        <!--        </router-link>-->
+        <!--        <button class="dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-full p-1.5" @click="openProfile">-->
+        <!--          <Settings class="text-black dark:text-slate-200 h-6 w-6"/>-->
+        <!--        </button>-->
+        <button
+            :class="['p-1.5 rounded-full bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-gray-500 transition-colors duration-300 text-xl']"
+            @click="toggleDarkMode"
+        >
+          <span v-if="isDarkMode" class="text-yellow-400">☀️</span>
+          <span v-else class="text-gray-800">🌙</span>
         </button>
       </div>
     </div>

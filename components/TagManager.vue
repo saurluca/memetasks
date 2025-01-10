@@ -53,8 +53,8 @@ function buttonClick() {
     <div class="flex flex-wrap gap-2 flex-grow">
       <button @click=buttonClick
               class="px-2 border-black rounded-full"
-              :class="todayFilter ? 'bg-gray-400' : 'bg-gray-200'">
-        <CalendarSearch class="w-5 h-5 text-gray-800 dark:text-gray-400"/>
+              :class="todayFilter ? 'bg-gray-400 dark:bg-gray-700' : 'bg-gray-200 dark:bg-gray-500'">
+        <CalendarSearch class="w-5 h-5 text-gray-800 dark:text-gray-200"/>
       </button>
       <span
           v-for="tag in tags"
