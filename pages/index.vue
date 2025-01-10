@@ -245,7 +245,10 @@ const filterForActiveTodos = (todos: Todo[]) => {
 
 // filter and reverse sort deleted todos based on completed_at
 const filterForCompletedTodos = (todos: Todo[]) => {
-  return todos.filter(todo => !todo.deleted_at && todo.completed).sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
+  console.log("filterForCompletedTodos")
+  return todos.filter(todo => !todo.deleted_at && todo.completed)
+
+      // .sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime())
 }
 
 const filterOutDeletedTodos = (todos: Todo[]) => {
@@ -269,17 +272,19 @@ const filterForToday = (todos: Todo[]) => {
 const filteredTodos = computed(() => {
   const realTodos = filterOutDeletedTodos(todos.value)
   const tagFilteredTodos = filterOutTags(realTodos)
-  const activeTodos = filterForActiveTodos(tagFilteredTodos)
-  let dayFilteredTodos = activeTodos
+  let dayFilteredTodos = tagFilteredTodos
   if (currentDayFilter.value) {
     dayFilteredTodos = filterForToday(dayFilteredTodos)
   }
+  const activeTodos = filterForActiveTodos(dayFilteredTodos)
 
   if (showDeletedTodos.value) {
+    console.log("showDeletedTodos")
     const deletedTodos = filterForCompletedTodos(dayFilteredTodos)
-    return [...dayFilteredTodos, ...deletedTodos];
+    console.log("deletedTodos", deletedTodos)
+    return [...activeTodos, ...deletedTodos];
   } else {
-    return dayFilteredTodos
+    return activeTodos
   }
 }, {
   deep: true
@@ -339,6 +344,7 @@ const closeProfile = () => {
 }
 
 const toggleShowDeletedTodos = () => {
+  console.log("toggleShowDeletedTodos")
   showDeletedTodos.value = !showDeletedTodos.value
 }
 
