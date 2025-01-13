@@ -10,10 +10,9 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         public: {
-            supabaseUrl: "" ,
-            test: "",
-            supabaseAnonKey: ""
-        }
+            posthogPublicKey: 'phc_11uwYEIIVE4L5AI37NS8U7MwLLRoeJnFKWYwLwIf4zX',
+            posthogHost: 'https://eu.i.posthog.com'
+        },
     },
     sitemap: {
         hostname: 'https://memetasks.com',
