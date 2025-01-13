@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
-    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase'],
+    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase', 'nuxt-posthog'],
     ssr: false,
     plugins: ['~/plugins/db.ts', '~/plugins/posthog.client.js'],
     supabase: {
@@ -13,6 +13,11 @@ export default defineNuxtConfig({
             posthogPublicKey: 'phc_11uwYEIIVE4L5AI37NS8U7MwLLRoeJnFKWYwLwIf4zX',
             posthogHost: 'https://eu.i.posthog.com'
         },
+    },
+    posthog: {
+        publicKey: 'phc_11uwYEIIVE4L5AI37NS8U7MwLLRoeJnFKWYwLwIf4zX',
+        host: 'https://eu.i.posthog.com', // Replace if using a self-hosted instance
+        capturePageViews: true, // Automatically captures page views
     },
     sitemap: {
         hostname: 'https://memetasks.com',
