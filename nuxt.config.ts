@@ -3,7 +3,9 @@ export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
     modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase'],
     ssr: false,
-    plugins: ['~/plugins/db.ts', '~/plugins/posthog.client.js'],
+    plugins: ['~/plugins/db.ts'],
+
+    // plugins: ['~/plugins/db.ts', '~/plugins/posthog.client.js'],
     supabase: {
         redirect: false,
         exclude: ["/login", "/sign_up"],
