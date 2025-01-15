@@ -1,20 +1,12 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-04-03',
-    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap', '@nuxthub/core', '@nuxtjs/supabase'],
+    modules: ['@vueuse/nuxt', '@vite-pwa/nuxt', '@nuxtjs/sitemap',  '@nuxtjs/supabase'],
     ssr: false,
     plugins: ['~/plugins/db.ts'],
-
-    // plugins: ['~/plugins/db.ts', '~/plugins/posthog.client.js'],
     supabase: {
         redirect: false,
         exclude: ["/login", "/sign_up"],
-    },
-    runtimeConfig: {
-        public: {
-            posthogPublicKey: 'phc_11uwYEIIVE4L5AI37NS8U7MwLLRoeJnFKWYwLwIf4zX',
-            posthogHost: 'https://eu.i.posthog.com'
-        },
     },
     sitemap: {
         hostname: 'https://memetasks.com',

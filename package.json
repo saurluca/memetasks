@@ -10,7 +10,6 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxthub/core": "^0.8.10",
     "@nuxtjs/sitemap": "^7.0.0",
     "@nuxtjs/supabase": "^1.4.5",
     "@popperjs/core": "^2.11.8",
