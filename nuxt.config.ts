@@ -8,6 +8,12 @@ export default defineNuxtConfig({
         redirect: false,
         exclude: ["/login", "/sign_up"],
     },
+    runtimeConfig: {
+        public: {
+            posthogPublicKey: 'phc_11uwYEIIVE4L5AI37NS8U7MwLLRoeJnFKWYwLwIf4zX',
+            posthogHost: 'https://eu.i.posthog.com'
+        }
+    },
     sitemap: {
         hostname: 'https://memetasks.com',
         gzip: true,
