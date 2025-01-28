@@ -38,7 +38,7 @@ const imagePopupIsOpen = ref(false)
 const imagePopupErrorMessage = ref("")
 const imagePopupBlob = ref<Blob | null>(null)
 const imagePopupUrl = ref('')
-const imageProbability = 0.5
+const imageProbability = 1
 
 
 // Lifecycle hooks
